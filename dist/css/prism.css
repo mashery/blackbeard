@@ -1,0 +1,64 @@
+/*!
+ * blackbeard v0.0.1: Future portal layout
+ * (c) 2017 Chris Ferdinandi
+ * BSD-3-Clause License
+ * http://github.com/mashery/blackbeard
+ */
+
+/**
+ * @section Prism syntax highlighting
+ * languages=markup+css+clike+javascript+php
+ */
+@media screen {
+  /* line 8, src/sass/prism.scss */
+  .token.comment,
+  .token.prolog,
+  .token.doctype,
+  .token.cdata {
+    color: slategray;
+  }
+  /* line 15, src/sass/prism.scss */
+  .token.punctuation {
+    color: #999;
+  }
+  /* line 19, src/sass/prism.scss */
+  .token.property,
+  .token.tag,
+  .token.boolean,
+  .token.number {
+    color: #905;
+  }
+  /* line 26, src/sass/prism.scss */
+  .token.selector,
+  .token.attr-name,
+  .token.string {
+    color: #690;
+  }
+  /* line 32, src/sass/prism.scss */
+  .token.operator,
+  .token.entity,
+  .token.url,
+  .language-css .token.string,
+  .style .token.string {
+    color: #a67f59;
+  }
+  /* line 40, src/sass/prism.scss */
+  .token.atrule,
+  .token.attr-value,
+  .token.keyword {
+    color: #07a;
+  }
+  /* line 47, src/sass/prism.scss */
+  .token.regex,
+  .token.important {
+    color: #e90;
+  }
+  /* line 52, src/sass/prism.scss */
+  .token.important {
+    font-weight: bold;
+  }
+  /* line 56, src/sass/prism.scss */
+  .token.entity {
+    cursor: help;
+  }
+}

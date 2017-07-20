@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en" class="loading">
+
+	<head>
+		<meta charset="utf-8">
+
+		<!-- Force latest available IE rendering engine and Chrome Frame (if installed) -->
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+		<title>Portal Option Examples | Mashery Portal</title>
+		<meta name="description" content="">
+
+		<!-- Mobile Screen Resizing -->
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+		<!-- Icons: place in the root directory -->
+		<!-- https://github.com/audreyr/favicon-cheat-sheet -->
+
+		<!-- feature detection -->
+		<script src="dist/js/detects.js"></script>
+
+		<!-- global variables -->
+		<script src="dist/js/globals.js"></script>
+
+		<!-- stylesheets -->
+		<link rel="stylesheet" href="dist/css/main.css" type="text/css">
+		<link rel="stylesheet" href="dist/css/prism.css" type="text/css">
+	</head>
+
+	<body>
+
+		<!-- Old Browser Warning -->
+		<!--[if lt IE 9]>
+			<section class="container">
+				Did you know that your web browser is a bit old? Some of the content on this site might not work right as a result. <a href="http://whatbrowser.org">Upgrade your browser</a> for a faster, better, and safer web experience.
+			</section>
+		<![endif]-->
+
+		<!-- Skip Nav Link -->
+		<a class="screen-reader screen-reader-focusable" href="#main">Skip to content</a>
+
+		<nav class="bg-primary" id="nav-primary">
+			<div class="container padding-top-small padding-bottom-small">
+				<ul class="list-inline no-margin-bottom">
+					<li><a style="color: #fff;" href="dashboard.html">TIBCO Mashery</a></li>
+					<li><a href="#">Analyze</a></li>
+					<li><a href="#">Manage</a></li>
+					<li><a href="#">Design</a></li>
+					<li><span style="color: #e5e5e5;"><~~ These are dummy links (they don't work)</span></li>
+				</ul>
+			</div>
+		</nav>
+
+		<!-- tabindex="-1" hack for skipnav link: https://code.google.com/p/chromium/issues/detail?id=37721 -->
+		<main class="tabindex" tabindex="-1" id="main">
+
+			<section class="container container-small">
+
+				<nav class="padding-top"><a href="dashboard.html">&larr; Back to the Dashboard</a></nav>
+
+				<h1>Examples</h1>
+
+				<p>Here are some sample configuration options you can experiment with. Copy/paste one of these into the "Options" box on the <a href="dashboard.html">Dashboard</a> and click save.</p>
+
+
+<h2>Change the User Nav Labels</h2>
+
+<pre class="lang-javascript"><code>{
+	"labels": {
+		"userNav": {
+			"signin": "Login",
+			"register": "Join",
+			"account": "{{username}}",
+			"signout": "Log Out"
+		}
+	}
+}</code></pre>
+
+
+<h2>Change the Navigation Layout</h2>
+
+<pre class="lang-javascript"><code>{
+	"templates": {
+		"userNav": " ",
+		"primaryNav": "&lt;div class='nav-wrap nav-collapse container'&gt;&lt;a class='logo' href='index.html'&gt;{{logo}}&lt;/a&gt;&lt;a role='button' class='nav-toggle' data-nav-toggle='#primary-nav-menu' href='#'&gt;Menu&lt;/a&gt;&lt;div class='nav-menu' id='primary-nav-menu'&gt;&lt;ul class='nav' id='primary-nav-list'&gt;{{navItemsPrimary}} {{navItemsUser}}&lt;/ul&gt;&lt;/div&gt;&lt;/div&gt;"
+	}
+}</code></pre>
+
+
+<h2>Change the Whole Page Layout</h2>
+
+<pre class="lang-javascript"><code>{
+	"templates": {
+		"layout": "&lt;div class='container'&gt;&lt;div class='row'&gt;&lt;div class='grid-fourth'&gt;&lt;a class='screen-reader screen-reader-focusable' href='#main'&gt;Skip to content&lt;/a&gt;{{navPrimary}}{{navUser}}&lt;/div&gt;&lt;div class='grid-three-fourths'&gt;{{main}}&lt;footer id='footer'&gt;{{footer1}}{{navSecondary}}{{footer2}}&lt;/footer&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;",
+		"userNav": "&lt;ul id='nav-user-list' class='list-unstyled'&gt;{{navItemsUser}}&lt;/ul&gt;&lt;/div&gt;",
+		"primaryNav": "&lt;div class='nav-menu' id='primary-nav-menu'&gt;&lt;ul class='list-unstyled' id='primary-nav-list'&gt;&lt;li&gt;&lt;strong&gt;&lt;a href='index.html'&gt;{{logo}}&lt;/a&gt;&lt;/strong&gt;&lt;/li&gt;{{navItemsPrimary}}&lt;/ul&gt;&lt;/div&gt;"
+	}
+}</code></pre>
+
+
+<h2>Add a Custom Privacy Policy to the <a href="registration.html">Registration Page</a></h2>
+
+<pre class="lang-javascript"><code>{
+	"labels": {
+		"register": {
+			"privacyPolicy": "Acme Corps &lt;a href='#'&gt;Privacy Policy&lt;/a&gt; and "
+		}
+	}
+}</code></pre>
+
+
+<h2>Customize the <a href="signin.html">Sign In Sidebar</a></h2>
+
+<pre class="lang-javascript"><code>{
+	"labels": {
+		"signin": {
+			"sidebar": "&lt;p&gt;Or &lt;a href='#'&gt;sign in with SSO&lt;/a&gt;.&lt;/p&gt;"
+		}
+	}
+}</code></pre>
+
+
+<h2>Add a Logo</h2>
+
+<pre class="lang-javascript"><code>{
+	"logo": "&lt;svg xmlns='http://www.w3.org/2000/svg' class='icon' viewBox='-105 196.2 1344.6 512'&gt;&lt;path fill='#FFF' d='M150.934 705.867c-139.9 0-253.6-113.8-253.6-253.7 0-139.9 113.8-253.7 253.6-253.7s253.6 113.8 253.6 253.7c-.1 139.9-113.8 253.7-253.6 253.7z'/&gt;&lt;path fill='#004883' d='M150.934 200.867c138.7 0 251.2 112.5 251.2 251.3s-112.5 251.3-251.2 251.3c-138.8 0-251.3-112.5-251.3-251.3s112.5-251.3 251.3-251.3m0-4.7c-141.1 0-255.9 114.8-255.9 256s114.8 256 255.9 256c141.1 0 255.9-114.8 255.9-256s-114.8-256-255.9-256z'/&gt;&lt;g&gt;&lt;g fill='#004883'&gt;&lt;path d='M1234.834 349.067c2.8-3.3 4.7-7 4.7-11.7 0-5.2-1.9-9.4-4.7-12.7-3.3-3.3-7.5-5.2-12.2-5.2-4.7 0-8.5 1.9-12.2 5.2-3.3 3.3-4.7 7.5-4.7 12.7 0 4.7 1.4 8.5 4.7 11.7 3.8 3.3 7.5 4.7 12.2 4.7 4.7 0 8.9-1.4 12.2-4.7zM1235.834 522.167v-151.9h-25.4l.5 151.9h24.9zM1177.034 377.767l-4.2-1.9c-11.3-6.6-24.9-9.9-41.4-9.9-17.9 0-32.5 4.2-43.3 12.7-5.6 4.2-9.4 8.5-12.2 14.1-2.8 5.2-4.2 10.3-4.2 16.5 0 10.4 4.7 18.8 13.2 26.3 8 7.1 19.7 12.7 35.3 17.4 13.2 4.2 22.1 8.5 27.8 12.7 4.7 4.7 7.5 9.9 7.5 16.5 0 7.1-3.8 12.7-10.4 17.4-6.6 3.8-16 6.1-27.8 6.1-12.7 0-25.4-3.3-38.6-9.4l-3.3-2.3-10.8 19.8 3.8 1.9c14.6 7.1 30.6 10.3 48 10.3 18.8 0 34.3-3.8 46.6-12.2 6.1-3.8 10.3-8.9 13.6-14.1 3.3-6.1 4.7-12.7 4.7-19.3v-.5c0-11.3-4.7-21.2-13.6-29.2-7.5-6.6-19.8-12.2-35.8-16.9-12.2-4.3-21.2-8.5-26.3-11.8-5.6-4.2-8-8.9-8-14.1 0-6.1 2.3-10.8 7.5-15 5.6-3.8 13.2-6.1 23-6.1 13.6 0 24.9 2.4 33.9 8l3.3 2.4 11.7-19.4zM1023.634 389.067c-17.4-15.1-39-23-64-23-24.5 0-44.7 7.5-61.1 22.1-18.4 16.5-27.8 39-27.8 68.7v118.1h24.4v-76.2c7.5 8.5 16.9 15.1 28.2 19.8 11.3 5.2 23.5 7.5 36.7 7.5 24.9 0 46.1-7.5 63.5-23.5 17.9-15.5 26.8-34.3 26.8-56.4.1-22.8-8.8-41.6-26.7-57.1zm-64-1.9c18.4 0 34.3 5.7 46.6 16.9 12.7 11.3 19.3 25.4 19.3 42.3 0 16-5.7 29.2-16.9 40.4-12.2 11.8-28.7 17.9-48.4 17.9-19.8 0-35.8-6.1-48.5-17.9-11.8-11.8-17.4-24.9-17.4-40.4s5.6-29.2 17.4-40.5c12.2-12.1 28.2-18.7 47.9-18.7zM831.734 396.567c-16.4-20.7-40-30.6-71.5-30.6-23.5 0-43.8 6.6-61.2 20.7-18.8 14.6-28.2 34.3-28.2 58.8 0 13.6 3.8 27.3 11.8 40 7.1 12.2 17.9 22.1 32.5 29.6 14.6 7.1 30.1 10.3 47 10.3 16 0 31-3.3 45.6-10.3 14.6-7.5 25.4-17.4 32.5-29.6l4.7-8h-27.3c-5.6 8-13.7 14.6-24 19.8-10.3 5.2-21.6 7.5-32.5 7.5-15.1 0-27.8-3.8-39-11.3-11.3-8-18.8-17.9-23.5-31 15.5-6.1 31-9.4 48-9.4l25.4 2.8 39.5 3.8c12.2 0 22.6-1.9 32-4.7 3.8-1.4 6.1-3.3 7.1-5.7 1.4-1.9 1.4-5.2.5-8.9-3-17-9.1-31.5-19.4-43.8zm-6.6 38.6l.5.9-13.6 1.9-29.6-2.8-41.4-3.3h-7.1c-13.2.9-25.4 3.3-37.2 7.5 1.9-17.4 10.3-31.1 24.5-40.9 11.8-7.5 24.9-11.8 39-11.8 22.1 0 39 7.1 51.7 21.2 6.6 8.5 11.3 17.4 13.2 27.3zM561.234 365.967c-24 0-44.7 7.5-61.2 22.1-18.3 16.5-27.3 39-27.3 68.7l-.5 118.1h25.4l-.5-76.2c7.5 8.5 16.9 15.1 27.8 19.8 11.8 5.2 24 7.5 37.2 7.5 24.9 0 46.1-7.5 63.5-23.5 17.9-15.5 26.3-34.3 26.3-56.4 0-22.6-8.5-41.4-25.9-56.9-17.8-15.2-38.9-23.2-64.8-23.2zm-48 40c12.7-12.2 28.2-18.8 48-18.8 18.8 0 34.3 5.7 47 16.9 12.7 11.3 18.8 25.4 18.8 42.3 0 16-5.6 29.2-16.5 40.4-12.2 11.8-28.2 17.9-48.9 17.9-19.3 0-35.7-6.1-48.5-17.9-11.3-11.8-16.9-24.9-16.9-40.4.1-15.4 5.7-29.1 17-40.4z'/&gt;&lt;/g&gt;&lt;path fill='#E32934' d='M294.534 261.667c-2.1-1.6-4.1-3.4-6.1-5.3-38.9-27.4-86.3-43.5-137.5-43.5-132.1 0-239.2 107.1-239.2 239.3 0 53.6 17.6 103 47.3 142.9 80-23.6 149.9-64.7 209.7-124.2 59.8-59.1 101.8-129.1 125.8-209.2z'/&gt;&lt;path fill='#004883' d='M150.934 691.467c132.1 0 239.2-107.1 239.2-239.3 0-46.8-13.4-90.4-36.6-127.2-.6-.6-1.2-1.3-1.6-2 4.8 15.9 7.3 32.4 7.3 49.5 0 27.2-6.3 52.8-18.6 76.9-12.3 23-29 42.4-50.1 58.1-16.7 12.3-36.8 22.8-60.4 31.3-18.8 6.9-43.3 14-73.5 20.9l-87.4 19.7c-37.1 8.5-71 17.6-101.1 27 43.7 52 109.4 85.1 182.8 85.1z'/&gt;&lt;/g&gt;&lt;/svg&gt;"
+}</code></pre>
+
+
+			</section>
+
+		</main>
+
+		<footer id="footer">
+
+			<div id="footer-content-1">
+				<div class="container">
+					<hr>
+					<p>&nbsp;</p>
+				</div>
+			</div>
+
+			<nav id="nav-secondary">
+			</nav>
+
+			<div id="footer-content-2">
+			</div>
+
+			<div id="mashery-made">
+				<div class="container">
+					<p><a href="http://mashery.com"><img src="https://stagingcs9.mashery.com/public/Mashery/images/masherymade.png"></a></p>
+				</div>
+			</div>
+
+		</footer>
+
+		<!-- Javascript -->
+		<script src="dist/js/prism.js"></script>
+		<script>
+			// Code goes here...
+		</script>
+
+	</body>
+
+</html>

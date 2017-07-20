@@ -1,0 +1,57 @@
+/**
+ * @section Placeholders
+ * Styling for placeholder elements.
+ */
+
+
+@keyframes fadeColor{
+	0% {
+		background-color: darken($color-gray-light, 7%);
+	}
+
+	50% {
+		background-color: $color-gray-light;
+	}
+
+	100% {
+		background-color: darken($color-gray-light, 7%);
+	}
+}
+
+.placeholder {
+	animation: fadeColor 1.5s ease-in infinite;
+	background-color: $color-gray-light;
+}
+
+.placeholder-hero {
+	@extend .margin-bottom;
+	height: 20em;
+}
+
+.placeholder-heading {
+	@extend .margin-bottom;
+	height: 3em;
+	width: 55%;
+}
+
+.placeholder-sentence {
+	@extend .margin-bottom-small;
+	height: 1.5em;
+}
+
+.placeholder-sentence-last {
+	width: 85%;
+}
+
+.placeholder-paragraph {
+	@extend .margin-bottom;
+	@extend .margin-top;
+	height: 8em;
+}
+
+.placeholder-btn {
+	@extend .margin-bottom;
+	height: 3em;
+	width: 8em;
+
+}
