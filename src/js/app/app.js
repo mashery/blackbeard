@@ -18,6 +18,8 @@ var loadPortal = (function () {
 
 		// Templates
 		templates: {
+
+			// Base layout
 			layout: '<!-- Skip Nav Link -->' +
 					'<a class="screen-reader screen-reader-focusable" href="#main">Skip to content</a>' +
 					'{{navUser}}' +
@@ -28,9 +30,11 @@ var loadPortal = (function () {
 						'{{navSecondary}}' +
 						'{{footer2}}' +
 					'</footer>',
+
+			// Navigation
 			userNav: '<div class="container"><ul id="nav-user-list" class="list-inline text-small text-muted padding-top-small padding-bottom-small no-margin-bottom text-right">{{navItemsUser}}</ul></div>',
 			primaryNav: '<div class="nav-wrap nav-collapse container padding-top-small padding-bottom-small">' +
-							'<a class="logo" href="index.html">{{logo}}</a>' +
+							'<a class="logo" href="/">{{logo}}</a>' +
 							'<a role="button" class="nav-toggle" data-nav-toggle="#primary-nav-menu" href="#">Menu</a>' +
 							'<div class="nav-menu" id="primary-nav-menu">' +
 								'<ul class="nav" id="primary-nav-list">' +
@@ -39,79 +43,59 @@ var loadPortal = (function () {
 							'</div>' +
 						'</div>',
 			secondaryNav: '<div class="container"><ul id="nav-secondary-list">{{navItemsSecondary}}</ul>',
+
+			// Footer
 			footer1: '<div class="container"><hr></div>',
 			footer2:	'<div class="container">' +
 							'<p>{{masheryMade}}</p>' +
 						'</div>',
+
+			// Content types
+			page:	'<div class="container">{{content}}</div>',
+			docs:	'<div class="container">' +
+						'<div class="row">' +
+							'<div class="grid-two-thirds">{{content}}</div>' +
+							'<div class="grid-third"><h2>In the Docs</h2><ul>{{nav}}</ul></div>' +
+						'</div>' +
+					'</div>',
 			signin:  '<div class="container">' +
 						'<div class="row">' +
 							'<div class="grid-half">' +
-								'<h1>{{label.heading}}</h1>' +
-								'{{label.subheading}}' +
-								'<div>' +
-									'<label for="username">Username</label>' +
-									'<input id="username" type="text">' +
-								'</div>' +
-								'<div>' +
-									'<label for="password">Password</label>' +
-									'<input id="password" type="password">' +
-								'</div>' +
-								'<div>' +
-									'<button id="signin-submit" class="btn">{{label.submit}}</button>' +
-								'</div>' +
+								'<h1>{{heading}}</h1>' +
+								'{{subheading}}' +
+								'{{form}}' +
 							'</div>' +
 							'<div class="grid-half">' +
-								'{{label.sidebar}}' +
+								'{{about}}' +
 							'</div>' +
 						'</div>' +
 					'</div>',
 			register:   '<div class="container">' +
 							'<div class="row">' +
 								'<div class="grid-two-thirds">' +
-									'<h1>{{label.heading}}</h1>' +
-									'{{label.subheading}}' +
-									'<div>' +
-										'<label for="username">Username</label>' +
-										'<input id="username" type="text">' +
-									'</div>' +
-									'<div>' +
-										'<label for="display-name">Display Name</label>' +
-										'<input id="display-name" type="text">' +
-									'</div>' +
-									'<div>' +
-										'<label for="email">Email</label>' +
-										'<input id="email" type="email">' +
-									'</div>' +
-									'<div>' +
-										'<label for="password">Password</label>' +
-										'<input id="password" type="password">' +
-									'</div>' +
-									'<div>' +
-										'<p><button id="register-submit" class="btn">{{label.submit}}</button></p>' +
-									'</div>' +
-									'<div>' +
-										'<p>By clicking the "Register" button, I certify that I have read and agree to {{registerPolicy}}the <a href="http://www.mashery.com/terms/">Mashery Terms of Service</a> and <a href="http://www.mashery.com/privacy/">Privacy Policy</a>.</p>' +
-									'</div>' +
+									'<h1>{{heading}}</h1>' +
+									'{{subheading}}' +
+									'{{form}}' +
+									'{{terms}}' +
 								'</div>' +
 								'<div class="grid-third">' +
-									'{{label.sidebar}}' +
+									'{{about}}' +
 								'</div>' +
 							'</div>' +
 						'</div>',
-			account:    '<div class="container">' +
-							'<h1>{{label.headingMyApiKeys}}</h1>' +
-							'<ul id="nav-account">' +
-								'<li><a href="{{keys}}">{{label.keys}}</a></li>' +
-								'<li><a href="{{apps}}">{{label.apps}}</a></li>' +
-								'<li><a href="{{account}}">{{label.account}}</a></li>' +
-							'</ul>' +
-							'<p>{{label.noKeys}}</p>' +
-						'</div>',
+			accountManage:	'<div class="container">' +
+								'<h1>{{label.headingMyApiKeys}}</h1>' +
+								'<ul id="nav-account">' +
+									'<li><a href="{{keys}}">{{label.keys}}</a></li>' +
+									'<li><a href="{{apps}}">{{label.apps}}</a></li>' +
+									'<li><a href="{{account}}">{{label.account}}</a></li>' +
+								'</ul>' +
+								'<p>{{label.noKeys}}</p>' +
+							'</div>',
 			logout: '<div class="container"><p>This content needs to get created.</p></div>',
-			docs: '<div class="container"><p>This content needs to get created.</p></div>',
 			ioDocs: '<div class="container"><p>This content needs to get created.</p></div>',
 			contact: '<div class="container"><p>This content needs to get created.</p></div>',
-			search: '<div class="container"><p>This content needs to get created.</p></div>'
+			search: '<div class="container"><p>This content needs to get created.</p></div>',
 		},
 
 		// Labels & Blurbs
@@ -120,7 +104,6 @@ var loadPortal = (function () {
 			userNav: {
 				signin: 'Sign In',
 				register: 'Register',
-				username: 'Signed in as {{username}}',
 				account: 'My Account',
 				dashboard: 'Dashboard',
 				signout: 'Sign Out',
@@ -156,12 +139,7 @@ var loadPortal = (function () {
 		// Callbacks
 		callbacks: {
 			beforeRenderLayout: function () {},
-			afterRenderLayout: function () {
-				// @temp
-				if (location.pathname.split('/').pop() === 'index.html') {
-					document.querySelector('#nav-primary').style.marginBottom = '0';
-				}
-			},
+			afterRenderLayout: function () {},
 			beforeRender: function () {},
 			afterRender: function () {},
 			beforeRenderUserNav: function () {},
@@ -180,112 +158,98 @@ var loadPortal = (function () {
 
 	// Paths
 	var paths = {
-		'signin.html': {
-			placeholder: '{{signin}}',
-			url: 'signin.html',
+		page: {
 			template: function () {
-				return replacePlaceholders(settings.templates.signin, 'signin');
-			},
+				return replacePlaceholders(settings.templates.page, 'page');
+			}
 		},
-		'register.html': {
-			placeholder: '{{register}}',
-			url: 'register.html',
-			template: function () {
-				return replacePlaceholders(settings.templates.register, 'register');
-			},
-		},
-		'account.html': {
-			placeholder: '{{account}}',
-			url: 'account.html',
-			template: function () {
-				return replacePlaceholders(settings.templates.account, 'account');
-			},
-		},
-		'apps.html': {
-			placeholder: '{{apps}}',
-			url: '#',
-			template: null,
-		},
-		'keys.html': {
-			placeholder: '{{keys}}',
-			url: '#',
-			template: null,
-		},
-		'dashboard.html': {
-			placeholder: '{{dashboard}}',
-			url: 'dashboard.html',
-			template: null,
-		},
-		'logout.html': {
-			placeholder: '{{logout}}',
-			url: 'logout.html',
-			template: function () {
-				return replacePlaceholders(settings.templates.logout, 'logout');
-			},
-		},
-		'docs.html': {
+		docs: {
 			placeholder: '{{docs}}',
-			url: 'docs.html',
+			url: '/docs',
 			template: function () {
 				return replacePlaceholders(settings.templates.docs, 'docs');
 			},
 		},
-		'io-docs.html': {
+		signin: {
+			placeholder: '{{signin}}',
+			url: '/login/login',
+			template: function () {
+				return replacePlaceholders(settings.templates.signin, 'signin');
+			},
+		},
+		register: {
+			placeholder: '{{register}}',
+			url: '/member/register',
+			template: function () {
+				return replacePlaceholders(settings.templates.register, 'register');
+			},
+		},
+		accountManage: {
+			placeholder: '{{account}}',
+			url: '/apps/mykeys',
+			template: function () {
+				return replacePlaceholders(settings.templates.account, 'account');
+			},
+		},
+		accountApps: {
+			placeholder: '{{apps}}',
+			url: '/apps/myapps',
+			template: null,
+		},
+		accountKeys: {
+			placeholder: '{{keys}}',
+			url: '/apps/mykeys',
+			template: null,
+		},
+		'dashboard.html': {
+			placeholder: '{{dashboard}}',
+			url: (window.mashery.dashboard ? window.mashery.dashboard : '#'),
+			template: null,
+		},
+		logout: {
+			// @todo inject logout form
+			placeholder: '{{logout}}',
+			url: '/logout/logout',
+			template: function () {
+				return replacePlaceholders(settings.templates.logout, 'logout');
+			},
+		},
+		ioDocs: {
 			placeholder: '{{iodocs}}',
-			url: 'io-docs.html',
+			url: '/io-docs',
 			template: function () {
 				return replacePlaceholders(settings.templates.ioDocs, 'ioDocs');
 			},
 		},
-		'contact.html': {
+		contact: {
 			placeholder: '{{contact}}',
-			url: 'contact.html',
+			url: '/contact',
 			template: function () {
 				return replacePlaceholders(settings.templates.contact, 'contact');
 			},
 		},
-		'search.html': {
+		search: {
 			placeholder: '{{search}}',
-			url: 'search.html',
+			url: '/search',
 			template: function () {
 				return replacePlaceholders(settings.templates.search, 'search');
 			},
-		},
-		page: {
-			template: function () {
-				var template =
-					'<div class="bg-dark bg-hero padding-top padding-bottom" style="background-image: linear-gradient( rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6) ), url(https://unsplash.it/1800/800);">' +
-						'<div class="container">' +
-							'<h1>' + data[0].title + '</h1>' +
-							'<p>' + data[0].body + '</p>' +
-							'<p><a class="btn" href="account.html">Register Now</a> <a href="#">Or learn more about our APIs...</a></div></p>' +
-						'</div>' +
-					'</div>' +
-
-					'<div class="container padding-top padding-bottom">' +
-						'<h2>' + data[1].title + '</h2>' +
-						'<p>' + data[1].body + '</p>' +
-						'<p>' + data[2].body + data[3].body + '</p>' +
-						'<p>' + data[4].body + '</p>' +
-					'</div>';
-				return template;
-			}
 		}
 	};
 
 	var globalPlaceholders = {
 		area: {
 			placeholder: '{{area}}',
-			text: mashery.area
+			text: window.mashery.area
 		},
 		username: {
 			placeholder: '{{username}}',
-			text: mashery.username
+			text: window.mashery.username
 		},
 		logo: {
 			placeholder: '{{logo}}',
 			text: function () {
-				return settings.logo ? settings.logo : mashery.area;
+				return settings.logo ? settings.logo : window.mashery.area;
 			}
 		},
 		navItemsUser: {
@@ -297,13 +261,13 @@ var loadPortal = (function () {
 		navItemsPrimary: {
 			placeholder: '{{navItemsPrimary}}',
 			text: function () {
-				return getNavItems(primaryNavItems);
+				return getNavItems(window.mashery.content.navPrimary);
 			}
 		},
 		navItemsSecondary: {
 			placeholder: '{{navItemsSecondary}}',
 			text: function () {
-				return getNavItems(secondaryNavItems);
+				return getNavItems(window.mashery.content.navSecondary);
 			}
 		},
 		registerPolicy: {
@@ -346,27 +310,41 @@ var loadPortal = (function () {
 				text: '<div id="footer-content-2"></div>'
 			}
 		},
+		page: {
+			content: {
+				placeholder: '{{content}}',
+				text: window.mashery.content.main
+			}
+		},
+		docs: {
+			content: {
+				placeholder: '{{content}}',
+				text: window.mashery.content.main
+			},
+			nav: {
+				placeholder: '{{nav}}',
+				text: window.mashery.content.secondary
+			}
+		},
 		signin: {
 			heading: {
-				placeholder: '{{label.heading}}',
+				placeholder: '{{heading}}',
 				text: function () {
 					return settings.labels.signin.heading;
 				}
 			},
 			subheading: {
-				placeholder: '{{label.subheading}}',
+				placeholder: '{{subheading}}',
 				text: function () {
 					return settings.labels.signin.subheading;
 				}
 			},
-			submit:  {
-				placeholder: '{{label.submit}}',
-				text: function () {
-					return settings.labels.signin.submit;
-				}
+			form: {
+				placeholder: '{{form}}',
+				text: window.mashery.content.main
 			},
-			sidebar: {
-				placeholder: '{{label.sidebar}}',
+			about: {
+				placeholder: '{{about}}',
 				text: function () {
 					return settings.labels.signin.sidebar;
 				}
@@ -374,31 +352,39 @@ var loadPortal = (function () {
 		},
 		register: {
 			heading: {
-				placeholder: '{{label.heading}}',
+				placeholder: '{{heading}}',
 				text: function () {
 					return settings.labels.register.heading;
 				}
 			},
 			subheading: {
-				placeholder: '{{label.subheading}}',
+				placeholder: '{{subheading}}',
 				text: function () {
 					return settings.labels.register.subheading;
 				}
 			},
-			submit: {
-				placeholder: '{{label.submit}}',
+			form: {
+				placeholder: '{{form}}',
+				text: window.mashery.content.main
+			},
+			terms: {
+				placeholder: '{{terms}}',
 				text: function () {
-					return settings.labels.register.submit;
+					var text =
+						'<div id="registration-terms-of-service">' +
+							'<p>By clicking the "Register" button, I certify that I have read and agree to {{privacyPolicy}}the <a href="http://www.mashery.com/terms/">Mashery Terms of Service</a> and <a href="http://www.mashery.com/privacy/">Privacy Policy</a>.</p>' +
+						'</div>';
+					return text;
 				}
 			},
-			sidebar: {
-				placeholder: '{{label.sidebar}}',
+			about: {
+				placeholder: '{{about}}',
 				text: function () {
 					return settings.labels.register.sidebar;
 				}
 			},
 			privacyPolicy: {
-				placeholder: '{{label.privacyPolicy}}',
+				placeholder: '{{privacyPolicy}}',
 				text: function () {
 					return settings.labels.register.privacyPolicy;
 				}
@@ -452,7 +438,6 @@ var loadPortal = (function () {
 		keys: {},
 		dashboard: {},
 		logout: {},
-		docs: {},
 		ioDocs: {},
 		contact: {},
 		search: {},
@@ -517,12 +502,6 @@ var loadPortal = (function () {
 
 	};
 
-	// var makeFunction = function () {
-	// 	forEach(settings.callbacks, function (callback, key) {
-	// 		settings.callbacks[key] = new Function('return (' + settings.callbacks[key] + ')')();
-	// 	});
-	// };
-
 	var replacePlaceholders = function (template, local) {
 		if (local && localPlaceholders[local]) {
 			forEach(localPlaceholders[local], function (placeholder) {
@@ -545,7 +524,6 @@ var loadPortal = (function () {
 		var template;
 		if (mashery.loggedIn) {
 			template =
-				'<li id="nav-user-username">' + settings.labels.userNav.username + '</li>' +
 				'<li id="nav-user-myaccount"><a href="{{account}}">' + settings.labels.userNav.account + '</a></li>' +
 				(mashery.isAdmin ? '<li><a href="{{dashboard}}">' + settings.labels.userNav.dashboard + '</a></li>' : '') +
 				'<li id="nav-user-signout"><a href="{{logout}}">' + settings.labels.userNav.signout + '</a></li>';
@@ -560,22 +538,18 @@ var loadPortal = (function () {
 	var getNavItems = function (items) {
 		var template = '';
 		forEach(items, function (item) {
-			template += '<li><a href="' + item.url + '">' + item.label + '</a></li>';
+			template += '<li><a href="' + decodeURIComponent(item.url) + '">' + item.label + '</a></li>';
 		});
 		return template;
 	};
 
-	var getMain = function () {
-		var template;
-		var path = location.pathname.split('/').pop();
-		if (paths[path] && paths[path].template) {
-			template = paths[path].template();
-		} else {
-			template = paths.page.template();
-		}
-		settings.callbacks.beforeRenderMain();
-		main.innerHTML = template;
-		settings.callbacks.afterRenderMain();
+	var inject = function (type, atts) {
+		var ref = window.document.getElementsByTagName( 'script' )[ 0 ];
+		var elem = document.createElement(type);
+		forEach(atts, function (value, key) {
+			elem.setAttribute(key, value);
+		});
+		ref.parentNode.insertBefore(elem, ref);
 	};
 
 	var render = function (selector, key, before, after) {
@@ -590,39 +564,31 @@ var loadPortal = (function () {
 		}
 	};
 
+	var verifyLoggedIn = function () {
+		if (window.mashery.contentType !== 'logout') return;
+		var loggedIn = window.mashery.dom.querySelector('#mashery-logout-form');
+		if (loggedIn) return;
+		window.mashery.loggedIn = false;
+		window.mashery.username = null;
+		window.mashery.isAdmin = false;
+		window.mashery.dashboard = null;
+		window.mashery.logout = null;
+	};
+
 	exports.renderLayout = function () {
-		// var app = document.querySelector('#app');
-		// if (!app) return;
-		// settings.callbacks.beforeRenderLayout();
-		// app.innerHTML = replacePlaceholders(settings.templates.layout, 'layout');
-		// settings.callbacks.afterRenderLayout();
 		render('#app', 'layout', settings.callbacks.beforeRenderLayout, settings.callbacks.afterRenderLayout);
+		verifyLoggedIn();
 	};
 
 	exports.renderUserNav = function () {
-		// var userNav = document.querySelector('#nav-user');
-		// if (!userNav) return;
-		// settings.callbacks.beforeRenderUserNav();
-		// userNav.innerHTML = replacePlaceholders(settings.templates.userNav);
-		// settings.callbacks.afterRenderUserNav();
 		render('#nav-user', 'userNav', settings.callbacks.beforeRenderUserNav, settings.callbacks.afterRenderUserNav);
 	};
 
 	exports.renderPrimaryNav = function () {
-		// var primaryNav = document.querySelector('#nav-primary');
-		// if (!primaryNav) return;
-		// settings.callbacks.beforeRenderPrimaryNav();
-		// primaryNav.innerHTML = replacePlaceholders(settings.templates.primaryNav);
-		// settings.callbacks.afterRenderPrimaryNav();
 		render('#nav-primary', 'primaryNav', settings.callbacks.beforeRenderPrimaryNav, settings.callbacks.afterRenderPrimaryNav);
 	};
 
 	exports.renderSecondaryNav = function () {
-		// var secondaryNav = document.querySelector('#nav-secondary');
-		// if (!secondaryNav) return;
-		// settings.callbacks.beforeRenderSecondaryNav();
-		// secondaryNav.innerHTML = replacePlaceholders(settings.templates.secondaryNav);
-		// settings.callbacks.afterRenderSecondaryNav();
 		render('#nav-secondary', 'secondaryNav', settings.callbacks.beforeRenderSecondaryNav, settings.callbacks.afterRenderSecondaryNav);
 	};
 
@@ -635,14 +601,43 @@ var loadPortal = (function () {
 	};
 
 	exports.renderMain = function () {
-		main = document.querySelector('#main');
-		if (!main) return;
-		atomic.ajax({
-			url: mashDataEndpoint
-		}).success(function (xhrData) {
-			data = xhrData;
-			getMain();
+		render('#main', window.mashery.contentType, settings.callbacks.beforeRenderMain, settings.callbacks.afterRenderMain);
+	};
+
+	var renderHead = function () {
+		inject('meta', {
+			'http-equiv': 'X-UA-Compatible',
+			'content': 'IE=edge,chrome=1'
 		});
+
+		inject('meta', {
+			name: 'viewport',
+			content: 'width=device-width, initial-scale=1.0'
+		});
+
+		inject('link', {
+			rel: 'shortcut icon',
+			href: '/files/favicon.ico'
+		});
+
+		inject('link', {
+			rel: 'icon',
+			sizes: '16x16 32x32',
+			href: '/files/favicon.icon'
+		});
+	};
+
+	var renderLogout = function () {
+		if (!window.mashery.logout) return;
+		window.mashery.logoutForm = document.body.insertBefore(window.mashery.logout, document.body.firstChild);
+	};
+
+	var fixLocation = function () {
+		if (window.location.hash) {
+			window.location.hash = window.location.hash;
+		} else {
+			window.scrollTo(0, 0);
+		}
 	};
 
 	exports.renderMasheryMade = function () {
@@ -657,6 +652,7 @@ var loadPortal = (function () {
 
 	exports.renderPortal = function () {
 		settings.callbacks.beforeRender();
+		renderHead(); // <head> attributes
 		exports.renderLayout(); // Layout
 		exports.renderUserNav(); // User Navigation
 		exports.renderPrimaryNav(); // Primary Navigation
@@ -664,9 +660,17 @@ var loadPortal = (function () {
 		exports.renderMain(); // Main Content
 		exports.renderContent('#footer-content-1', 'footer1'); // Footer Content 1
 		exports.renderContent('#footer-content-2', 'footer2'); // Footer Content 2
+		fixLocation(); // Jump to anchor
+		renderLogout(); // Logout Form
 		exports.renderMasheryMade(); // Add the Mashery Made logo if missing
 		settings.callbacks.afterRender();
 		document.documentElement.classList.remove('loading');
+	};
+
+	var logoutListener = function (event) {
+		if (!event.target.closest('a[href="' + paths.logout.url + '"') || !window.mashery.logoutForm) return;
+		event.preventDefault();
+		window.mashery.logoutForm.submit();
 	};
 
 	/**
@@ -676,17 +680,18 @@ var loadPortal = (function () {
 	 */
 	exports.init = function (options) {
 
-		// Get options from localStorage
-		// @temp
-		options = localStorage.getItem('mashDemoOptions');
-		if (options) {
-			options = JSON.parse(options);
-		}
+		loadJS('https://ft-polyfill-service.herokuapp.com/v2/polyfill.min.js', function () {
 
-		// Merge user options with defaults
-		settings = extend( defaults, options || {} );
+			// Merge user options with defaults
+			settings = extend( defaults, options || {} );
 
-		exports.renderPortal();
+			// Render the Portal
+			exports.renderPortal();
+
+			// Listen for logout click
+			document.addEventListener('click', logoutListener, false);
+
+		});
 
 	};
 

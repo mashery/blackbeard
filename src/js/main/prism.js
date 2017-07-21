@@ -1,200 +1,3 @@
-/*!
- * blackbeard v0.0.1: Future portal layout
- * (c) 2017 Chris Ferdinandi
- * BSD-3-Clause License
- * http://github.com/mashery/blackbeard
- */
-
-(function (root, factory) {
-	if ( typeof define === 'function' && define.amd ) {
-		define([], factory(root));
-	} else if ( typeof exports === 'object' ) {
-		module.exports = factory(root);
-	} else {
-		root.astro = factory(root);
-	}
-})(typeof global !== 'undefined' ? global : this.window || this.global, (function (root) {
-
-	'use strict';
-
-	//
-	// Variables
-	//
-
-	var astro = {}; // Object for public APIs
-	var supports = 'querySelector' in document && 'addEventListener' in root && 'classList' in document.createElement('_'); // Feature test
-	var settings;
-
-	// Default settings
-	var defaults = {
-		selector: '[data-nav-toggle]',
-		toggleActiveClass: 'active',
-		navActiveClass: 'active',
-		initClass: 'js-astro',
-		callback: function () {}
-	};
-
-
-	//
-	// Methods
-	//
-
-	/**
-	 * Merge defaults with user options
-	 * @private
-	 * @param {Object} defaults Default settings
-	 * @param {Object} options User options
-	 * @returns {Object} Merged values of defaults and options
-	 */
-	var extend = function () {
-
-		// Variables
-		var extended = {};
-		var deep = false;
-		var i = 0;
-		var length = arguments.length;
-
-		// Check if a deep merge
-		if ( Object.prototype.toString.call( arguments[0] ) === '[object Boolean]' ) {
-			deep = arguments[0];
-			i++;
-		}
-
-		// Merge the object into the extended object
-		var merge = function (obj) {
-			for ( var prop in obj ) {
-				if ( Object.prototype.hasOwnProperty.call( obj, prop ) ) {
-					// If deep merge and property is an object, merge properties
-					if ( deep && Object.prototype.toString.call(obj[prop]) === '[object Object]' ) {
-						extended[prop] = buoy.extend( true, extended[prop], obj[prop] );
-					} else {
-						extended[prop] = obj[prop];
-					}
-				}
-			}
-		};
-
-		// Loop through each object and conduct a merge
-		for ( ; i < length; i++ ) {
-			var obj = arguments[i];
-			merge(obj);
-		}
-
-		return extended;
-
-	};
-
-	/**
-	 * Get the closest matching element up the DOM tree.
-	 * @private
-	 * @param  {Element} elem     Starting element
-	 * @param  {String}  selector Selector to match against
-	 * @return {Boolean|Element}  Returns null if not match found
-	 */
-	var getClosest = function ( elem, selector ) {
-
-		// Element.matches() polyfill
-		if (!Element.prototype.matches) {
-			Element.prototype.matches =
-				Element.prototype.matchesSelector ||
-				Element.prototype.mozMatchesSelector ||
-				Element.prototype.msMatchesSelector ||
-				Element.prototype.oMatchesSelector ||
-				Element.prototype.webkitMatchesSelector ||
-				function(s) {
-					var matches = (this.document || this.ownerDocument).querySelectorAll(s),
-						i = matches.length;
-					while (--i >= 0 && matches.item(i) !== this) {}
-					return i > -1;
-				};
-		}
-
-		// Get closest match
-		for ( ; elem && elem !== document; elem = elem.parentNode ) {
-			if ( elem.matches( selector ) ) return elem;
-		}
-
-		return null;
-
-	};
-
-	/**
-	 * Show and hide navigation menu
-	 * @public
-	 * @param  {Element} toggle Element that triggered the toggle
-	 * @param  {String} navID The ID of the navigation element to toggle
-	 * @param  {Object} settings
-	 * @param  {Event} event
-	 */
-	astro.toggleNav = function ( toggle, navID, options, event ) {
-
-		// Selectors and variables
-		var settings = extend( settings || defaults, options || {} );  // Merge user options with defaults
-		var nav = document.querySelector(navID);
-
-		toggle.classList.toggle( settings.toggleActiveClass ); // Toggle the '.active' class on the toggle element
-		nav.classList.toggle( settings.navActiveClass ); // Toggle the '.active' class on the menu
-		settings.callback( toggle, navID ); // Run callbacks after toggling nav
-
-	};
-
-	/**
-	 * Handle click event methods
-	 * @private
-	 */
-	var eventHandler = function (event) {
-		var toggle = getClosest(event.target, settings.selector);
-		if ( toggle ) {
-			// Prevent default click event
-			if ( toggle.tagName.toLowerCase() === 'a') {
-				event.preventDefault();
-			}
-			// Toggle nav
-			astro.toggleNav( toggle, toggle.getAttribute('data-nav-toggle'), settings );
-		}
-	};
-
-	/**
-	 * Destroy the current initialization.
-	 * @public
-	 */
-	astro.destroy = function () {
-		if ( !settings ) return;
-		document.documentElement.classList.remove( settings.initClass );
-		document.removeEventListener('click', eventHandler, false);
-		settings = null;
-	};
-
-	/**
-	 * Initialize Astro
-	 * @public
-	 * @param {Object} options User settings
-	 */
-	astro.init = function ( options ) {
-
-		// feature test
-		if ( !supports ) return;
-
-		// Destroy any existing initializations
-		astro.destroy();
-
-		// Selectors and variables
-		settings = extend( defaults, options || {} ); // Merge user options with defaults
-
-		// Listeners and methods
-		document.documentElement.classList.add( settings.initClass ); // Add class to HTML element to activate conditional CSS
-		document.addEventListener('click', eventHandler, false); // Listen for click events and run event handler
-
-	};
-
-
-	//
-	// Public APIs
-	//
-
-	return astro;
-
-}));
 /* http://prismjs.com/download.html?themes=prism&languages=markup+css+clike+javascript+bash+c+csharp+cpp+ruby+http+java+php+python+sass+scss */
 var _self = (typeof window !== 'undefined')
 	? window   // if in browser
@@ -249,7 +52,7 @@ var _ = _self.Prism = {
 
 				case 'Array':
 					// Check for existence for IE8
-					return o.map && o.map((function(v) { return _.util.clone(v); }));
+					return o.map && o.map(function(v) { return _.util.clone(v); });
 			}
 
 			return o;
@@ -313,11 +116,11 @@ var _ = _self.Prism = {
 			}
 
 			// Update references in other language definitions
-			_.languages.DFS(_.languages, (function(key, value) {
+			_.languages.DFS(_.languages, function(key, value) {
 				if (value === root[inside] && key != inside) {
 					this[key] = ret;
 				}
-			}));
+			});
 
 			return root[inside] = ret;
 		},
@@ -548,9 +351,9 @@ Token.stringify = function(o, language, parent) {
 	}
 
 	if (_.util.type(o) === 'Array') {
-		return o.map((function(element) {
+		return o.map(function(element) {
 			return Token.stringify(element, language, o);
-		})).join('');
+		}).join('');
 	}
 
 	var env = {
@@ -590,7 +393,7 @@ if (!_self.document) {
 		return _self.Prism;
 	}
  	// In worker
-	_self.addEventListener('message', (function(evt) {
+	_self.addEventListener('message', function(evt) {
 		var message = JSON.parse(evt.data),
 		    lang = message.language,
 		    code = message.code,
@@ -600,7 +403,7 @@ if (!_self.document) {
 		if (immediateClose) {
 			_self.close();
 		}
-	}), false);
+	}, false);
 
 	return _self.Prism;
 }
@@ -666,12 +469,12 @@ Prism.languages.markup = {
 };
 
 // Plugin to make entity title show the real entity, idea by Roman Komarov
-Prism.hooks.add('wrap', (function(env) {
+Prism.hooks.add('wrap', function(env) {
 
 	if (env.type === 'entity') {
 		env.attributes['title'] = env.content.replace(/&amp;/, '&');
 	}
-}));
+});
 
 Prism.languages.xml = Prism.languages.markup;
 Prism.languages.html = Prism.languages.markup;
@@ -1173,7 +976,7 @@ if (Prism.languages.markup) {
 
 	// Tokenize all inline PHP blocks that are wrapped in <?php ?>
 	// This allows for easy PHP + markup highlighting
-	Prism.hooks.add('before-highlight', (function(env) {
+	Prism.hooks.add('before-highlight', function(env) {
 		if (env.language !== 'php') {
 			return;
 		}
@@ -1181,23 +984,23 @@ if (Prism.languages.markup) {
 		env.tokenStack = [];
 
 		env.backupCode = env.code;
-		env.code = env.code.replace(/(?:<\?php|<\?)[\w\W]*?(?:\?>)/ig, (function(match) {
+		env.code = env.code.replace(/(?:<\?php|<\?)[\w\W]*?(?:\?>)/ig, function(match) {
 			env.tokenStack.push(match);
 
 			return '{{{PHP' + env.tokenStack.length + '}}}';
-		}));
-	}));
+		});
+	});
 
 	// Restore env.code for other plugins (e.g. line-numbers)
-	Prism.hooks.add('before-insert', (function(env) {
+	Prism.hooks.add('before-insert', function(env) {
 		if (env.language === 'php') {
 			env.code = env.backupCode;
 			delete env.backupCode;
 		}
-	}));
+	});
 
 	// Re-insert the tokens after highlighting
-	Prism.hooks.add('after-highlight', (function(env) {
+	Prism.hooks.add('after-highlight', function(env) {
 		if (env.language !== 'php') {
 			return;
 		}
@@ -1208,14 +1011,14 @@ if (Prism.languages.markup) {
 		}
 
 		env.element.innerHTML = env.highlightedCode;
-	}));
+	});
 
 	// Wrap tokens in classes that are missing them
-	Prism.hooks.add('wrap', (function(env) {
+	Prism.hooks.add('wrap', function(env) {
 		if (env.language === 'php' && env.type === 'markup') {
 			env.content = env.content.replace(/(\{\{\{PHP[0-9]+\}\}\})/g, "<span class=\"token php\">$1</span>");
 		}
-	}));
+	});
 
 	// Add the rules before all others
 	Prism.languages.insertBefore('php', 'comment', {
