@@ -36,7 +36,7 @@ var loadPlaceholder = function () {
 			'</section>' +
 		'<![endif]-->' +
 
-		'<div id="app">' +
+		'<div id="app" class="tabindex" tabindex="-1">' +
 
 			'<nav id="nav-user">' +
 				'<div class="text-small padding-top-small padding-bottom-small">&nbsp;</div>' +

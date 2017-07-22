@@ -1118,7 +1118,7 @@ var loadPortal = (function () {
 		if (window.location.hash) {
 			window.location.hash = window.location.hash;
 		} else {
-			window.scrollTo(0, 0);
+			document.querySelector('#app').focus();
 		}
 	};
 
