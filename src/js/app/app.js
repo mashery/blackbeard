@@ -629,7 +629,7 @@ var loadPortal = (function () {
 
 	var renderLogout = function () {
 		if (!window.mashery.logout) return;
-		window.mashery.logoutForm = document.body.insertBefore(window.mashery.logout, document.body.firstChild);
+		document.body.insertBefore(window.mashery.logout, document.body.lastChild);
 	};
 
 	var fixLocation = function () {
@@ -668,9 +668,11 @@ var loadPortal = (function () {
 	};
 
 	var logoutListener = function (event) {
-		if (!event.target.closest('a[href="' + paths.logout.url + '"') || !window.mashery.logoutForm) return;
+		if (!event.target.closest('a[href="' + paths.logout.url + '"]')) return;
+		var logout = document.querySelector('#mashery-logout-form');
+		if (!logout) return;
 		event.preventDefault();
-		window.mashery.logoutForm.submit();
+		logout.submit();
 	};
 
 	/**
