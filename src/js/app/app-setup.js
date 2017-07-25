@@ -1,5 +1,5 @@
 // Setup mashery variables
-setupMashery();
+setupMashery(document);
 
 // Make sure placeholder loaded
 if (!document.querySelector('#app')) {

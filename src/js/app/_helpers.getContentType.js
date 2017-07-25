@@ -14,7 +14,7 @@ var getContentType = function (elem) {
 		if (elem.classList.contains('topics')) {
 			type = 'forumTopics';
 		} else if (elem.classList.contains('topic-add')) {
-			type = 'formAdd-Topic';
+			type = 'forumAddTopic';
 		} else if (elem.classList.contains('read')) {
 			type = 'forumSingle';
 		} else if (elem.classList.contains('recent')) {
@@ -41,6 +41,12 @@ var getContentType = function (elem) {
 			type = 'accountPassword';
 		} else if (elem.classList.contains('register')) {
 			type = 'register';
+		} else if (elem.classList.contains('remove')) {
+			if (/You have been removed!/.test(elem.querySelector('.main .section-body').innerHTML)) {
+				type = 'memberRemoveSuccess';
+			} else {
+				type = 'memberRemove';
+			}
 		} else {
 			type = 'accountManage';
 		}
@@ -51,7 +57,11 @@ var getContentType = function (elem) {
 	} else if (elem.classList.contains('page-search')) {
 		type = 'search';
 	} else if (elem.classList.contains('page-logout')) {
-		type = 'logout';
+		if (elem.querySelector('#user-nav .account')) {
+			type = 'logoutFail';
+		} else {
+			type = 'logout';
+		}
 	} else if (elem.classList.contains('page-contact')) {
 		type = 'contact';
 	}
