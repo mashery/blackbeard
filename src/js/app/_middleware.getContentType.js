@@ -33,6 +33,12 @@ var getContentType = function (elem) {
 			type = 'accountKeys';
 		} else if (elem.classList.contains('myapps')) {
 			type = 'accountApps';
+		} else if (elem.classList.contains('register')) {
+			if (elem.querySelector('#application-edit')) {
+				type = 'appRegister';
+			} else {
+				type = 'appRegisterSuccess';
+			}
 		}
 	} else if (elem.classList.contains('page-member')) {
 		if (elem.classList.contains('email')) {
@@ -40,12 +46,40 @@ var getContentType = function (elem) {
 		} else if (elem.classList.contains('passwd')) {
 			type = 'accountPassword';
 		} else if (elem.classList.contains('register')) {
-			type = 'register';
+			if (/Registration Almost Complete/.test(elem.querySelector('h1.first').innerHTML)) {
+				type = 'registerSent';
+			} else {
+				type = 'register';
+			}
+		} else if (elem.classList.contains('resend-confirmation')) {
+			if (elem.querySelector('ul.success')) {
+				type = 'registerResendSuccess';
+			} else {
+				type = 'registerResend';
+			}
 		} else if (elem.classList.contains('remove')) {
 			if (/You have been removed!/.test(elem.querySelector('.main .section-body').innerHTML)) {
 				type = 'memberRemoveSuccess';
 			} else {
 				type = 'memberRemove';
+			}
+		} else if (elem.classList.contains('lost')) {
+			if (/E-mail Sent/.test(elem.querySelector('h2').innerHTML)) {
+				type = 'lostPasswordReset';
+			} else {
+				type = 'lostPassword';
+			}
+		} else if (elem.classList.contains('lost-username')) {
+			if (/E-mail Sent/.test(elem.querySelector('h2').innerHTML)) {
+				type = 'lostUsernameReset';
+			} else {
+				type = 'lostUsername';
+			}
+		} else if (elem.classList.contains('join') || elem.classList.contains('confirm')) {
+			if (/Registration Successful/.test(elem.querySelector('h1.first').innerHTML)) {
+				type = 'joinSuccess';
+			} else {
+				type = 'join';
 			}
 		} else {
 			type = 'accountManage';
@@ -63,7 +97,11 @@ var getContentType = function (elem) {
 			type = 'logout';
 		}
 	} else if (elem.classList.contains('page-contact')) {
-		type = 'contact';
+		if (elem.querySelector('#main form')) {
+			type = 'contact';
+		} else {
+			type = 'contactSuccess';
+		}
 	}
 
 	return type;

@@ -1,6 +1,7 @@
 var loadPlaceholder = function () {
 	document.documentElement.className += ' loading';
 	var placeholder = document.createElement('div');
+	placeholder.id = 'app-wrapper';
 	placeholder.innerHTML =
 		'<!-- Old Browser Warning -->' +
 		'<!--[if lt IE 9]>' +

@@ -503,7 +503,7 @@ dt {
  * Display lists on a single line.
  */
 /* line 116, src/sass/components/_typography.scss */
-.list-inline, #nav-secondary-list, #nav-account {
+.list-inline, #nav-secondary-list, #nav-account, #controls ul, .endpoint > .title .actions {
   list-style: none;
   margin-left: -0.5em;
   margin-right: -0.5em;
@@ -511,7 +511,7 @@ dt {
 }
 
 /* line 123, src/sass/components/_typography.scss */
-.list-inline > li, #nav-secondary-list > li, #nav-account > li {
+.list-inline > li, #nav-secondary-list > li, #nav-account > li, #controls ul > li, .endpoint > .title .actions > li {
   display: inline-block;
   margin-left: 0.5em;
   margin-right: 0.5em;
@@ -553,7 +553,9 @@ h2,
 
 /* line 158, src/sass/components/_typography.scss */
 h3,
-.h3 {
+.h3,
+.apiDescriptionList h4,
+.method h4 {
   font-size: 1.1875em;
 }
 
@@ -748,7 +750,7 @@ pre code {
  * Primary buttons
  */
 /* line 10, src/sass/components/_buttons.scss */
-.btn {
+.btn, #search-button {
   background-color: #0088cc;
   border: 1px solid #0088cc;
   border-radius: 1px;
@@ -763,10 +765,13 @@ pre code {
 }
 
 /* line 23, src/sass/components/_buttons.scss */
-.btn:hover,
-a .btn:hover, .link-block-styled .btn:hover, .btn:focus,
-a .btn:focus, .link-block-styled .btn:focus, .btn:active,
-a .btn:active, .link-block-styled .btn:active, .btn.active {
+.btn:hover, #search-button:hover,
+a .btn:hover, .link-block-styled .btn:hover,
+a #search-button:hover, .link-block-styled #search-button:hover, .btn:focus, #search-button:focus,
+a .btn:focus, .link-block-styled .btn:focus,
+a #search-button:focus, .link-block-styled #search-button:focus, .btn:active, #search-button:active,
+a .btn:active, .link-block-styled .btn:active,
+a #search-button:active, .link-block-styled #search-button:active, .btn.active, .active#search-button {
   background-color: #005580;
   border-color: #005580;
   color: #ffffff;
@@ -795,8 +800,9 @@ a .btn-secondary:active, .link-block-styled .btn-secondary:active, .btn-secondar
  * Active state
  */
 /* line 61, src/sass/components/_buttons.scss */
-.btn:active,
-.btn.active {
+.btn:active, #search-button:active,
+.btn.active,
+.active#search-button {
   box-shadow: inset 0 0.15625em 0.25em rgba(0, 0, 0, 0.15), 0 1px 0.15625em rgba(0, 0, 0, 0.05);
   outline: 0;
 }
@@ -805,8 +811,9 @@ a .btn-secondary:active, .link-block-styled .btn-secondary:active, .btn-secondar
  * Disabled state
  */
 /* line 71, src/sass/components/_buttons.scss */
-.btn.disabled,
-.btn[disabled] {
+.btn.disabled, .disabled#search-button,
+.btn[disabled],
+[disabled]#search-button {
   box-shadow: none;
   cursor: not-allowed;
   opacity: 0.5;
@@ -842,7 +849,7 @@ input[type="button"].btn-block {
  * General styles
  */
 /* line 108, src/sass/components/_buttons.scss */
-.btn,
+.btn, #search-button,
 button,
 html input[type="button"],
 input[type="reset"],
@@ -861,8 +868,9 @@ input[type="submit"] {
  * Remove right margin on last element and inputs
  */
 /* line 129, src/sass/components/_buttons.scss */
-.btn:last-child,
-input.btn {
+.btn:last-child, #search-button:last-child,
+input.btn,
+input#search-button {
   margin-right: 0;
 }
 
@@ -1098,27 +1106,22 @@ button:-moz-focusring,
 /**
  * Create rounded search bar
  */
-/* line 210, src/sass/components/_forms.scss */
-.input-search {
-  width: 85%;
+/* line 216, src/sass/components/_forms.scss */
+.input-search,
+#search-input {
+  border-radius: 1.3125em;
+  float: left;
+  margin-bottom: 0;
   padding-left: 0.9375em;
   padding-right: 2.5em;
-  border-radius: 1.3125em;
-  transition: width 300ms ease-in;
-}
-
-@media (min-width: 40em) {
-  /* line 210, src/sass/components/_forms.scss */
-  .input-search {
-    width: 65%;
-  }
 }
 
 /**
  * Special styling for search icon as button
  */
-/* line 226, src/sass/components/_forms.scss */
-.btn-search {
+/* line 240, src/sass/components/_forms.scss */
+.btn-search,
+#search-button {
   display: inline;
   color: #808080;
   border: none;
@@ -1127,18 +1130,27 @@ button:-moz-focusring,
   margin-bottom: 0;
 }
 
-/* line 234, src/sass/components/_forms.scss */
-.btn-search .icon {
+/* line 249, src/sass/components/_forms.scss */
+.btn-search svg,
+#search-button svg {
   fill: #808080;
 }
 
-/* line 238, src/sass/components/_forms.scss */
-.btn-search:hover {
+/* line 253, src/sass/components/_forms.scss */
+.btn-search:active, .btn-search:focus, .btn-search:hover,
+#search-button:active,
+#search-button:focus,
+#search-button:hover {
+  background-color: transparent;
+  border-color: transparent;
   color: #5a5a5a;
 }
 
-/* line 241, src/sass/components/_forms.scss */
-.btn-search:hover .icon {
+/* line 260, src/sass/components/_forms.scss */
+.btn-search:active svg, .btn-search:focus svg, .btn-search:hover svg,
+#search-button:active svg,
+#search-button:focus svg,
+#search-button:hover svg {
   fill: #5a5a5a;
 }
 
@@ -1557,6 +1569,439 @@ td {
 }
 
 /**
+ * @section Mashery IODocs
+ * Styling specific to IODocs pages
+ */
+/**
+ * API Select Element
+ */
+/* line 10, src/sass/components/_iodocs.scss */
+#apiId {
+  width: auto !important;
+}
+
+/* line 17, src/sass/components/_iodocs.scss */
+.servicesIodocs h2 {
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  font-size: 1em;
+  font-weight: normal;
+  line-height: 1.5;
+}
+
+@media (min-width: 40em) {
+  /* line 17, src/sass/components/_iodocs.scss */
+  .servicesIodocs h2 {
+    line-height: 1.5625;
+  }
+}
+
+/* line 29, src/sass/components/_iodocs.scss */
+#apiTitle {
+  display: none;
+  overflow: hidden;
+}
+
+/**
+ * Form for API Key
+ */
+/* line 38, src/sass/components/_iodocs.scss */
+.credentials {
+  background-color: #f7f7f7;
+  border: 1px solid #e5e5e5;
+  border-radius: 1px;
+  display: none;
+  margin-bottom: 1.5625em;
+  overflow: hidden;
+  padding: 1.5em;
+}
+
+/* line 47, src/sass/components/_iodocs.scss */
+.credentials #apiKeyContainer,
+.credentials #apiSecretContainer,
+.credentials #apiKeySecretListContainer,
+.credentials #apiOAuth2PresetKeysContainer {
+  display: none;
+  overflow: hidden;
+}
+
+/**
+ * Error styling
+ */
+/* line 61, src/sass/components/_iodocs.scss */
+pre.error {
+  background-color: #e7cfd0;
+  border-color: #d5abad;
+  color: #43070a;
+}
+
+/* line 67, src/sass/components/_iodocs.scss */
+div.error {
+  clear: left;
+}
+
+/**
+ * Toggle Endpoints/Methods Links
+ */
+/* line 75, src/sass/components/_iodocs.scss */
+#controls {
+  display: none;
+  overflow: hidden;
+}
+
+/**
+ * List of all available endpoints and methods
+ */
+/* line 89, src/sass/components/_iodocs.scss */
+.endpointList {
+  display: none;
+}
+
+/* line 93, src/sass/components/_iodocs.scss */
+.apiDescriptionList th,
+.method th {
+  background-color: transparent;
+}
+
+/* line 98, src/sass/components/_iodocs.scss */
+.apiDescriptionList tbody tr,
+.method tbody tr {
+  background-color: transparent;
+}
+
+/* line 107, src/sass/components/_iodocs.scss */
+.apiDescriptionList h4 a.select-all, .apiDescriptionList h4 .select-all.link-block-styled,
+.method h4 a.select-all,
+.method h4 .select-all.link-block-styled {
+  font-size: 0.85em;
+  margin-left: 1em;
+}
+
+/* line 113, src/sass/components/_iodocs.scss */
+.apiDescriptionList {
+  display: none;
+}
+
+/**
+ * Make h3 element appear as a link
+ */
+/* line 123, src/sass/components/_iodocs.scss */
+.endpoint > .title .name:hover {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* line 128, src/sass/components/_iodocs.scss */
+.endpoint > .title .actions {
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  font-size: 0.85em;
+  font-weight: normal;
+}
+
+/**
+ * Individual Methods
+ */
+/* line 147, src/sass/components/_iodocs.scss */
+.method .title {
+  overflow: hidden;
+  padding: 0.75em;
+}
+
+/* line 152, src/sass/components/_iodocs.scss */
+.method .title:hover {
+  cursor: pointer;
+}
+
+/* line 155, src/sass/components/_iodocs.scss */
+.method .title:hover .name {
+  text-decoration: underline;
+}
+
+/* line 160, src/sass/components/_iodocs.scss */
+.method .title .http-method {
+  border-radius: 0.3125em;
+  color: #ffffff;
+  display: inline-block;
+  font-family: Menlo, Monaco, "Courier New", monospace;
+  font-size: 0.9375em;
+  margin-right: 0.5em;
+  padding: 0.25em 0.5em;
+  text-align: center;
+}
+
+/* line 171, src/sass/components/_iodocs.scss */
+.method .title .name {
+  margin-right: 0.5em;
+}
+
+/* line 175, src/sass/components/_iodocs.scss */
+.method .title .uri {
+  margin-right: 0.5em;
+  opacity: 0.8;
+}
+
+/* line 186, src/sass/components/_iodocs.scss */
+.method form {
+  display: none;
+  padding: 0.75em;
+}
+
+/* line 190, src/sass/components/_iodocs.scss */
+.method form .parameters tr.hidden {
+  display: none;
+}
+
+/* line 195, src/sass/components/_iodocs.scss */
+.method a.clear-results, .method .clear-results.link-block-styled {
+  color: red;
+  margin-left: 1em;
+}
+
+/* line 199, src/sass/components/_iodocs.scss */
+.method a.clear-results:hover, .method .clear-results.link-block-styled:hover, .method .link-block:hover .clear-results.link-block-styled, .link-block:hover .method .clear-results.link-block-styled {
+  background-color: #0088cc;
+  color: #ffffff;
+}
+
+/**
+ * SOAP/JSON Nesting
+ */
+/* line 216, src/sass/components/_iodocs.scss */
+.fieldset-expanded {
+  padding-left: 1em;
+  padding-right: 1em;
+  border: 1px solid lightgray;
+}
+
+@media (min-width: 40em) {
+  /* line 216, src/sass/components/_iodocs.scss */
+  .fieldset-expanded {
+    padding-left: 1.5625em;
+    padding-right: 1.5625em;
+  }
+}
+
+/* line 227, src/sass/components/_iodocs.scss */
+.legend-expanded {
+  background-color: inherit;
+  padding-left: 0.25em;
+  padding-right: 0.25em;
+}
+
+/**
+ * GET Methods
+ */
+/* line 237, src/sass/components/_iodocs.scss */
+.get {
+  background-color: #e6f3fa;
+  border: 1px solid #bfe1f2;
+}
+
+/* line 241, src/sass/components/_iodocs.scss */
+.get .http-method {
+  background-color: #0088cc;
+}
+
+/* line 245, src/sass/components/_iodocs.scss */
+.get th,
+.get td {
+  border-color: #bfe1f2;
+}
+
+/* line 250, src/sass/components/_iodocs.scss */
+.get .fieldset-expanded {
+  border-color: #bfe1f2;
+}
+
+/**
+ * POST Methods
+ */
+/* line 258, src/sass/components/_iodocs.scss */
+.post {
+  background-color: #ebf2ea;
+  border: 1px solid #cddfcc;
+}
+
+/* line 262, src/sass/components/_iodocs.scss */
+.post .http-method {
+  background-color: #377f31;
+}
+
+/* line 266, src/sass/components/_iodocs.scss */
+.post th,
+.post td {
+  border-color: #cddfcc;
+}
+
+/* line 271, src/sass/components/_iodocs.scss */
+.post .fieldset-expanded {
+  border-color: #cddfcc;
+}
+
+/**
+ * PUT Methods
+ */
+/* line 279, src/sass/components/_iodocs.scss */
+.put {
+  background-color: #fbf6e6;
+  border: 1px solid #f6eac2;
+}
+
+/* line 283, src/sass/components/_iodocs.scss */
+.put .http-method {
+  background-color: #dba909;
+}
+
+/* line 287, src/sass/components/_iodocs.scss */
+.put th,
+.put td {
+  border-color: #f6eac2;
+}
+
+/* line 292, src/sass/components/_iodocs.scss */
+.put .fieldset-expanded {
+  border-color: #f6eac2;
+}
+
+/**
+ * DELETE Methods
+ */
+/* line 300, src/sass/components/_iodocs.scss */
+.delete {
+  background-color: #f3e7e8;
+  border: 1px solid #e1c3c4;
+}
+
+/* line 304, src/sass/components/_iodocs.scss */
+.delete .http-method {
+  background-color: #880e14;
+}
+
+/* line 308, src/sass/components/_iodocs.scss */
+.delete th,
+.delete td {
+  border-color: #e1c3c4;
+}
+
+/* line 313, src/sass/components/_iodocs.scss */
+.delete .fieldset-expanded {
+  border-color: #e1c3c4;
+}
+
+/**
+ * PATCH Methods
+ */
+/* line 321, src/sass/components/_iodocs.scss */
+.patch {
+  background-color: #f3e7f4;
+  border: 1px solid #e1c3e3;
+}
+
+/* line 325, src/sass/components/_iodocs.scss */
+.patch .http-method {
+  background-color: #860d8e;
+}
+
+/* line 329, src/sass/components/_iodocs.scss */
+.patch th,
+.patch td {
+  border-color: #e1c3e3;
+}
+
+/* line 334, src/sass/components/_iodocs.scss */
+.patch .fieldset-expanded {
+  border-color: #e1c3e3;
+}
+
+/**
+ * OPTIONS Methods
+ */
+/* line 342, src/sass/components/_iodocs.scss */
+.method.options {
+  background-color: #faf1e6;
+  border: 1px solid #f2dcbf;
+}
+
+/* line 346, src/sass/components/_iodocs.scss */
+.method.options .http-method {
+  background-color: #cc7100;
+}
+
+/* line 350, src/sass/components/_iodocs.scss */
+.method.options th,
+.method.options td {
+  border-color: #f2dcbf;
+}
+
+/* line 355, src/sass/components/_iodocs.scss */
+.method.options .fieldset-expanded {
+  border-color: #f2dcbf;
+}
+
+/**
+ * HEAD Methods
+ */
+/* line 363, src/sass/components/_iodocs.scss */
+.head {
+  background-color: #e6eef2;
+  border: 1px solid #bfd5df;
+}
+
+/* line 367, src/sass/components/_iodocs.scss */
+.head .http-method {
+  background-color: #00557f;
+}
+
+/* line 371, src/sass/components/_iodocs.scss */
+.head th,
+.head td {
+  border-color: #bfd5df;
+}
+
+/* line 376, src/sass/components/_iodocs.scss */
+.head .fieldset-expanded {
+  border-color: #bfd5df;
+}
+
+/* line 384, src/sass/components/_iodocs.scss */
+.category-iodocs {
+  /**
+	 * Limit the max height of the response
+	 */
+}
+
+/* line 386, src/sass/components/_iodocs.scss */
+.category-iodocs #main {
+  /**
+		 * Prevent select content from clipping
+		 */
+  /**
+		 * Override default list styles
+		 */
+}
+
+/* line 391, src/sass/components/_iodocs.scss */
+.category-iodocs #main select {
+  width: auto;
+}
+
+/* line 399, src/sass/components/_iodocs.scss */
+.category-iodocs #main ul {
+  margin: 0;
+}
+
+/* line 403, src/sass/components/_iodocs.scss */
+.category-iodocs #main li {
+  list-style: none;
+  margin-left: 0;
+}
+
+/* line 413, src/sass/components/_iodocs.scss */
+.category-iodocs pre.response {
+  max-height: 32em;
+  overflow-y: auto;
+}
+
+/**
  * @section Overrides
  * Nudge and tweak alignment, spacing, and visibility.
  */
@@ -1634,7 +2079,7 @@ td {
 }
 
 /* line 80, src/sass/components/_overrides.scss */
-.text-right {
+.text-right, .method .title .description {
   text-align: right;
 }
 
@@ -1666,7 +2111,7 @@ td {
 }
 
 /* line 109, src/sass/components/_overrides.scss */
-.float-right {
+.float-right, .endpoint > .title .actions, .method .title .description {
   float: right;
 }
 
@@ -1679,7 +2124,7 @@ td {
 }
 
 /* line 122, src/sass/components/_overrides.scss */
-.no-margin-bottom, .loading #nav-primary {
+.no-margin-bottom, #search-form, .loading #nav-primary {
   margin-bottom: 0;
 }
 
@@ -1689,12 +2134,12 @@ td {
 }
 
 /* line 130, src/sass/components/_overrides.scss */
-.margin-bottom, #nav-primary, .loading .placeholder-hero, .loading .placeholder-heading, .loading .placeholder-paragraph, .loading .placeholder-btn {
+.margin-bottom, #nav-primary, .loading .placeholder-hero, .loading .placeholder-heading, .loading .placeholder-paragraph, .loading .placeholder-btn, .method {
   margin-bottom: 1.5625em;
 }
 
 /* line 134, src/sass/components/_overrides.scss */
-.margin-bottom-small, .loading .placeholder-sentence {
+.margin-bottom-small, .loading .placeholder-sentence, .servicesIodocs {
   margin-bottom: 0.5em;
 }
 
@@ -1802,17 +2247,20 @@ td {
  */
 /* line 234, src/sass/components/_overrides.scss */
 .clearfix:before, .container:before,
-.row:before,
+.row:before, .method .title:before,
 .clearfix:after,
 .container:after,
-.row:after {
+.row:after,
+.method .title:after,
+.method a.clear-results:after,
+.method .clear-results.link-block-styled:after {
   display: table;
   content: " ";
 }
 
 /* line 240, src/sass/components/_overrides.scss */
 .clearfix:after, .container:after,
-.row:after {
+.row:after, .method .title:after, .method a.clear-results:after, .method .clear-results.link-block-styled:after {
   clear: both;
 }
 

@@ -1,0 +1,418 @@
+/**
+ * @section Mashery IODocs
+ * Styling specific to IODocs pages
+ */
+
+/**
+ * API Select Element
+ */
+
+#apiId {
+	width: auto !important;
+}
+
+.servicesIodocs {
+	@extend .margin-bottom-small;
+
+	h2 {
+		font-family: $font-primary;
+		font-size: calc-em(16px);
+		font-weight: normal;
+		line-height: 1.5;
+
+		@media (min-width: $bp-medium) {
+			line-height: 1.5625;
+		}
+	}
+}
+
+#apiTitle {
+	display: none;
+	overflow: hidden;
+}
+
+
+/**
+ * Form for API Key
+ */
+.credentials {
+	background-color: lighten( $color-gray-light, 7% );
+	border: calc-em(1px) solid $color-gray-light;
+	border-radius: calc-em(1px);
+	display: none;
+	margin-bottom: $spacing;
+	overflow: hidden;
+	padding: calc-em(24px);
+
+	#apiKeyContainer,
+	#apiSecretContainer,
+	#apiKeySecretListContainer,
+	#apiOAuth2PresetKeysContainer {
+		display: none;
+		overflow: hidden;
+	}
+}
+
+
+/**
+ * Error styling
+ */
+
+pre.error {
+	background-color: mix( white, $color-danger, 80% );
+	border-color: mix( white, $color-danger, 65% );
+	color: darken( $color-danger, 15% );
+}
+
+div.error {
+	clear: left;
+}
+
+
+/**
+ * Toggle Endpoints/Methods Links
+ */
+#controls {
+	display: none;
+	overflow: hidden;
+
+	ul {
+		@extend .list-inline;
+	}
+}
+
+
+/**
+ * List of all available endpoints and methods
+ */
+
+.endpointList {
+	display: none;
+}
+
+.apiDescriptionList th,
+.method th, {
+	background-color: transparent;
+}
+
+.apiDescriptionList tbody tr,
+.method tbody tr {
+	background-color: transparent;
+}
+
+.apiDescriptionList h4,
+.method h4 {
+	@extend .h3;
+
+	a.select-all {
+		font-size: 0.85em;
+		margin-left: calc-em(16px);
+	}
+}
+
+.apiDescriptionList {
+	display: none;
+}
+
+
+/**
+ * Make h3 element appear as a link
+ */
+.endpoint > .title {
+
+	.name:hover {
+		cursor: pointer;
+		text-decoration: underline;
+	}
+
+	.actions {
+		@extend .list-inline;
+		@extend .float-right;
+		font-family: $font-primary;
+		font-size: 0.85em;
+		font-weight: normal;
+	}
+
+}
+
+
+/**
+ * Individual Methods
+ */
+
+.method {
+	@extend .margin-bottom;
+
+
+	.title {
+		@extend .clearfix;
+		overflow: hidden;
+		padding: calc-em(12px);
+
+		&:hover {
+			cursor: pointer;
+
+			.name {
+				text-decoration: underline;
+			}
+		}
+
+		.http-method {
+			border-radius: calc-em(5px);
+			color: $color-white;
+			display: inline-block;
+			font-family: $font-monospace;
+			font-size: calc-em(15px);
+			margin-right: calc-em(8px);
+			padding: calc-em(4px) calc-em(8px);
+			text-align: center;
+		}
+
+		.name {
+			margin-right: calc-em(8px);
+		}
+
+		.uri {
+			margin-right: calc-em(8px);
+			opacity: 0.8;
+		}
+
+		.description {
+			@extend .float-right;
+			@extend .text-right;
+		}
+	}
+
+	form {
+		display: none;
+		padding: calc-em(12px);
+
+		.parameters tr.hidden {
+			display: none;
+		}
+	}
+
+	a.clear-results {
+		color: red;
+		margin-left: calc-em(16px);
+
+		&:hover {
+			background-color: $color-primary;
+			color: $color-white;
+		}
+
+		&:after {
+			@extend .clearfix;
+		}
+	}
+
+}
+
+
+/**
+ * SOAP/JSON Nesting
+ */
+
+.fieldset-expanded {
+    padding-left: calc-em(16px);
+    padding-right: calc-em(16px);
+    border: calc-em(1px) solid darken( $color-gray-light, 7% );
+
+    @media (min-width: $bp-medium) {
+        padding-left: $spacing;
+        padding-right: $spacing;
+    }
+}
+
+.legend-expanded {
+    background-color: inherit;
+    padding-left: calc-em(4px);
+    padding-right: calc-em(4px);
+}
+
+
+/**
+ * GET Methods
+ */
+.get {
+    background-color: mix( white, $color-get, 90% );
+    border: calc-em(1px) solid mix( white, $color-get, 75% );
+
+    .http-method {
+        background-color: $color-get;
+    }
+
+    th,
+    td {
+        border-color: mix( white, $color-get, 75% );
+    }
+
+    .fieldset-expanded {
+        border-color: mix( white, $color-get, 75% );
+    }
+}
+
+/**
+ * POST Methods
+ */
+.post {
+    background-color: mix( white, $color-post, 90% );
+    border: calc-em(1px) solid mix( white, $color-post, 75% );
+
+    .http-method {
+        background-color: $color-post;
+    }
+
+    th,
+    td {
+        border-color: mix( white, $color-post, 75% );
+    }
+
+    .fieldset-expanded {
+        border-color: mix( white, $color-post, 75% );
+    }
+}
+
+/**
+ * PUT Methods
+ */
+.put {
+    background-color: mix( white, $color-put, 90% );
+    border: calc-em(1px) solid mix( white, $color-put, 75% );
+
+    .http-method {
+        background-color: $color-put;
+    }
+
+    th,
+    td {
+        border-color: mix( white, $color-put, 75% );
+    }
+
+    .fieldset-expanded {
+        border-color: mix( white, $color-put, 75% );
+    }
+}
+
+/**
+ * DELETE Methods
+ */
+.delete {
+    background-color: mix( white, $color-delete, 90% );
+    border: calc-em(1px) solid mix( white, $color-delete, 75% );
+
+    .http-method {
+        background-color: $color-delete;
+    }
+
+    th,
+    td {
+        border-color: mix( white, $color-delete, 75% );
+    }
+
+    .fieldset-expanded {
+        border-color: mix( white, $color-delete, 75% );
+    }
+}
+
+/**
+ * PATCH Methods
+ */
+.patch {
+    background-color: mix( white, $color-patch, 90% );
+    border: calc-em(1px) solid mix( white, $color-patch, 75% );
+
+    .http-method {
+        background-color: $color-patch;
+    }
+
+    th,
+    td {
+        border-color: mix( white, $color-patch, 75% );
+    }
+
+    .fieldset-expanded {
+        border-color: mix( white, $color-patch, 75% );
+    }
+}
+
+/**
+ * OPTIONS Methods
+ */
+.method.options {
+    background-color: mix( white, $color-options, 90% );
+    border: calc-em(1px) solid mix( white, $color-options, 75% );
+
+    .http-method {
+        background-color: $color-options;
+    }
+
+    th,
+    td {
+        border-color: mix( white, $color-options, 75% );
+    }
+
+    .fieldset-expanded {
+        border-color: mix( white, $color-options, 75% );
+    }
+}
+
+/**
+ * HEAD Methods
+ */
+.head {
+    background-color: mix( white, $color-head, 90% );
+    border: calc-em(1px) solid mix( white, $color-head, 75% );
+
+    .http-method {
+        background-color: $color-head;
+    }
+
+    th,
+    td {
+        border-color: mix( white, $color-head, 75% );
+    }
+
+    .fieldset-expanded {
+        border-color: mix( white, $color-head, 75% );
+    }
+}
+
+
+// When additional specificity is needed.
+// Use with care and avoid whenever possible.
+.category-iodocs {
+
+	#main {
+
+		/**
+		 * Prevent select content from clipping
+		 */
+		select {
+			width: auto;
+		}
+
+		/**
+		 * Override default list styles
+		 */
+
+		ul {
+			margin: 0;
+		}
+
+		li {
+			list-style: none;
+			margin-left: 0;
+		}
+
+	}
+
+	/**
+	 * Limit the max height of the response
+	 */
+	pre.response {
+	  max-height: 32em;
+	  overflow-y: auto;
+	}
+
+}
