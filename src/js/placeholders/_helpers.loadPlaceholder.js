@@ -12,16 +12,16 @@ var loadPlaceholder = function () {
 
 		'<div id="app" class="tabindex" tabindex="-1">' +
 
-			'<nav id="nav-user">' +
+			'<nav id="nav-user-wrapper">' +
 				'<div class="text-small padding-top-small padding-bottom-small">&nbsp;</div>' +
 			'</nav>' +
 
-			'<nav id="nav-primary">' +
+			'<nav id="nav-primary-wrapper">' +
 				'<div class="padding-top-small padding-bottom-small">&nbsp;</div>' +
 			'</nav>' +
 
 			'<!-- tabindex="-1" hack for skipnav link: https://code.google.com/p/chromium/issues/detail?id=37721 -->' +
-			'<main class="tabindex" tabindex="-1" id="main">' +
+			'<main class="tabindex" tabindex="-1" id="main-wrapper">' +
 
 				'<div class="placeholder placeholder-hero"></div>' +
 
@@ -44,18 +44,18 @@ var loadPlaceholder = function () {
 
 			'</main>' +
 
-			'<footer id="footer">' +
+			'<footer id="footer-wrapper">' +
 
-				'<div id="footer-content-1">' +
+				'<div id="footer-1-wrapper">' +
 					'<div class="container">' +
 						'<hr>' +
 						'<p>&nbsp;</p>' +
 					'</div>' +
 				'</div>' +
 
-				'<nav id="nav-secondary"></nav>' +
+				'<nav id="nav-secondary-wrapper"></nav>' +
 
-				'<div id="footer-content-2"></div>' +
+				'<div id="footer-2-wrapper"></div>' +
 
 				'<div id="mashery-made">' +
 					'<div class="container">' +

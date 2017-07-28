@@ -1,5 +1,5 @@
 /*!
- * blackbeard v0.0.1: Future portal layout
+ * blackbeard v0.1.0: Future portal layout
  * (c) 2017 Chris Ferdinandi
  * BSD-3-Clause License
  * http://github.com/mashery/blackbeard
@@ -2025,7 +2025,7 @@ div.error {
 }
 
 /* line 25, src/sass/components/_overrides.scss */
-.bg-muted, #nav-user {
+.bg-muted, #nav-user-wrapper {
   background-color: #f2f2f2;
 }
 

@@ -1,8 +1,12 @@
 var getContentType = function (elem) {
 
 	var type = null;
+	var h1 = elem.querySelector('#main h1.first')
+	h1 = h1 ? h1.innerHTML : '';
 
-	if (elem.classList.contains('please-login')) {
+	if (elem.classList.contains('not-found') || (h1 && /Not Found/.test(h1)) ) {
+		type = 'fourOhFour';
+	} else if (elem.classList.contains('please-login')) {
 		type = 'pleaseLogin';
 	} else if (elem.classList.contains('page-page')) {
 		type = 'page';
@@ -46,7 +50,7 @@ var getContentType = function (elem) {
 		} else if (elem.classList.contains('passwd')) {
 			type = 'accountPassword';
 		} else if (elem.classList.contains('register')) {
-			if (/Registration Almost Complete/.test(elem.querySelector('h1.first').innerHTML)) {
+			if (/Registration Almost Complete/.test(h1)) {
 				type = 'registerSent';
 			} else {
 				type = 'register';
@@ -76,7 +80,7 @@ var getContentType = function (elem) {
 				type = 'lostUsername';
 			}
 		} else if (elem.classList.contains('join') || elem.classList.contains('confirm')) {
-			if (/Registration Successful/.test(elem.querySelector('h1.first').innerHTML)) {
+			if (/Registration Successful/.test(h1)) {
 				type = 'joinSuccess';
 			} else {
 				type = 'join';
