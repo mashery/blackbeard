@@ -1,5 +1,5 @@
 /*!
- * blackbeard v0.1.0: Future portal layout
+ * blackbeard v0.2.0: Future portal layout
  * (c) 2017 Chris Ferdinandi
  * BSD-3-Clause License
  * http://github.com/mashery/blackbeard
@@ -1022,19 +1022,19 @@ var loadPortal = (function () {
 										'<li>Created: ' + key.created + '</li>' +
 									'</ul>' +
 									key.limits +
-									'<p><a class="btn" href="' + key.delete + '">Delete This Key</a></p>';
+									'<p><a class="btn btn-delete-key" id="btn-delete-key" href="' + key.delete + '">Delete This Key</a></p>';
 							}));
 						} else {
 							template += '<p>{{content.noPlanKeys}}</p>';
 							if (mashery.content.secondary) {
-								template += '<p><a class="btn" href="' + mashery.content.secondary + '">Get a Key for ' + plan.name + '</a></p>';
+								template += '<p><a class="btn btn-get-key" id="' + sanitizeClass(plan.name, 'btn-get-key') + '"  href="' + mashery.content.secondary + '">Get a Key for ' + plan.name + '</a></p>';
 							}
 						}
 					}));
 				} else {
 					template += '{{content.noKeys}}';
 					if (mashery.content.secondary) {
-						template += '<p><a class="btn" href="' + mashery.content.secondary + '">Get API Keys</a></p>';
+						template += '<p><a class="btn btn-get-key" id="btn-get-key" href="' + mashery.content.secondary + '">Get API Keys</a></p>';
 					}
 				}
 				return '<div class="main container container-small" id="main">' + template + '</div>';
@@ -1056,15 +1056,15 @@ var loadPortal = (function () {
 								'<li>Created: ' + app.created + '</li>' +
 							'</ul>' +
 							'<p>' +
-								'<a class="btn" href="' + app.edit + '">Edit This App</a>' +
-								'<a class="btn" href="' + app.delete + '">Delete This App</a>' +
+						'<a class="btn btn-edit-app" id="' + sanitizeClass(app.application, 'btn-edit-app') + '" href="' + app.edit + '">Edit This App</a>' +
+						'<a class="btn btn-delete-app" id="' + sanitizeClass(app.application, 'btn-delete-app') + '" href="' + app.delete + '">Delete This App</a>' +
 							'</p>';
 					}));
 				} else {
 					template += '{{content.noApps}}';
 				}
 				if (mashery.content.secondary) {
-					template += '<p><a class="btn" href="' + window.mashery.content.secondary + '">Create a New App</a></p>';
+					template += '<p><a class="btn btn-get-app" id="btn-get-app" href="' + window.mashery.content.secondary + '">Create a New App</a></p>';
 				}
 				return '<div class="main container container-small" id="main">' + template + '</div>';
 			},
@@ -1156,8 +1156,8 @@ var loadPortal = (function () {
 								'<h1>{{content.heading}}</h1>' +
 								'<p>{{content.main}}</p>' +
 								'<p>' +
-									'<a class="btn" href="{{path.removeMember}}">{{content.confirm}}</a>' +
-									'<a class="btn" href="{{path.account}}">{{content.cancel}}</a>' +
+									'<a class="btn btn-remove-member-confirm" id="btn-remove-member-confirm" href="{{path.removeMember}}">{{content.confirm}}</a>' +
+									'<a class="btn btn-remove-member-cancel" id="btn-remove-member-cancel" href="{{path.account}}">{{content.cancel}}</a>' +
 								'</p>' +
 							'</div>',
 
@@ -1398,7 +1398,9 @@ var loadPortal = (function () {
 							'<p><a href="{{path.register}}">Create an account</a> to access stagingcs9.mashery.com. Your account information can then be used to access other APIs on the Mashery API Network.</p>' +
 
 							'<h2>What is Mashery?</h2>' +
-							'<p><a href="http://mashery.com">Mashery</a> powers APIs of leading brands in retail, media, business services, software, and more. By signing in to a Mashery powered portal, you can gain access to Mashery\'s base of API providers. All with a single Mashery ID.</p><p><a class="btn" href="{{path.register}}">Register a Mashery ID</a></p>',
+							'<p><a href="http://mashery.com">Mashery</a> powers APIs of leading brands in retail, media, business services, software, and more. By signing in to a Mashery powered portal, you can gain access to Mashery\'s base of API providers. All with a single Mashery ID.</p>' +
+
+							'<p><a class="btn btn-user-register" id="btn-user-register" href="{{path.register}}">Register a Mashery ID</a></p>',
 			},
 
 			/**
@@ -2607,8 +2609,8 @@ var loadPortal = (function () {
 			text: function () {
 				var template =
 					'<form id="search-form" class="search-form" method="get" action="/search">' +
-						'<input id="search-input" class="search-input" type="text" value="" placeholder="' + settings.labels.search.placeholder + '" name="q">' +
-						'<button id="search-button" type="submit">' + settings.labels.search.button + '</button>' +
+						'<input class="search-input" id="search-input" type="text" value="" placeholder="' + settings.labels.search.placeholder + '" name="q">' +
+						'<button class="search-button" id="search-button" type="submit">' + settings.labels.search.button + '</button>' +
 					'</form>';
 				return template;
 			}
