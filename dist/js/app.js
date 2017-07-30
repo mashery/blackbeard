@@ -1616,6 +1616,8 @@ var loadPortal = (function () {
 		 * They allow you to hook into and extend the functionality of your Portal.
 		 */
 		callbacks: {
+			beforeInit: function () {}, // Before the
+			afterInit: function () {},
 			beforeRender: function () {}, // Before any rendering begings
 			afterRender: function () {}, // After all page rendering is complete
 			beforeRenderLayout: function () {}, // Before the layout is rendered
@@ -3215,6 +3217,9 @@ var loadPortal = (function () {
 			// Merge user options with defaults
 			settings = extend( defaults, options || {} );
 
+			// Run callback before initializing
+			exports.callbacks.beforeInit();
+
 			// Render the Portal
 			exports.renderPortal();
 
@@ -3225,6 +3230,9 @@ var loadPortal = (function () {
 				window.addEventListener('popstate', popstateHandler, false);
 				window.addEventListener('submit', submitHandler, false);
 			}
+
+			// Run callback after initializing
+			exports.callbacks.afterInit();
 
 		}));
 
