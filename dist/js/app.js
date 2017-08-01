@@ -5,251 +5,6 @@
  * http://github.com/mashery/blackbeard
  */
 
-/*!
- * atomic v3.1.1: Vanilla JavaScript Ajax requests with chained success/error callbacks and JSON parsing
- * (c) 2017 Chris Ferdinandi
- * MIT License
- * https://github.com/cferdinandi/atomic
- * Originally created and maintained by Todd Motto - https://toddmotto.com
- */
-(function (root, factory) {
-	if (typeof define === 'function' && define.amd) {
-		define([], factory(root));
-	} else if (typeof exports === 'object') {
-		module.exports = factory(root);
-	} else {
-		root.atomic = factory(root);
-	}
-})(typeof global !== 'undefined' ? global : this.window || this.global, (function (root) {
-
-	'use strict';
-
-	//
-	// Variables
-	//
-
-	var atomic = {}; // Object for public APIs
-	var supports = !!root.XMLHttpRequest && !!root.JSON; // Feature test
-	var settings;
-
-	// Default settings
-	var defaults = {
-		type: 'GET',
-		url: null,
-		data: {},
-		callback: null,
-		headers: {
-			'Content-type': 'application/x-www-form-urlencoded'
-		},
-		responseType: 'text',
-		withCredentials: false
-	};
-
-
-	//
-	// Methods
-	//
-
-	/**
-	 * Merge two or more objects. Returns a new object.
-	 * @private
-	 * @param {Boolean}  deep     If true, do a deep (or recursive) merge [optional]
-	 * @param {Object}   objects  The objects to merge together
-	 * @returns {Object}          Merged values of defaults and options
-	 */
-	var extend = function () {
-
-		// Setup extended object
-		var extended = {};
-
-		// Merge the object into the extended object
-		var merge = function (obj) {
-			for ( var prop in obj ) {
-				if ( Object.prototype.hasOwnProperty.call( obj, prop ) ) {
-					if ( Object.prototype.toString.call(obj[prop]) === '[object Object]' ) {
-						extended[prop] = extend( true, extended[prop], obj[prop] );
-					} else {
-						extended[prop] = obj[prop];
-					}
-				}
-			}
-		};
-
-		// Loop through each object and conduct a merge
-		for (var i = 0; i < arguments.length; i++) {
-			var obj = arguments[i];
-			merge(obj);
-		}
-
-		return extended;
-
-	};
-
-	/**
-	 * Parse text response into JSON
-	 * @private
-	 * @param  {String} req The response
-	 * @return {Array}      A JSON Object of the responseText, plus the orginal response
-	 */
-	var parse = function (req) {
-		var result;
-		if (settings.responseType !== 'text' && settings.responseType !== '') {
-			return [req.response, req];
-		}
-		try {
-			result = JSON.parse(req.responseText);
-		} catch (e) {
-			result = req.responseText;
-		}
-		return [result, req];
-	};
-
-	/**
-	 * Convert an object into a query string
-	 * @private
-	 * @@link  https://blog.garstasio.com/you-dont-need-jquery/ajax/
-	 * @param  {Object} obj The object
-	 * @return {String}     The query string
-	 */
-	var param = function (obj) {
-		var encodedString = '';
-		for (var prop in obj) {
-			if (obj.hasOwnProperty(prop)) {
-				if (encodedString.length > 0) {
-					encodedString += '&';
-				}
-				encodedString += encodeURI(prop + '=' + obj[prop]);
-			}
-		}
-		return encodedString;
-	};
-
-	/**
-	 * Make an XML HTTP request
-	 * @private
-	 * @return {Object} Chained success/error/always methods
-	 */
-	var xhr = function () {
-
-		// Our default methods
-		var methods = {
-			success: function () {},
-			error: function () {},
-			always: function () {}
-		};
-
-		// Override defaults with user methods and setup chaining
-		var atomXHR = {
-			success: function (callback) {
-				methods.success = callback;
-				return atomXHR;
-			},
-			error: function (callback) {
-				methods.error = callback;
-				return atomXHR;
-			},
-			always: function (callback) {
-				methods.always = callback;
-				return atomXHR;
-			}
-		};
-
-		// Create our HTTP request
-		var request = new XMLHttpRequest();
-
-		// Setup our listener to process compeleted requests
-		request.onreadystatechange = function () {
-
-			// Only run if the request is complete
-			if ( request.readyState !== 4 ) return;
-
-			// Parse the response text
-			var req = parse(request);
-
-			// Process the response
-			if (request.status >= 200 && request.status < 300) {
-				// If successful
-				methods.success.apply(methods, req);
-			} else {
-				// If failed
-				methods.error.apply(methods, req);
-			}
-
-			// Run always
-			methods.always.apply(methods, req);
-
-		};
-
-		// Setup our HTTP request
-		request.open(settings.type, settings.url, true);
-		request.responseType = settings.responseType;
-
-		// Add headers
-		for (var header in settings.headers) {
-			if (settings.headers.hasOwnProperty(header)) {
-				request.setRequestHeader(header, settings.headers[header]);
-			}
-		}
-
-		// Add withCredentials
-		if (settings.withCredentials) {
-			request.withCredentials = true;
-		}
-
-		// Send the request
-		request.send(param(settings.data));
-
-		return atomXHR;
-	};
-
-	/**
-	 * Make a JSONP request
-	 * @private
-	 * @return {[type]} [description]
-	 */
-	var jsonp = function () {
-		// Create script with the url and callback
-		var ref = root.document.getElementsByTagName( 'script' )[ 0 ];
-		var script = root.document.createElement( 'script' );
-		settings.data.callback = settings.callback;
-		script.src = settings.url + (settings.url.indexOf( '?' ) + 1 ? '&' : '?') + param(settings.data);
-
-		// Insert script tag into the DOM (append to <head>)
-		ref.parentNode.insertBefore( script, ref );
-
-		// After the script is loaded and executed, remove it
-		script.onload = function () {
-			this.remove();
-		};
-	};
-
-	/**
-	 * Make an Ajax request
-	 * @public
-	 * @param  {Object} options  User settings
-	 * @return {String|Object}   The Ajax request response
-	 */
-	atomic.ajax = function (options) {
-
-		// feature test
-		if ( !supports ) return;
-
-		// Merge user options with defaults
-		settings = extend( defaults, options || {} );
-
-		// Make our Ajax or JSONP request
-		return ( settings.type.toLowerCase() === 'jsonp' ? jsonp() : xhr() );
-
-	};
-
-
-	//
-	// Public APIs
-	//
-
-	return atomic;
-
-}));
 var m$ = (function () {
 
 	'use strict';
@@ -265,22 +20,12 @@ var m$ = (function () {
 	// Polyfills
 	//
 
-	// NodeList.prototype.forEach()
-	if (window.NodeList && !NodeList.prototype.forEach) {
-		NodeList.prototype.forEach = function (callback, thisArg) {
-			thisArg = thisArg || window;
-			for (var i = 0; i < this.length; i++) {
-				callback.call(thisArg, this[i], i, this);
-			}
-		};
-	}
-
 	// Object.prototype.forEach()
 	if (!Object.prototype.forEach) {
 		Object.defineProperties(Object.prototype, {
 			'forEach': {
 				value: function (callback) {
-					if (this == null) {
+					if (this === null) {
 						throw new TypeError('Not an object');
 					}
 					var obj = this;
@@ -300,15 +45,27 @@ var m$ = (function () {
 	// Methods
 	//
 
+	/**
+	 * Get the first matching element
+	 * @param  {String} selector  The selector to match against
+	 * @param  {Node}   scope     The element to search inside [optional, defaults to document]
+	 * @return {Node}             The element
+	 */
 	m$.get = function (selector, scope) {
 		scope = scope || document;
-		return scope.querySelector(selector) || document.createElement('_');
+		return scope.querySelector(selector);
 	};
 
+	/**
+	 * Get the all matching elements
+	 * @param {String} selector  The selector to match against
+	 * @param {Node}   scope     The element to search inside [optional, defaults to document]
+	 * @param {Array}            An array of matching elements
+	 */
 	m$.getAll = function (selector, scope) {
 		scope = scope || document;
 		return Array.prototype.slice.call(scope.querySelectorAll(selector));
-	}
+	};
 
 	/**
 	 * Simulate a click event.
@@ -326,6 +83,13 @@ var m$ = (function () {
 		var canceled = !elem.dispatchEvent(evt);
 	};
 
+	/**
+	 * Add an event listener
+	 * @param {String}   event    The event type
+	 * @param {Node}     elem     The element to run the event on [optional, defaults to window]
+	 * @param {Function} callback The function to run on the event
+	 * @param {Boolean}  capture  If true, for bubbling on non-bubbling event
+	 */
 	m$.on = function (event, elem, callback, capture) {
 		if (typeof (elem) === 'function') {
 			capture = callback;
@@ -336,6 +100,13 @@ var m$ = (function () {
 		elem.addEventListener(event, callback, capture);
 	};
 
+	/**
+	 * Remove an event listener (if a named function was used to set it up)
+	 * @param {String}   event    The event type
+	 * @param {Node}     elem     The element to run the event on [optional, defaults to window]
+	 * @param {Function} callback The function to run on the event
+	 * @param {Boolean}  capture  If true, for bubbling on non-bubbling event
+	 */
 	m$.off = function (event, elem, callback, capture) {
 		if (typeof (elem) === 'function') {
 			capture = callback;
@@ -346,8 +117,15 @@ var m$ = (function () {
 		elem.removeEventListener(event, callback, capture);
 	};
 
+	/**
+	 * Add a query string to a URL
+	 * @param  {String} url   The URL
+	 * @param  {String} key   The query string key
+	 * @param  {String} value The query string value
+	 * @return {String}       The URL with query string
+	 */
 	m$.addQueryString = function (url, key, value) {
-		return (/[\?]/.test(url) ? '&' : '?') + key + '=' + value;
+		return url + (/[\?]/.test(url) ? '&' : '?') + key + '=' + value;
 	};
 
 	/**
@@ -364,6 +142,18 @@ var m$ = (function () {
 	};
 
 	/**
+	 * Sanitize a string for use as a class
+	 * @url Regex pattern: http://stackoverflow.com/a/9635698/1293256
+	 * @param {String} id      The string to convert into a class
+	 * @param {String} prefix  A prefix to use before the class [optionals]
+	 */
+	m$.sanitizeClass = function (id, prefix) {
+		if (!id) return '';
+		prefix = prefix ? prefix + '-' : '';
+		return prefix + id.replace(/^[^a-z]+|[^\w:.-]+/gi, '-').toLowerCase();
+	};
+
+	/**
 	 * Merge two or more objects together.
 	 * @param   {Boolean}  deep     If true, do a deep (or recursive) merge [optional]
 	 * @param   {Object}   objects  The objects to merge together
@@ -375,34 +165,29 @@ var m$ = (function () {
 		// Variables
 		var extended = {};
 		var deep = false;
-		var i = 0;
-		var length = arguments.length;
 
 		// Check if a deep merge
-		if (Object.prototype.toString.call(arguments[0]) === '[object Boolean]') {
+		if (typeof (arguments[0]) === 'boolean') {
 			deep = arguments[0];
-			i++;
+			delete arguments[0];
 		}
 
 		// Merge the object into the extended object
 		var merge = function (obj) {
-			for (var prop in obj) {
-				if (Object.prototype.hasOwnProperty.call(obj, prop)) {
-					// If deep merge and property is an object, merge properties
-					if (deep && Object.prototype.toString.call(obj[prop]) === '[object Object]') {
-						extended[prop] = extend(true, extended[prop], obj[prop]);
-					} else {
-						extended[prop] = obj[prop];
-					}
+			obj.forEach((function(prop) {
+				// If deep merge and property is an object, merge properties
+				if (deep && Object.prototype.toString.call(obj[prop]) === '[object Object]') {
+					extended[prop] = extend(true, extended[prop], prop);
+				} else {
+					extended[prop] = prop;
 				}
-			}
+			}));
 		};
 
 		// Loop through each object and conduct a merge
-		for (; i < length; i++) {
-			var obj = arguments[i];
+		arguments.forEach((function (obj) {
 			merge(obj);
-		}
+		}));
 
 		return extended;
 
@@ -420,7 +205,7 @@ var getNav = function (selector) {
 
 	// Variables
 	var nav = [];
-	var items = mashery.dom.querySelectorAll(selector);
+	var items = m$.getAll(selector, mashery.dom);
 
 	// Generate items object
 	for (var i = 0; i < items.length; i++) {
@@ -440,12 +225,12 @@ var fetchUserProfile = function () {
 		url: '/member/edit',
 		responseType: 'document'
 	}).success((function (data) {
-		var userProfile = data.querySelector('.actions .public-profile.action');
+		var userProfile = m$.get('.actions .public-profile.action', data);
 		if (!userProfile) return;
 		userProfile = userProfile.getAttribute('href');
 		window.mashery.userProfile = userProfile;
 		sessionStorage.setItem('masheryUserProfile', userProfile);
-		var profileLink = document.querySelector('a[href*="/profile/profile/"]');
+		var profileLink = m$.get('a[href*="/profile/profile/"]');
 		if (!profileLink) return;
 		profileLink.href = userProfile;
 	}));
@@ -465,50 +250,50 @@ var getContent = function (type) {
 
 	// type = page
 	if (type === 'page') {
-		content.main = dom.querySelector('#main').innerHTML;
+		content.main = m$.get('#main', dom).innerHTML;
 	}
 
 	// type = docs
 	if (type === 'docs') {
-		content.main = dom.querySelector('#main').innerHTML;
-		content.secondary = dom.querySelector('#sub ul').innerHTML;
+		content.main = m$.get('#main', dom).innerHTML;
+		content.secondary = m$.get('#sub ul', dom).innerHTML;
 	}
 
 	// type = signin
 	if (type === 'signin') {
-		var signinForm = dom.querySelector('#signin form');
+		var signinForm = m$.get('#signin form', dom);
 		content.main = '<form action="' + signinForm.action + '" method="post" enctype="multipart/form-data">' + signinForm.innerHTML + '</form>';
 	}
 
 	// type = register
 	if (type === 'register') {
-		var regForm = dom.querySelector('#member-register');
+		var regForm = m$.get('#member-register', dom);
 		content.main = '<form action="' + regForm.action + '" method="post" enctype="multipart/form-data">' + regForm.innerHTML + '</form>';
 	}
 
 	// type = register-confirm
 	if (type === 'registerSent') {
-		var email = dom.querySelector('#main p');
+		var email = m$.get('#main p', dom);
 		content.main = email ? email.innerHTML.replace('We have sent a confirmation e-mail to you at this address: ', '') : null;
 	}
 
 	// type = resend-confirmation
 	if (type === 'registerResend') {
-		var form = dom.querySelector('#resend-confirmation');
+		var form = m$.get('#resend-confirmation', dom);
 		content.main = '<form action="' + form.getAttribute('action') + '" method="post" enctype="multipart/form-data" id="resend-confirmation">' + form.innerHTML + '</form>';
 		content.main = content.main.replace('<legend>Resend your account confirmation email.</legend>', '');
 	}
 
 	// type = join
 	if (type === 'join') {
-		var form = dom.querySelector('#member-edit');
+		var form = m$.get('#member-edit', dom);
 		content.main = '<form action="' + form.getAttribute('action') + '" method="post" enctype="multipart/form-data" id="member-edit">' + form.innerHTML + '</form>';
 		content.main = content.main.replace('<legend>Additional Information</legend>', '');
 	}
 
 	// type = join-success
 	if (type === 'joinSuccess') {
-		var username = dom.querySelector('#main .section-body p');
+		var username = m$.get('#main .section-body p', dom);
 		content.main = username ? username.innerHTML.replace('You have successfully registered as <strong>', '').replace('</strong>.', '').trim() : null;
 	}
 
@@ -517,8 +302,8 @@ var getContent = function (type) {
 	if (type === 'accountKeys') {
 
 		// Get elements
-		var keys = dom.querySelectorAll('.main .section-body h2, .main .section-body div.key');
-		var getKeys = dom.querySelector('.action.new-key'); // @todo check if user can register at all based on this link
+		var keys = m$.getAll('.main .section-body h2, .main .section-body div.key', dom);
+		var getKeys = m$.get('.action.new-key', dom); // @todo check if user can register at all based on this link
 
 		if (keys.length > 0) {
 			content.main = {};
@@ -533,18 +318,18 @@ var getContent = function (type) {
 						keys: []
 					};
 				} else {
-					var data = key.querySelectorAll('dd');
+					var data = m$.getAll('dd', key);
 					var secret = data.length === 5 ? true : false;
-					var created = secret ? data[4].querySelector('abbr') : data[3].querySelector('abbr');
+					var created = secret ? m$.get('abbr', data[4]) : m$.get('abbr', data[3]);
 					content.main[currentPlan].keys.push({
 						application: data[0].innerHTML.trim(),
 						key: data[1].innerHTML.trim(),
 						secret: secret ? data[2].innerHTML.trim() : null,
 						status: secret ? data[3].innerHTML.trim() : data[2].innerHTML.trim(),
 						created: created ? created.getAttribute('title') : '',
-						limits: '<table>' + key.querySelector('table.key').innerHTML + '<table>',
-						report: key.querySelector('.key-actions.actions .view-report.action').getAttribute('href'),
-						delete: key.querySelector('.key-actions.actions .delete.action').getAttribute('href')
+						limits: '<table>' + m$.get('table.key', key).innerHTML + '<table>',
+						report: m$.get('.key-actions.actions .view-report.action', key).getAttribute('href'),
+						delete: m$.get('.key-actions.actions .delete.action', key).getAttribute('href')
 					});
 				}
 			}));
@@ -557,22 +342,22 @@ var getContent = function (type) {
 	if (type === 'accountApps') {
 
 		// Get elements
-		var apps = dom.querySelectorAll('.main .application');
-		var createApps = dom.querySelector('.main .actions .add-app.action');
+		var apps = m$.getAll('.main .application', dom);
+		var createApps = m$.getAll('.main .actions .add-app.action', dom);
 
 		// Set values
 		content.main = [];
 		content.secondary = createApps ? createApps.getAttribute('href') : null;
 		apps.forEach((function(app) {
-			var dataBasic = app.querySelectorAll('dd');
-			var dataDetails = app.querySelectorAll('tbody td');
+			var dataBasic = m$.getAll('dd', app);
+			var dataDetails = m$.getAll('tbody td', app);
 			content.main.push({
-				application: app.querySelector('h3').innerHTML.trim(),
-				created: dataBasic[1].querySelector('abbr').getAttribute('title'),
+				application: m$.get('h3', app).innerHTML.trim(),
+				created: m$.get('abbr', dataBasic[1]).getAttribute('title'),
 				api: dataDetails[0] ? dataDetails[0].innerHTML.trim() : null,
 				key: dataDetails[1] ? dataDetails[1].innerHTML.trim() : null,
-				edit: app.querySelector('.application-actions.actions .edit.action').getAttribute('href'),
-				delete: app.querySelector('.application-actions.actions .delete-app.action').getAttribute('href')
+				edit: m$.get('.application-actions.actions .edit.action', app).getAttribute('href'),
+				delete: m$.get('.application-actions.actions .delete-app.action', app).getAttribute('href')
 			});
 		}));
 
@@ -580,16 +365,16 @@ var getContent = function (type) {
 
 	// type = app-register
 	if (type === 'appRegister') {
-		var form = dom.querySelector('#application-edit');
-		var table = dom.querySelector('#main .section-body table');
+		var form = m$.get('#application-edit', dom);
+		var table = m$.get('#main .section-body table', dom);
 		content.main = '<form action="' + form.getAttribute('action') + '" method="post" enctype="multipart/form-data" id="application-edit">' + form.innerHTML + '</form>';
 		content.secondary = table ? '<table>' + table.innerHTML + '</table>' : null;
 	};
 
 	// type = account-manage
 	if (type === 'accountManage') {
-		var accountForm = dom.querySelector('#member-edit');
-		var userProfile = dom.querySelector('.actions .public-profile.action');
+		var accountForm = m$.get('#member-edit', dom);
+		var userProfile = m$.get('.actions .public-profile.action', dom);
 		content.main = '<form action="' + accountForm.getAttribute('action') + '" method="post" enctype="multipart/form-data" id="member-edit">' + accountForm.innerHTML + '</form>';
 		content.main = content.main.replace('<legend>Account Information</legend>', '');
 		if (userProfile) {
@@ -601,7 +386,7 @@ var getContent = function (type) {
 
 	// type = account-email
 	if (type === 'accountEmail') {
-		var emailForm = dom.querySelector('.main form');
+		var emailForm = m$.get('.main form', dom);
 		if (!emailForm) return;
 		content.main = '<form action="' + emailForm.getAttribute('action') + '" method="post" enctype="multipart/form-data">' + emailForm.innerHTML + '</form>';
 		fetchUserProfile();
@@ -609,32 +394,32 @@ var getContent = function (type) {
 
 	// type = account-password
 	if (type === 'accountPassword') {
-		var passwordForm = dom.querySelector('.main form');
+		var passwordForm = m$.get('.main form', dom);
 		if (!passwordForm) return;
 		content.main = '<form action="' + passwordForm.getAttribute('action') + '" method="post" enctype="multipart/form-data">' + passwordForm.innerHTML + '</form>';
-		content.secondary = dom.querySelector('#passwd_requirements').innerHTML;
+		content.secondary = m$.get('#passwd_requirements', dom).innerHTML;
 		fetchUserProfile();
 	}
 
 	// type = profile
 	if (type === 'profile') {
-		var data = dom.querySelectorAll('.user-information dd');
-		var activity = dom.querySelector('table.recent-activity');
-		var admin = dom.querySelector('a[href*="/r/member/"]');
+		var data = m$.getAll('.user-information dd', dom);
+		var activity = m$.get('table.recent-activity', dom);
+		var admin = m$.get('a[href*="/r/member/"]', dom);
 		content.main = {
-			name: dom.querySelector('h1.first').innerHTML.replace('View Member ', '').trim(),
+			name: m$.get('h1.first', dom).innerHTML.replace('View Member ', '').trim(),
 			admin: admin ? admin.getAttribute('href') : null,
-			blog: data[0] ? data[0].querySelector('a').getAttribute('href') : '',
-			website: data[1] ? data[1].querySelector('a').getAttribute('href') : '',
-			registered: data[2] ? data[2].querySelector('abbr').getAttribute('title') : '',
+			blog: data[0] ? m$.get('a', data[0]).getAttribute('href') : '',
+			website: data[1] ? m$.get('a', data[1]).getAttribute('href') : '',
+			registered: data[2] ? m$.get('abbr', data[2]).getAttribute('title') : '',
 			activity: activity ? '<table>' + activity.innerHTML + '</table>' : null
 		};
 	}
 
 	// type = ioDocs
 	if (type === 'ioDocs') {
-		var junk = dom.querySelectorAll('#main h1, #main .introText, #main .endpoint ul.actions, #apiTitle');
-		var apiID = dom.querySelector('#apiId');
+		var junk = m$.getAll('#main h1, #main .introText, #main .endpoint ul.actions, #apiTitle', dom);
+		var apiID = m$.get('#apiId', dom);
 		junk.forEach((function (item) {
 			item.remove();
 		}));
@@ -644,45 +429,45 @@ var getContent = function (type) {
 			apiID.parentNode.parentNode.insertBefore(apiID.cloneNode(true), apiID.parentNode);
 			apiID.parentNode.remove();
 		}
-		content.main = dom.querySelector('#main').innerHTML;
+		content.main = m$.get('#main', dom).innerHTML;
 	}
 
 	// type = lost-password
 	if (type === 'lostPassword') {
-		var form = dom.querySelector('#lost form');
+		var form = m$.get('#lost form', dom);
 		content.main = '<form action="' + form.getAttribute('action') + '" method="post" enctype="multipart/form-data">' + form.innerHTML + '</form>';
 		content.main = content.main.replace('<legend>Lost Password</legend>', '');
 	}
 
 	// type = lost-username
 	if (type === 'lostUsername') {
-		var form = dom.querySelector('#lost form');
+		var form = m$.get('#lost form', dom);
 		content.main = '<form action="' + form.getAttribute('action') + '" method="post" enctype="multipart/form-data">' + form.innerHTML + '</form>';
 		content.main = content.main.replace('<legend>E-mail yourself your username</legend>', '');
 	}
 
 	// type = search
 	if (type === 'search') {
-		if (dom.querySelector('.no-result')) {
+		if (m$.get('.no-result', dom)) {
 			content.main = null;
 			content.secondary = {
 				first: 0,
 				last: 0,
 				total: 0,
-				query: dom.querySelector('.no-result b').innerHTML.trim()
+				query: m$.get('.no-result b', dom).innerHTML.trim()
 			}
 		} else {
-			var results = dom.querySelectorAll('.section-body .result');
-			var meta = dom.querySelectorAll('.result-info b');
-			var paging = dom.querySelectorAll('.result-paging a');
+			var results = m$.getAll('.section-body .result', dom);
+			var meta = m$.getAll('.result-info b', dom);
+			var paging = m$.getAll('.result-paging a', dom);
 			content.main = [];
 
 			results.forEach((function (result) {
-				var link = result.querySelector('a');
+				var link = m$.get('a', result);
 				content.main.push({
 					url: link.getAttribute('href'),
 					title: link.innerHTML.trim(),
-					summary: result.querySelector('.result-summary').innerHTML.replace('<strong>', '<span class="search-term">').replace('</strong>', '</span>').trim()
+					summary: m$.get('.result-summary', result).innerHTML.replace('<strong>', '<span class="search-term">').replace('</strong>', '</span>').trim()
 				});
 			}));
 
@@ -707,7 +492,7 @@ var getContent = function (type) {
 
 	// type = contact
 	if (type === 'contact') {
-		var form = dom.querySelector('#main form');
+		var form = m$.get('#main form', dom);
 		content.main = '<form action="' + form.getAttribute('action') + '" method="post" enctype="multipart/form-data">' + form.innerHTML + '</form>';
 	}
 
@@ -727,7 +512,7 @@ var getContent = function (type) {
 var getContentType = function (elem) {
 
 	var type = null;
-	var h1 = elem.querySelector('#main h1.first')
+	var h1 = m$('#main h1.first', elem)
 	h1 = h1 ? h1.innerHTML : '';
 
 	if (elem.classList.contains('not-found') || (h1 && /Not Found/.test(h1)) ) {
@@ -764,7 +549,7 @@ var getContentType = function (elem) {
 		} else if (elem.classList.contains('myapps')) {
 			type = 'accountApps';
 		} else if (elem.classList.contains('register')) {
-			if (elem.querySelector('#application-edit')) {
+			if (m$.get('#application-edit', elem)) {
 				type = 'appRegister';
 			} else {
 				type = 'appRegisterSuccess';
@@ -782,25 +567,25 @@ var getContentType = function (elem) {
 				type = 'register';
 			}
 		} else if (elem.classList.contains('resend-confirmation')) {
-			if (elem.querySelector('ul.success')) {
+			if (m$.get('ul.success', elem)) {
 				type = 'registerResendSuccess';
 			} else {
 				type = 'registerResend';
 			}
 		} else if (elem.classList.contains('remove')) {
-			if (/You have been removed!/.test(elem.querySelector('.main .section-body').innerHTML)) {
+			if (/You have been removed!/.test(m$.get('.main .section-body', elem).innerHTML)) {
 				type = 'memberRemoveSuccess';
 			} else {
 				type = 'memberRemove';
 			}
 		} else if (elem.classList.contains('lost')) {
-			if (/E-mail Sent/.test(elem.querySelector('h2').innerHTML)) {
+			if (/E-mail Sent/.test(m$.get('h2', elem).innerHTML)) {
 				type = 'lostPasswordReset';
 			} else {
 				type = 'lostPassword';
 			}
 		} else if (elem.classList.contains('lost-username')) {
-			if (/E-mail Sent/.test(elem.querySelector('h2').innerHTML)) {
+			if (/E-mail Sent/.test(m$.get('h2', elem).innerHTML)) {
 				type = 'lostUsernameReset';
 			} else {
 				type = 'lostUsername';
@@ -821,13 +606,13 @@ var getContentType = function (elem) {
 	} else if (elem.classList.contains('page-search')) {
 		type = 'search';
 	} else if (elem.classList.contains('page-logout')) {
-		if (elem.querySelector('#user-nav .account')) {
+		if (m$.get('#user-nav .account', elem)) {
 			type = 'logoutFail';
 		} else {
 			type = 'logout';
 		}
 	} else if (elem.classList.contains('page-contact')) {
-		if (elem.querySelector('#main form')) {
+		if (m$.get('#main form', elem)) {
 			type = 'contact';
 		} else {
 			type = 'contactSuccess';
@@ -841,41 +626,36 @@ var getContentType = function (elem) {
  * Remove stylesheets from the DOM.
  * Copyright (c) 2017. TIBCO Software Inc. All Rights Reserved.
  * @param  {String} filename The name of the stylesheet to remove
- * @return {Object}          The stylesheet that was removed
  */
-var removeCSS = function ( filename ) {
+var removeCSS = function (filename) {
 
 	'use strict';
 
-	// Get all stylesheets
-	var links = document.getElementsByTagName('link');
-	var regex = new RegExp(filename);
+	// Get all matching stylesheets
+	var links = m$.getAll('link[href*="' + filename + '"]');
 
-	// Find and remove matching stylesheet
-	for ( var i = links.length; i >= 0; i-- ) {
-		if ( links[i] && links[i].href !== null && regex.test(links[i].href) ) {
-			links[i].parentNode.removeChild(links[i]);
-			return links[i];
-		}
-	}
+	// Remove all matching stylesheets
+	links.forEach((function (link) {
+		link.remove();
+	}));
 };
 var setupMashery = function (doc) {
 
 	// Get the default page
-	var page = doc.querySelector('#page');
+	var page = m$.get('#page', doc);
 
 	// Convert DOM content to a node
 	var dom = document.createElement('div');
 	dom.innerHTML = page.innerHTML;
 
 	// Get special links
-	var dashboard = dom.querySelector('#user-nav .dashboard a');
-	var logout = dom.querySelector('#mashery-logout-form');
-	var login = dom.querySelector('#user-nav .sign-in a');
+	var dashboard = m$.get('#user-nav .dashboard a', dom);
+	var logout = m$.get('#mashery-logout-form', dom);
+	var login = m$.get('#user-nav .sign-in a', dom);
 
 	// Set mashery properties
 	window.mashery = {
-		area: dom.querySelector('#branding-logo').innerHTML.trim(),
+		area: m$.get('#branding-logo', dom).innerHTML.trim(),
 		content: {
 			main: null,
 			secondary: null
@@ -884,8 +664,8 @@ var setupMashery = function (doc) {
 		contentType: getContentType(doc.body),
 		dashboard: dashboard ? dashboard : null,
 		dom: dom,
-		isAdmin: dom.querySelector('#user-nav .dashboard.toggle') ? true : false,
-		loggedIn: dom.querySelector('#mashery-logout-form') ? true : false,
+		isAdmin: m$.get('#user-nav .dashboard.toggle', dom) ? true : false,
+		loggedIn: m$.get('#mashery-logout-form', dom) ? true : false,
 		login: {
 			url: login ? login.pathname : null,
 			redirect: login ? login.search : null
@@ -904,7 +684,7 @@ var setupMashery = function (doc) {
 setupMashery(document);
 
 // Make sure placeholder loaded
-if (!document.querySelector('#app')) {
+if (!m$.get('#app')) {
 	loadPlaceholder();
 }
 
@@ -1146,7 +926,7 @@ var loadPortal = (function () {
 			 * The layout for the page displaying a users API keys.
 			 */
 			accountKeys: function () {
-				var template = 	'<h1>{{content.headingMyApiKeys}}</h1><ul id="nav-account">{{content.navItemsAccount}}</ul>';
+				var template = '<h1>{{content.headingMyApiKeys}}</h1><ul id="nav-account">{{content.navItemsAccount}}</ul>';
 				if (Object.keys(mashery.content.main).length > 0 ) {
 					mashery.content.main.forEach((function (plan) {
 						template += '<h2>' + plan.name + '</h2>';
@@ -1167,7 +947,7 @@ var loadPortal = (function () {
 						} else {
 							template += '<p>{{content.noPlanKeys}}</p>';
 							if (mashery.content.secondary) {
-								template += '<p><a class="btn btn-get-key" id="' + sanitizeClass(plan.name, 'btn-get-key') + '"  href="' + mashery.content.secondary + '">Get a Key for ' + plan.name + '</a></p>';
+								template += '<p><a class="btn btn-get-key" id="' + m$.sanitizeClass(plan.name, 'btn-get-key') + '"  href="' + mashery.content.secondary + '">Get a Key for ' + plan.name + '</a></p>';
 							}
 						}
 					}));
@@ -1196,8 +976,8 @@ var loadPortal = (function () {
 								'<li>Created: ' + app.created + '</li>' +
 							'</ul>' +
 							'<p>' +
-						'<a class="btn btn-edit-app" id="' + sanitizeClass(app.application, 'btn-edit-app') + '" href="' + app.edit + '">Edit This App</a>' +
-						'<a class="btn btn-delete-app" id="' + sanitizeClass(app.application, 'btn-delete-app') + '" href="' + app.delete + '">Delete This App</a>' +
+						'<a class="btn btn-edit-app" id="' + m$.sanitizeClass(app.application, 'btn-edit-app') + '" href="' + app.edit + '">Edit This App</a>' +
+						'<a class="btn btn-delete-app" id="' + m$.sanitizeClass(app.application, 'btn-delete-app') + '" href="' + app.delete + '">Delete This App</a>' +
 							'</p>';
 					}));
 				} else {
@@ -2660,7 +2440,7 @@ var loadPortal = (function () {
 		title: {
 			placeholder: '{{mashery.title}}',
 			text: function () {
-				var heading = document.querySelector('h1');
+				var heading = m$.get('h1');
 				return (heading ? heading.innerHTML.trim() : window.mashery.title.replace(window.mashery.area + ' - ', '').replace(window.mashery.area, ''));
 			}
 		},
@@ -2791,61 +2571,6 @@ var loadPortal = (function () {
 	//
 
 	/**
-	* Merge two or more objects. Returns a new object.
-	* Set the first argument to `true` for a deep or recursive merge
-	* @private
-	* @param   {Object} objects The objects to merge together
-	* @returns {Object}         Merged values of defaults and options
-	*/
-	var extend = function () {
-
-		// Variables
-		var extended = {};
-		var deep = false;
-		var i = 0;
-		var length = arguments.length;
-
-		// Merge the object into the extended object
-		var merge = function ( obj ) {
-			for ( var prop in obj ) {
-				if ( Object.prototype.hasOwnProperty.call( obj, prop ) ) {
-					// If deep merge and property is an object, merge properties
-					if ( Object.prototype.toString.call(obj[prop]) === '[object Object]' ) {
-						extended[prop] = extend( true, extended[prop], obj[prop] );
-					} else {
-						extended[prop] = obj[prop];
-					}
-				}
-			}
-		};
-
-		// Loop through each object and conduct a merge
-		for ( ; i < length; i++ ) {
-			var obj = arguments[i];
-			merge(obj);
-		}
-
-		return extended;
-
-	};
-
-	/**
-	 * Simulate a click event.
-	 * @public
-	 * @param {Element} elem  the element to simulate a click on
-	 */
-	var simulateClick = function (elem) {
-		// Create our event (with options)
-		var evt = new MouseEvent('click', {
-			bubbles: true,
-			cancelable: true,
-			view: window
-		});
-		// If cancelled, don't dispatch our event
-		var canceled = !elem.dispatchEvent(evt);
-	};
-
-	/**
 	 * Replaces placeholders with real content
 	 * @param {String} template The template string
 	 * @param {String} local    A local placeholder to use, if any
@@ -2947,14 +2672,14 @@ var loadPortal = (function () {
 	 * @param {Function} after    The callback to run after rendering
 	 */
 	var render = function (selector, key, before, after) {
-		var content = document.querySelector(selector);
+		var content = m$.get(selector);
 		if (!content) return;
 		if (before) {
 			before();
 		}
 		content.innerHTML = settings.templates[key] ? replacePlaceholders(settings.templates[key], key) : '';
 		if (['page','docs'].indexOf(window.mashery.contentType !== -1)) {
-			var junk = document.querySelectorAll('#header-edit, #main .section .section-meta');
+			var junk = m$.getAll('#header-edit, #main .section .section-meta');
 			junk.forEach((function (item) {
 				item.remove();
 			}))
@@ -2970,7 +2695,7 @@ var loadPortal = (function () {
 	 */
 	var verifyLoggedIn = function () {
 		if (['logout', 'memberRemoveSuccess'].indexOf(window.mashery.contentType) === -1) return;
-		var loggedIn = window.mashery.dom.querySelector('#mashery-logout-form');
+		var loggedIn = m$.get('#mashery-logout-form', window.mashery.dom);
 		if (loggedIn) return;
 		window.mashery.loggedIn = false;
 		window.mashery.username = null;
@@ -2980,26 +2705,14 @@ var loadPortal = (function () {
 	};
 
 	/**
-	 * Sanitize a string for use as a class
-	 * @url Regex pattern: http://stackoverflow.com/a/9635698/1293256
-	 * @param {String} id      The string to convert into a class
-	 * @param {String} prefix  A prefix to use before the class [optionals]
-	 */
-	var sanitizeClass = function (id, prefix) {
-		if (!id) return '';
-		prefix = prefix ? prefix + '-' : '';
-		return prefix + id.replace(/^[^a-z]+|[^\w:.-]+/gi, '-').toLowerCase();
-	};
-
-	/**
 	 * Add class hooks for styling to the DOM, and a global JS variable for conditional functions
 	 */
 	exports.addStyleHooks = function () {
-		var wrapper = document.querySelector('#app-wrapper');
+		var wrapper = m$.get('#app-wrapper');
 		if (!wrapper) return;
 		var path = ['/', '/home'].indexOf(window.location.pathname.toLowerCase()) === -1 ? window.location.pathname.slice(1) : 'home';
-		wrapper.className = sanitizeClass(window.mashery.contentType, 'category') + ' ' + sanitizeClass(path, 'single');
-		window.mashery.contentId = sanitizeClass(path);
+		wrapper.className = m$.sanitizeClass(window.mashery.contentType, 'category') + ' ' + m$.sanitizeClass(path, 'single');
+		window.mashery.contentId = m$.sanitizeClass(path);
 	};
 
 	/**
@@ -3044,7 +2757,7 @@ var loadPortal = (function () {
 	 * @param {String} key  The content type
 	 */
 	exports.renderContent = function (id, key) {
-		var content = document.querySelector(id);
+		var content = m$.get(id);
 		if (!content) return;
 		settings.callbacks.beforeRenderFooter();
 		content.innerHTML = settings.templates[key] ? replacePlaceholders(settings.templates[key]) : '';
@@ -3127,7 +2840,7 @@ var loadPortal = (function () {
 	 * Inject the logout form into the DOM
 	 */
 	var renderLogout = function () {
-		if (!window.mashery.logout || document.querySelector('#mashery-logout-form')) return;
+		if (!window.mashery.logout || m$.get('#mashery-logout-form')) return;
 		document.body.insertBefore(window.mashery.logout, document.body.lastChild);
 	};
 
@@ -3135,12 +2848,12 @@ var loadPortal = (function () {
 	 * Inject the remove member form into the DOM on remove member page
 	 */
 	var renderMemberRemove = function () {
-		if (window.mashery.contentType !== 'memberRemove' || document.querySelector('#member-remove-form')) return;
-		var form = window.mashery.dom.querySelector('.main form');
+		if (window.mashery.contentType !== 'memberRemove' || m$.get('#member-remove-form')) return;
+		var form = m$.get('.main form', window.mashery.dom);
 		if (!form) return;
 		form.id = 'member-remove-form';
 		form.setAttribute('hidden', 'hidden');
-		var submit = form.querySelector('#process');
+		var submit = m$.get('#process', form);
 		if (submit) {
 			submit.setAttribute('onclick', 'return confirm("' + localPlaceholders.memberRemove.popup.text() + '")');
 		}
@@ -3154,7 +2867,7 @@ var loadPortal = (function () {
 		if (window.location.hash) {
 			window.location.hash = window.location.hash;
 		} else {
-			document.querySelector('#app').focus();
+			m$.get('#app').focus();
 		}
 	};
 
@@ -3171,9 +2884,9 @@ var loadPortal = (function () {
 	 * Render the Mashery Made logo (if missing)
 	 */
 	exports.renderMasheryMade = function () {
-		var masheryMade = document.querySelector('#mashery-made-logo');
+		var masheryMade = m$.get('#mashery-made-logo');
 		if (masheryMade) return;
-		var app = document.querySelector('#app');
+		var app = m$.get('#app');
 		if (!app) return;
 		var mashMade = document.createElement('div');
 		mashMade.innerHTML = '<p>x</p><div id="mashery-made"><div class="container"><p>' + globalPlaceholders.masheryMade.text + '</p></div></div>';
@@ -3185,9 +2898,9 @@ var loadPortal = (function () {
 	 */
 	exports.renderTOS = function () {
 		if (['register', 'join'].indexOf(window.mashery.contentType) === -1) return;
-		var tos = document.querySelector('#registration-terms-of-service');
+		var tos = m$.get('#registration-terms-of-service');
 		if (tos) return;
-		var reg = document.querySelector('form[action*="/member/register"]');
+		var reg = m$.get('form[action*="/member/register"]');
 		if (!reg) return;
 		var div = document.createElement('div');
 		div.innerHTML = '<p>x</p>' + replacePlaceholders(globalPlaceholders.registerTerms.text, 'register');
@@ -3225,7 +2938,7 @@ var loadPortal = (function () {
 	 * @param {Event} event The click event
 	 */
 	var processLogout = function (event) {
-		var logout = document.querySelector('#mashery-logout-form');
+		var logout = m$.get('#mashery-logout-form');
 		if (!logout) return;
 		event.preventDefault();
 		logout.submit();
@@ -3295,10 +3008,10 @@ var loadPortal = (function () {
 	 * @param {Event} event The click event
 	 */
 	var processMemberRemove = function (event) {
-		var remove = document.querySelector('#member-remove-form #process');
+		var remove = m$.get('#member-remove-form #process');
 		if (!remove || window.mashery.contentType !== 'memberRemove') return;
 		event.preventDefault();
-		simulateClick(remove);
+		m$.click(remove);
 	};
 
 	/**
@@ -3339,7 +3052,7 @@ var loadPortal = (function () {
 	 */
 	var submitHandler = function (event) {
 		if (!event.target.closest('#search-form')) return;
-		var input = event.target.querySelector('#search-input');
+		var input = m$.get('#search-input', event.target);
 		if (!input) return;
 		event.preventDefault();
 		fetchContent(paths.search.url + '?q=' + encodeURIComponent(input.value), true);
@@ -3355,7 +3068,7 @@ var loadPortal = (function () {
 		loadJS('https://cdn.polyfill.io/v2/polyfill.min.js?features=default', (function () {
 
 			// Merge user options with defaults
-			settings = extend( defaults, options || {} );
+			settings = m$.extend( defaults, options || {} );
 
 			// Run callback before initializing
 			exports.callbacks.beforeInit();
@@ -3364,11 +3077,11 @@ var loadPortal = (function () {
 			exports.renderPortal();
 
 			// Listen for click events
-			document.addEventListener('click', clickHandler, false);
+			m$.on('click', clickHandler);
 
 			if (settings.ajax) {
-				window.addEventListener('popstate', popstateHandler, false);
-				window.addEventListener('submit', submitHandler, false);
+				m$.on('popstate', popstateHandler);
+				m$.on('submit', submitHandler);
 			}
 
 			// Run callback after initializing

@@ -1,7 +1,7 @@
 var getContentType = function (elem) {
 
 	var type = null;
-	var h1 = m$('#main h1.first', elem)
+	var h1 = elem.querySelector('#main h1.first')
 	h1 = h1 ? h1.innerHTML : '';
 
 	if (elem.classList.contains('not-found') || (h1 && /Not Found/.test(h1)) ) {
@@ -38,7 +38,7 @@ var getContentType = function (elem) {
 		} else if (elem.classList.contains('myapps')) {
 			type = 'accountApps';
 		} else if (elem.classList.contains('register')) {
-			if (m$.get('#application-edit', elem)) {
+			if (elem.querySelector('#application-edit')) {
 				type = 'appRegister';
 			} else {
 				type = 'appRegisterSuccess';
@@ -56,25 +56,25 @@ var getContentType = function (elem) {
 				type = 'register';
 			}
 		} else if (elem.classList.contains('resend-confirmation')) {
-			if (m$.get('ul.success', elem)) {
+			if (elem.querySelector('ul.success')) {
 				type = 'registerResendSuccess';
 			} else {
 				type = 'registerResend';
 			}
 		} else if (elem.classList.contains('remove')) {
-			if (/You have been removed!/.test(m$.get('.main .section-body', elem).innerHTML)) {
+			if (/You have been removed!/.test(elem.querySelector('.main .section-body').innerHTML)) {
 				type = 'memberRemoveSuccess';
 			} else {
 				type = 'memberRemove';
 			}
 		} else if (elem.classList.contains('lost')) {
-			if (/E-mail Sent/.test(m$.get('h2', elem).innerHTML)) {
+			if (/E-mail Sent/.test(elem.querySelector('h2').innerHTML)) {
 				type = 'lostPasswordReset';
 			} else {
 				type = 'lostPassword';
 			}
 		} else if (elem.classList.contains('lost-username')) {
-			if (/E-mail Sent/.test(m$.get('h2', elem).innerHTML)) {
+			if (/E-mail Sent/.test(elem.querySelector('h2').innerHTML)) {
 				type = 'lostUsernameReset';
 			} else {
 				type = 'lostUsername';
@@ -95,13 +95,13 @@ var getContentType = function (elem) {
 	} else if (elem.classList.contains('page-search')) {
 		type = 'search';
 	} else if (elem.classList.contains('page-logout')) {
-		if (m$.get('#user-nav .account', elem)) {
+		if (elem.querySelector('#user-nav .account')) {
 			type = 'logoutFail';
 		} else {
 			type = 'logout';
 		}
 	} else if (elem.classList.contains('page-contact')) {
-		if (m$.get('#main form', elem)) {
+		if (elem.querySelector('#main form')) {
 			type = 'contact';
 		} else {
 			type = 'contactSuccess';

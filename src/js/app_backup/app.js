@@ -222,7 +222,7 @@ var loadPortal = (function () {
 			 * The layout for the page displaying a users API keys.
 			 */
 			accountKeys: function () {
-				var template = '<h1>{{content.headingMyApiKeys}}</h1><ul id="nav-account">{{content.navItemsAccount}}</ul>';
+				var template = 	'<h1>{{content.headingMyApiKeys}}</h1><ul id="nav-account">{{content.navItemsAccount}}</ul>';
 				if (Object.keys(mashery.content.main).length > 0 ) {
 					mashery.content.main.forEach(function (plan) {
 						template += '<h2>' + plan.name + '</h2>';
@@ -243,7 +243,7 @@ var loadPortal = (function () {
 						} else {
 							template += '<p>{{content.noPlanKeys}}</p>';
 							if (mashery.content.secondary) {
-								template += '<p><a class="btn btn-get-key" id="' + m$.sanitizeClass(plan.name, 'btn-get-key') + '"  href="' + mashery.content.secondary + '">Get a Key for ' + plan.name + '</a></p>';
+								template += '<p><a class="btn btn-get-key" id="' + sanitizeClass(plan.name, 'btn-get-key') + '"  href="' + mashery.content.secondary + '">Get a Key for ' + plan.name + '</a></p>';
 							}
 						}
 					});
@@ -272,8 +272,8 @@ var loadPortal = (function () {
 								'<li>Created: ' + app.created + '</li>' +
 							'</ul>' +
 							'<p>' +
-						'<a class="btn btn-edit-app" id="' + m$.sanitizeClass(app.application, 'btn-edit-app') + '" href="' + app.edit + '">Edit This App</a>' +
-						'<a class="btn btn-delete-app" id="' + m$.sanitizeClass(app.application, 'btn-delete-app') + '" href="' + app.delete + '">Delete This App</a>' +
+						'<a class="btn btn-edit-app" id="' + sanitizeClass(app.application, 'btn-edit-app') + '" href="' + app.edit + '">Edit This App</a>' +
+						'<a class="btn btn-delete-app" id="' + sanitizeClass(app.application, 'btn-delete-app') + '" href="' + app.delete + '">Delete This App</a>' +
 							'</p>';
 					});
 				} else {
@@ -1736,7 +1736,7 @@ var loadPortal = (function () {
 		title: {
 			placeholder: '{{mashery.title}}',
 			text: function () {
-				var heading = m$.get('h1');
+				var heading = document.querySelector('h1');
 				return (heading ? heading.innerHTML.trim() : window.mashery.title.replace(window.mashery.area + ' - ', '').replace(window.mashery.area, ''));
 			}
 		},
@@ -1867,6 +1867,61 @@ var loadPortal = (function () {
 	//
 
 	/**
+	* Merge two or more objects. Returns a new object.
+	* Set the first argument to `true` for a deep or recursive merge
+	* @private
+	* @param   {Object} objects The objects to merge together
+	* @returns {Object}         Merged values of defaults and options
+	*/
+	var extend = function () {
+
+		// Variables
+		var extended = {};
+		var deep = false;
+		var i = 0;
+		var length = arguments.length;
+
+		// Merge the object into the extended object
+		var merge = function ( obj ) {
+			for ( var prop in obj ) {
+				if ( Object.prototype.hasOwnProperty.call( obj, prop ) ) {
+					// If deep merge and property is an object, merge properties
+					if ( Object.prototype.toString.call(obj[prop]) === '[object Object]' ) {
+						extended[prop] = extend( true, extended[prop], obj[prop] );
+					} else {
+						extended[prop] = obj[prop];
+					}
+				}
+			}
+		};
+
+		// Loop through each object and conduct a merge
+		for ( ; i < length; i++ ) {
+			var obj = arguments[i];
+			merge(obj);
+		}
+
+		return extended;
+
+	};
+
+	/**
+	 * Simulate a click event.
+	 * @public
+	 * @param {Element} elem  the element to simulate a click on
+	 */
+	var simulateClick = function (elem) {
+		// Create our event (with options)
+		var evt = new MouseEvent('click', {
+			bubbles: true,
+			cancelable: true,
+			view: window
+		});
+		// If cancelled, don't dispatch our event
+		var canceled = !elem.dispatchEvent(evt);
+	};
+
+	/**
 	 * Replaces placeholders with real content
 	 * @param {String} template The template string
 	 * @param {String} local    A local placeholder to use, if any
@@ -1968,14 +2023,14 @@ var loadPortal = (function () {
 	 * @param {Function} after    The callback to run after rendering
 	 */
 	var render = function (selector, key, before, after) {
-		var content = m$.get(selector);
+		var content = document.querySelector(selector);
 		if (!content) return;
 		if (before) {
 			before();
 		}
 		content.innerHTML = settings.templates[key] ? replacePlaceholders(settings.templates[key], key) : '';
 		if (['page','docs'].indexOf(window.mashery.contentType !== -1)) {
-			var junk = m$.getAll('#header-edit, #main .section .section-meta');
+			var junk = document.querySelectorAll('#header-edit, #main .section .section-meta');
 			junk.forEach(function (item) {
 				item.remove();
 			})
@@ -1991,7 +2046,7 @@ var loadPortal = (function () {
 	 */
 	var verifyLoggedIn = function () {
 		if (['logout', 'memberRemoveSuccess'].indexOf(window.mashery.contentType) === -1) return;
-		var loggedIn = m$.get('#mashery-logout-form', window.mashery.dom);
+		var loggedIn = window.mashery.dom.querySelector('#mashery-logout-form');
 		if (loggedIn) return;
 		window.mashery.loggedIn = false;
 		window.mashery.username = null;
@@ -2001,14 +2056,26 @@ var loadPortal = (function () {
 	};
 
 	/**
+	 * Sanitize a string for use as a class
+	 * @url Regex pattern: http://stackoverflow.com/a/9635698/1293256
+	 * @param {String} id      The string to convert into a class
+	 * @param {String} prefix  A prefix to use before the class [optionals]
+	 */
+	var sanitizeClass = function (id, prefix) {
+		if (!id) return '';
+		prefix = prefix ? prefix + '-' : '';
+		return prefix + id.replace(/^[^a-z]+|[^\w:.-]+/gi, '-').toLowerCase();
+	};
+
+	/**
 	 * Add class hooks for styling to the DOM, and a global JS variable for conditional functions
 	 */
 	exports.addStyleHooks = function () {
-		var wrapper = m$.get('#app-wrapper');
+		var wrapper = document.querySelector('#app-wrapper');
 		if (!wrapper) return;
 		var path = ['/', '/home'].indexOf(window.location.pathname.toLowerCase()) === -1 ? window.location.pathname.slice(1) : 'home';
-		wrapper.className = m$.sanitizeClass(window.mashery.contentType, 'category') + ' ' + m$.sanitizeClass(path, 'single');
-		window.mashery.contentId = m$.sanitizeClass(path);
+		wrapper.className = sanitizeClass(window.mashery.contentType, 'category') + ' ' + sanitizeClass(path, 'single');
+		window.mashery.contentId = sanitizeClass(path);
 	};
 
 	/**
@@ -2053,7 +2120,7 @@ var loadPortal = (function () {
 	 * @param {String} key  The content type
 	 */
 	exports.renderContent = function (id, key) {
-		var content = m$.get(id);
+		var content = document.querySelector(id);
 		if (!content) return;
 		settings.callbacks.beforeRenderFooter();
 		content.innerHTML = settings.templates[key] ? replacePlaceholders(settings.templates[key]) : '';
@@ -2136,7 +2203,7 @@ var loadPortal = (function () {
 	 * Inject the logout form into the DOM
 	 */
 	var renderLogout = function () {
-		if (!window.mashery.logout || m$.get('#mashery-logout-form')) return;
+		if (!window.mashery.logout || document.querySelector('#mashery-logout-form')) return;
 		document.body.insertBefore(window.mashery.logout, document.body.lastChild);
 	};
 
@@ -2144,12 +2211,12 @@ var loadPortal = (function () {
 	 * Inject the remove member form into the DOM on remove member page
 	 */
 	var renderMemberRemove = function () {
-		if (window.mashery.contentType !== 'memberRemove' || m$.get('#member-remove-form')) return;
-		var form = m$.get('.main form', window.mashery.dom);
+		if (window.mashery.contentType !== 'memberRemove' || document.querySelector('#member-remove-form')) return;
+		var form = window.mashery.dom.querySelector('.main form');
 		if (!form) return;
 		form.id = 'member-remove-form';
 		form.setAttribute('hidden', 'hidden');
-		var submit = m$.get('#process', form);
+		var submit = form.querySelector('#process');
 		if (submit) {
 			submit.setAttribute('onclick', 'return confirm("' + localPlaceholders.memberRemove.popup.text() + '")');
 		}
@@ -2163,7 +2230,7 @@ var loadPortal = (function () {
 		if (window.location.hash) {
 			window.location.hash = window.location.hash;
 		} else {
-			m$.get('#app').focus();
+			document.querySelector('#app').focus();
 		}
 	};
 
@@ -2180,9 +2247,9 @@ var loadPortal = (function () {
 	 * Render the Mashery Made logo (if missing)
 	 */
 	exports.renderMasheryMade = function () {
-		var masheryMade = m$.get('#mashery-made-logo');
+		var masheryMade = document.querySelector('#mashery-made-logo');
 		if (masheryMade) return;
-		var app = m$.get('#app');
+		var app = document.querySelector('#app');
 		if (!app) return;
 		var mashMade = document.createElement('div');
 		mashMade.innerHTML = '<p>x</p><div id="mashery-made"><div class="container"><p>' + globalPlaceholders.masheryMade.text + '</p></div></div>';
@@ -2194,9 +2261,9 @@ var loadPortal = (function () {
 	 */
 	exports.renderTOS = function () {
 		if (['register', 'join'].indexOf(window.mashery.contentType) === -1) return;
-		var tos = m$.get('#registration-terms-of-service');
+		var tos = document.querySelector('#registration-terms-of-service');
 		if (tos) return;
-		var reg = m$.get('form[action*="/member/register"]');
+		var reg = document.querySelector('form[action*="/member/register"]');
 		if (!reg) return;
 		var div = document.createElement('div');
 		div.innerHTML = '<p>x</p>' + replacePlaceholders(globalPlaceholders.registerTerms.text, 'register');
@@ -2234,7 +2301,7 @@ var loadPortal = (function () {
 	 * @param {Event} event The click event
 	 */
 	var processLogout = function (event) {
-		var logout = m$.get('#mashery-logout-form');
+		var logout = document.querySelector('#mashery-logout-form');
 		if (!logout) return;
 		event.preventDefault();
 		logout.submit();
@@ -2304,10 +2371,10 @@ var loadPortal = (function () {
 	 * @param {Event} event The click event
 	 */
 	var processMemberRemove = function (event) {
-		var remove = m$.get('#member-remove-form #process');
+		var remove = document.querySelector('#member-remove-form #process');
 		if (!remove || window.mashery.contentType !== 'memberRemove') return;
 		event.preventDefault();
-		m$.click(remove);
+		simulateClick(remove);
 	};
 
 	/**
@@ -2348,7 +2415,7 @@ var loadPortal = (function () {
 	 */
 	var submitHandler = function (event) {
 		if (!event.target.closest('#search-form')) return;
-		var input = m$.get('#search-input', event.target);
+		var input = event.target.querySelector('#search-input');
 		if (!input) return;
 		event.preventDefault();
 		fetchContent(paths.search.url + '?q=' + encodeURIComponent(input.value), true);
@@ -2364,7 +2431,7 @@ var loadPortal = (function () {
 		loadJS('https://cdn.polyfill.io/v2/polyfill.min.js?features=default', function () {
 
 			// Merge user options with defaults
-			settings = m$.extend( defaults, options || {} );
+			settings = extend( defaults, options || {} );
 
 			// Run callback before initializing
 			exports.callbacks.beforeInit();
@@ -2373,11 +2440,11 @@ var loadPortal = (function () {
 			exports.renderPortal();
 
 			// Listen for click events
-			m$.on('click', clickHandler);
+			document.addEventListener('click', clickHandler, false);
 
 			if (settings.ajax) {
-				m$.on('popstate', popstateHandler);
-				m$.on('submit', submitHandler);
+				window.addEventListener('popstate', popstateHandler, false);
+				window.addEventListener('submit', submitHandler, false);
 			}
 
 			// Run callback after initializing

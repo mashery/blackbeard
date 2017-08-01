@@ -13,22 +13,12 @@ var m$ = (function () {
 	// Polyfills
 	//
 
-	// NodeList.prototype.forEach()
-	if (window.NodeList && !NodeList.prototype.forEach) {
-		NodeList.prototype.forEach = function (callback, thisArg) {
-			thisArg = thisArg || window;
-			for (var i = 0; i < this.length; i++) {
-				callback.call(thisArg, this[i], i, this);
-			}
-		};
-	}
-
 	// Object.prototype.forEach()
 	if (!Object.prototype.forEach) {
 		Object.defineProperties(Object.prototype, {
 			'forEach': {
 				value: function (callback) {
-					if (this == null) {
+					if (this === null) {
 						throw new TypeError('Not an object');
 					}
 					var obj = this;
@@ -48,15 +38,27 @@ var m$ = (function () {
 	// Methods
 	//
 
+	/**
+	 * Get the first matching element
+	 * @param  {String} selector  The selector to match against
+	 * @param  {Node}   scope     The element to search inside [optional, defaults to document]
+	 * @return {Node}             The element
+	 */
 	m$.get = function (selector, scope) {
 		scope = scope || document;
-		return scope.querySelector(selector) || document.createElement('_');
+		return scope.querySelector(selector);
 	};
 
+	/**
+	 * Get the all matching elements
+	 * @param {String} selector  The selector to match against
+	 * @param {Node}   scope     The element to search inside [optional, defaults to document]
+	 * @param {Array}            An array of matching elements
+	 */
 	m$.getAll = function (selector, scope) {
 		scope = scope || document;
 		return Array.prototype.slice.call(scope.querySelectorAll(selector));
-	}
+	};
 
 	/**
 	 * Simulate a click event.
@@ -74,6 +76,13 @@ var m$ = (function () {
 		var canceled = !elem.dispatchEvent(evt);
 	};
 
+	/**
+	 * Add an event listener
+	 * @param {String}   event    The event type
+	 * @param {Node}     elem     The element to run the event on [optional, defaults to window]
+	 * @param {Function} callback The function to run on the event
+	 * @param {Boolean}  capture  If true, for bubbling on non-bubbling event
+	 */
 	m$.on = function (event, elem, callback, capture) {
 		if (typeof (elem) === 'function') {
 			capture = callback;
@@ -84,6 +93,13 @@ var m$ = (function () {
 		elem.addEventListener(event, callback, capture);
 	};
 
+	/**
+	 * Remove an event listener (if a named function was used to set it up)
+	 * @param {String}   event    The event type
+	 * @param {Node}     elem     The element to run the event on [optional, defaults to window]
+	 * @param {Function} callback The function to run on the event
+	 * @param {Boolean}  capture  If true, for bubbling on non-bubbling event
+	 */
 	m$.off = function (event, elem, callback, capture) {
 		if (typeof (elem) === 'function') {
 			capture = callback;
@@ -94,8 +110,15 @@ var m$ = (function () {
 		elem.removeEventListener(event, callback, capture);
 	};
 
+	/**
+	 * Add a query string to a URL
+	 * @param  {String} url   The URL
+	 * @param  {String} key   The query string key
+	 * @param  {String} value The query string value
+	 * @return {String}       The URL with query string
+	 */
 	m$.addQueryString = function (url, key, value) {
-		return (/[\?]/.test(url) ? '&' : '?') + key + '=' + value;
+		return url + (/[\?]/.test(url) ? '&' : '?') + key + '=' + value;
 	};
 
 	/**
@@ -112,6 +135,18 @@ var m$ = (function () {
 	};
 
 	/**
+	 * Sanitize a string for use as a class
+	 * @url Regex pattern: http://stackoverflow.com/a/9635698/1293256
+	 * @param {String} id      The string to convert into a class
+	 * @param {String} prefix  A prefix to use before the class [optionals]
+	 */
+	m$.sanitizeClass = function (id, prefix) {
+		if (!id) return '';
+		prefix = prefix ? prefix + '-' : '';
+		return prefix + id.replace(/^[^a-z]+|[^\w:.-]+/gi, '-').toLowerCase();
+	};
+
+	/**
 	 * Merge two or more objects together.
 	 * @param   {Boolean}  deep     If true, do a deep (or recursive) merge [optional]
 	 * @param   {Object}   objects  The objects to merge together
@@ -123,34 +158,29 @@ var m$ = (function () {
 		// Variables
 		var extended = {};
 		var deep = false;
-		var i = 0;
-		var length = arguments.length;
 
 		// Check if a deep merge
-		if (Object.prototype.toString.call(arguments[0]) === '[object Boolean]') {
+		if (typeof (arguments[0]) === 'boolean') {
 			deep = arguments[0];
-			i++;
+			delete arguments[0];
 		}
 
 		// Merge the object into the extended object
 		var merge = function (obj) {
-			for (var prop in obj) {
-				if (Object.prototype.hasOwnProperty.call(obj, prop)) {
-					// If deep merge and property is an object, merge properties
-					if (deep && Object.prototype.toString.call(obj[prop]) === '[object Object]') {
-						extended[prop] = extend(true, extended[prop], obj[prop]);
-					} else {
-						extended[prop] = obj[prop];
-					}
+			obj.forEach(function(prop) {
+				// If deep merge and property is an object, merge properties
+				if (deep && Object.prototype.toString.call(obj[prop]) === '[object Object]') {
+					extended[prop] = extend(true, extended[prop], prop);
+				} else {
+					extended[prop] = prop;
 				}
-			}
+			});
 		};
 
 		// Loop through each object and conduct a merge
-		for (; i < length; i++) {
-			var obj = arguments[i];
+		arguments.forEach(function (obj) {
 			merge(obj);
-		}
+		});
 
 		return extended;
 

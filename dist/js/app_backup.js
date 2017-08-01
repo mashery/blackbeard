@@ -1,3 +1,516 @@
+/*!
+ * blackbeard v0.2.0: Future portal layout
+ * (c) 2017 Chris Ferdinandi
+ * BSD-3-Clause License
+ * http://github.com/mashery/blackbeard
+ */
+
+var getNav = function (selector) {
+
+	// Variables
+	var nav = [];
+	var items = mashery.dom.querySelectorAll(selector);
+
+	// Generate items object
+	for (var i = 0; i < items.length; i++) {
+		nav.push({
+			label: items[i].innerHTML,
+			url: items[i].getAttribute('href')
+		});
+	}
+
+	return nav;
+
+};
+
+var fetchUserProfile = function () {
+	if (window.mashery.userProfile) return;
+	atomic.ajax({
+		url: '/member/edit',
+		responseType: 'document'
+	}).success((function (data) {
+		var userProfile = data.querySelector('.actions .public-profile.action');
+		if (!userProfile) return;
+		userProfile = userProfile.getAttribute('href');
+		window.mashery.userProfile = userProfile;
+		sessionStorage.setItem('masheryUserProfile', userProfile);
+		var profileLink = document.querySelector('a[href*="/profile/profile/"]');
+		if (!profileLink) return;
+		profileLink.href = userProfile;
+	}));
+};
+
+var getContent = function (type) {
+
+	// Cache mashery objects
+	var dom = window.mashery.dom;
+	var content = window.mashery.content;
+
+	// Add primary nav
+	content.navPrimary = getNav('#local a');
+
+	// Add secondary nav
+	content.navSecondary = getNav('#footer > ul a');
+
+	// type = page
+	if (type === 'page') {
+		content.main = dom.querySelector('#main').innerHTML;
+	}
+
+	// type = docs
+	if (type === 'docs') {
+		content.main = dom.querySelector('#main').innerHTML;
+		content.secondary = dom.querySelector('#sub ul').innerHTML;
+	}
+
+	// type = signin
+	if (type === 'signin') {
+		var signinForm = dom.querySelector('#signin form');
+		content.main = '<form action="' + signinForm.action + '" method="post" enctype="multipart/form-data">' + signinForm.innerHTML + '</form>';
+	}
+
+	// type = register
+	if (type === 'register') {
+		var regForm = dom.querySelector('#member-register');
+		content.main = '<form action="' + regForm.action + '" method="post" enctype="multipart/form-data">' + regForm.innerHTML + '</form>';
+	}
+
+	// type = register-confirm
+	if (type === 'registerSent') {
+		var email = dom.querySelector('#main p');
+		content.main = email ? email.innerHTML.replace('We have sent a confirmation e-mail to you at this address: ', '') : null;
+	}
+
+	// type = resend-confirmation
+	if (type === 'registerResend') {
+		var form = dom.querySelector('#resend-confirmation');
+		content.main = '<form action="' + form.getAttribute('action') + '" method="post" enctype="multipart/form-data" id="resend-confirmation">' + form.innerHTML + '</form>';
+		content.main = content.main.replace('<legend>Resend your account confirmation email.</legend>', '');
+	}
+
+	// type = join
+	if (type === 'join') {
+		var form = dom.querySelector('#member-edit');
+		content.main = '<form action="' + form.getAttribute('action') + '" method="post" enctype="multipart/form-data" id="member-edit">' + form.innerHTML + '</form>';
+		content.main = content.main.replace('<legend>Additional Information</legend>', '');
+	}
+
+	// type = join-success
+	if (type === 'joinSuccess') {
+		var username = dom.querySelector('#main .section-body p');
+		content.main = username ? username.innerHTML.replace('You have successfully registered as <strong>', '').replace('</strong>.', '').trim() : null;
+	}
+
+	// type = account-keys
+	// @todo verify that there's only one app per key
+	if (type === 'accountKeys') {
+
+		// Get elements
+		var keys = dom.querySelectorAll('.main .section-body h2, .main .section-body div.key');
+		var getKeys = dom.querySelector('.action.new-key'); // @todo check if user can register at all based on this link
+
+		if (keys.length > 0) {
+			content.main = {};
+			content.secondary = getKeys ? getKeys.getAttribute('href') : null;
+			var currentPlan;
+
+			keys.forEach((function (key, index) {
+				if (key.tagName.toLowerCase() === 'h2') {
+					currentPlan = key.innerHTML;
+					content.main[key.innerHTML] = {
+						name: key.innerHTML,
+						keys: []
+					};
+				} else {
+					var data = key.querySelectorAll('dd');
+					var secret = data.length === 5 ? true : false;
+					var created = secret ? data[4].querySelector('abbr') : data[3].querySelector('abbr');
+					content.main[currentPlan].keys.push({
+						application: data[0].innerHTML.trim(),
+						key: data[1].innerHTML.trim(),
+						secret: secret ? data[2].innerHTML.trim() : null,
+						status: secret ? data[3].innerHTML.trim() : data[2].innerHTML.trim(),
+						created: created ? created.getAttribute('title') : '',
+						limits: '<table>' + key.querySelector('table.key').innerHTML + '<table>',
+						report: key.querySelector('.key-actions.actions .view-report.action').getAttribute('href'),
+						delete: key.querySelector('.key-actions.actions .delete.action').getAttribute('href')
+					});
+				}
+			}));
+		}
+
+	}
+
+	// type = account-apps
+	// nav, create apps link, no apps message, app content/table
+	if (type === 'accountApps') {
+
+		// Get elements
+		var apps = dom.querySelectorAll('.main .application');
+		var createApps = dom.querySelector('.main .actions .add-app.action');
+
+		// Set values
+		content.main = [];
+		content.secondary = createApps ? createApps.getAttribute('href') : null;
+		apps.forEach((function(app) {
+			var dataBasic = app.querySelectorAll('dd');
+			var dataDetails = app.querySelectorAll('tbody td');
+			content.main.push({
+				application: app.querySelector('h3').innerHTML.trim(),
+				created: dataBasic[1].querySelector('abbr').getAttribute('title'),
+				api: dataDetails[0] ? dataDetails[0].innerHTML.trim() : null,
+				key: dataDetails[1] ? dataDetails[1].innerHTML.trim() : null,
+				edit: app.querySelector('.application-actions.actions .edit.action').getAttribute('href'),
+				delete: app.querySelector('.application-actions.actions .delete-app.action').getAttribute('href')
+			});
+		}));
+
+	}
+
+	// type = app-register
+	if (type === 'appRegister') {
+		var form = dom.querySelector('#application-edit');
+		var table = dom.querySelector('#main .section-body table');
+		content.main = '<form action="' + form.getAttribute('action') + '" method="post" enctype="multipart/form-data" id="application-edit">' + form.innerHTML + '</form>';
+		content.secondary = table ? '<table>' + table.innerHTML + '</table>' : null;
+	};
+
+	// type = account-manage
+	if (type === 'accountManage') {
+		var accountForm = dom.querySelector('#member-edit');
+		var userProfile = dom.querySelector('.actions .public-profile.action');
+		content.main = '<form action="' + accountForm.getAttribute('action') + '" method="post" enctype="multipart/form-data" id="member-edit">' + accountForm.innerHTML + '</form>';
+		content.main = content.main.replace('<legend>Account Information</legend>', '');
+		if (userProfile) {
+			userProfile = userProfile.getAttribute('href');
+			window.mashery.userProfile = userProfile;
+			sessionStorage.setItem('masheryUserProfile', userProfile);
+		}
+	}
+
+	// type = account-email
+	if (type === 'accountEmail') {
+		var emailForm = dom.querySelector('.main form');
+		if (!emailForm) return;
+		content.main = '<form action="' + emailForm.getAttribute('action') + '" method="post" enctype="multipart/form-data">' + emailForm.innerHTML + '</form>';
+		fetchUserProfile();
+	}
+
+	// type = account-password
+	if (type === 'accountPassword') {
+		var passwordForm = dom.querySelector('.main form');
+		if (!passwordForm) return;
+		content.main = '<form action="' + passwordForm.getAttribute('action') + '" method="post" enctype="multipart/form-data">' + passwordForm.innerHTML + '</form>';
+		content.secondary = dom.querySelector('#passwd_requirements').innerHTML;
+		fetchUserProfile();
+	}
+
+	// type = profile
+	if (type === 'profile') {
+		var data = dom.querySelectorAll('.user-information dd');
+		var activity = dom.querySelector('table.recent-activity');
+		var admin = dom.querySelector('a[href*="/r/member/"]');
+		content.main = {
+			name: dom.querySelector('h1.first').innerHTML.replace('View Member ', '').trim(),
+			admin: admin ? admin.getAttribute('href') : null,
+			blog: data[0] ? data[0].querySelector('a').getAttribute('href') : '',
+			website: data[1] ? data[1].querySelector('a').getAttribute('href') : '',
+			registered: data[2] ? data[2].querySelector('abbr').getAttribute('title') : '',
+			activity: activity ? '<table>' + activity.innerHTML + '</table>' : null
+		};
+	}
+
+	// type = ioDocs
+	if (type === 'ioDocs') {
+		var junk = dom.querySelectorAll('#main h1, #main .introText, #main .endpoint ul.actions, #apiTitle');
+		var apiID = dom.querySelector('#apiId');
+		junk.forEach((function (item) {
+			item.remove();
+		}));
+		if (apiID) {
+			var apiIDClone = apiID.cloneNode(true);
+			apiID.style.width = '';
+			apiID.parentNode.parentNode.insertBefore(apiID.cloneNode(true), apiID.parentNode);
+			apiID.parentNode.remove();
+		}
+		content.main = dom.querySelector('#main').innerHTML;
+	}
+
+	// type = lost-password
+	if (type === 'lostPassword') {
+		var form = dom.querySelector('#lost form');
+		content.main = '<form action="' + form.getAttribute('action') + '" method="post" enctype="multipart/form-data">' + form.innerHTML + '</form>';
+		content.main = content.main.replace('<legend>Lost Password</legend>', '');
+	}
+
+	// type = lost-username
+	if (type === 'lostUsername') {
+		var form = dom.querySelector('#lost form');
+		content.main = '<form action="' + form.getAttribute('action') + '" method="post" enctype="multipart/form-data">' + form.innerHTML + '</form>';
+		content.main = content.main.replace('<legend>E-mail yourself your username</legend>', '');
+	}
+
+	// type = search
+	if (type === 'search') {
+		if (dom.querySelector('.no-result')) {
+			content.main = null;
+			content.secondary = {
+				first: 0,
+				last: 0,
+				total: 0,
+				query: dom.querySelector('.no-result b').innerHTML.trim()
+			}
+		} else {
+			var results = dom.querySelectorAll('.section-body .result');
+			var meta = dom.querySelectorAll('.result-info b');
+			var paging = dom.querySelectorAll('.result-paging a');
+			content.main = [];
+
+			results.forEach((function (result) {
+				var link = result.querySelector('a');
+				content.main.push({
+					url: link.getAttribute('href'),
+					title: link.innerHTML.trim(),
+					summary: result.querySelector('.result-summary').innerHTML.replace('<strong>', '<span class="search-term">').replace('</strong>', '</span>').trim()
+				});
+			}));
+
+			content.secondary = {
+				first: meta[0].innerHTML,
+				last: meta[1].innerHTML,
+				total: meta[2].innerHTML,
+				query: meta[3].innerHTML,
+				pagePrevious: null,
+				pageNext: null
+			};
+
+			paging.forEach((function (link) {
+				if (/Previous/.test(link.innerHTML)) {
+					content.secondary.pagePrevious = link.getAttribute('href');
+				} else {
+					content.secondary.pageNext = link.getAttribute('href');
+				}
+			}));
+		}
+	}
+
+	// type = contact
+	if (type === 'contact') {
+		var form = dom.querySelector('#main form');
+		content.main = '<form action="' + form.getAttribute('action') + '" method="post" enctype="multipart/form-data">' + form.innerHTML + '</form>';
+	}
+
+	// =======
+
+	// type = forum {IGNORE}
+	// recent topics link, categories RSS, categories OL
+
+	// type = blog-all
+	// RSS
+	// foreach: article link/title, user link, date, content, comments link
+
+	// type = blog-single
+	// title, user link, date, content, comment count, comment box
+
+};
+var getContentType = function (elem) {
+
+	var type = null;
+	var h1 = elem.querySelector('#main h1.first')
+	h1 = h1 ? h1.innerHTML : '';
+
+	if (elem.classList.contains('not-found') || (h1 && /Not Found/.test(h1)) ) {
+		type = 'fourOhFour';
+	} else if (elem.classList.contains('please-login')) {
+		type = 'pleaseLogin';
+	} else if (elem.classList.contains('page-page')) {
+		type = 'page';
+	} else if (elem.classList.contains('page-docs')) {
+		type = 'docs';
+	} else if (elem.classList.contains('page-ioDocs')) {
+		type = 'ioDocs';
+	} else if (elem.classList.contains('page-forum')) {
+		if (elem.classList.contains('topics')) {
+			type = 'forumTopics';
+		} else if (elem.classList.contains('topic-add')) {
+			type = 'forumAddTopic';
+		} else if (elem.classList.contains('read')) {
+			type = 'forumSingle';
+		} else if (elem.classList.contains('recent')) {
+			type = 'forumRecent';
+		} else {
+			type = 'forumAll';
+		}
+	} else if (elem.classList.contains('page-blog')){
+		if (elem.classList.contains('browse')) {
+			type = 'blogAll';
+		} else {
+			type = 'blogSingle';
+		}
+	} else if (elem.classList.contains('page-apps')) {
+		if (elem.classList.contains('mykeys')) {
+			type = 'accountKeys';
+		} else if (elem.classList.contains('myapps')) {
+			type = 'accountApps';
+		} else if (elem.classList.contains('register')) {
+			if (elem.querySelector('#application-edit')) {
+				type = 'appRegister';
+			} else {
+				type = 'appRegisterSuccess';
+			}
+		}
+	} else if (elem.classList.contains('page-member')) {
+		if (elem.classList.contains('email')) {
+			type = 'accountEmail';
+		} else if (elem.classList.contains('passwd')) {
+			type = 'accountPassword';
+		} else if (elem.classList.contains('register')) {
+			if (/Registration Almost Complete/.test(h1)) {
+				type = 'registerSent';
+			} else {
+				type = 'register';
+			}
+		} else if (elem.classList.contains('resend-confirmation')) {
+			if (elem.querySelector('ul.success')) {
+				type = 'registerResendSuccess';
+			} else {
+				type = 'registerResend';
+			}
+		} else if (elem.classList.contains('remove')) {
+			if (/You have been removed!/.test(elem.querySelector('.main .section-body').innerHTML)) {
+				type = 'memberRemoveSuccess';
+			} else {
+				type = 'memberRemove';
+			}
+		} else if (elem.classList.contains('lost')) {
+			if (/E-mail Sent/.test(elem.querySelector('h2').innerHTML)) {
+				type = 'lostPasswordReset';
+			} else {
+				type = 'lostPassword';
+			}
+		} else if (elem.classList.contains('lost-username')) {
+			if (/E-mail Sent/.test(elem.querySelector('h2').innerHTML)) {
+				type = 'lostUsernameReset';
+			} else {
+				type = 'lostUsername';
+			}
+		} else if (elem.classList.contains('join') || elem.classList.contains('confirm')) {
+			if (/Registration Successful/.test(h1)) {
+				type = 'joinSuccess';
+			} else {
+				type = 'join';
+			}
+		} else {
+			type = 'accountManage';
+		}
+	} else if (elem.classList.contains('page-profile')) {
+		type = 'profile';
+	} else if (elem.classList.contains('page-login')) {
+		type = 'signin';
+	} else if (elem.classList.contains('page-search')) {
+		type = 'search';
+	} else if (elem.classList.contains('page-logout')) {
+		if (elem.querySelector('#user-nav .account')) {
+			type = 'logoutFail';
+		} else {
+			type = 'logout';
+		}
+	} else if (elem.classList.contains('page-contact')) {
+		if (elem.querySelector('#main form')) {
+			type = 'contact';
+		} else {
+			type = 'contactSuccess';
+		}
+	}
+
+	return type;
+
+};
+/**
+ * Remove stylesheets from the DOM.
+ * Copyright (c) 2017. TIBCO Software Inc. All Rights Reserved.
+ * @param  {String} filename The name of the stylesheet to remove
+ * @return {Object}          The stylesheet that was removed
+ */
+var removeCSS = function ( filename ) {
+
+	'use strict';
+
+	// Get all stylesheets
+	var links = document.getElementsByTagName('link');
+	var regex = new RegExp(filename);
+
+	// Find and remove matching stylesheet
+	for ( var i = links.length; i >= 0; i-- ) {
+		if ( links[i] && links[i].href !== null && regex.test(links[i].href) ) {
+			links[i].parentNode.removeChild(links[i]);
+			return links[i];
+		}
+	}
+};
+var setupMashery = function (doc) {
+
+	// Get the default page
+	var page = doc.querySelector('#page');
+
+	// Convert DOM content to a node
+	var dom = document.createElement('div');
+	dom.innerHTML = page.innerHTML;
+
+	// Get special links
+	var dashboard = dom.querySelector('#user-nav .dashboard a');
+	var logout = dom.querySelector('#mashery-logout-form');
+	var login = dom.querySelector('#user-nav .sign-in a');
+
+	// Set mashery properties
+	window.mashery = {
+		area: dom.querySelector('#branding-logo').innerHTML.trim(),
+		content: {
+			main: null,
+			secondary: null
+		},
+		contentId: null,
+		contentType: getContentType(doc.body),
+		dashboard: dashboard ? dashboard : null,
+		dom: dom,
+		isAdmin: dom.querySelector('#user-nav .dashboard.toggle') ? true : false,
+		loggedIn: dom.querySelector('#mashery-logout-form') ? true : false,
+		login: {
+			url: login ? login.pathname : null,
+			redirect: login ? login.search : null
+		},
+		logout: logout ? logout : null,
+		title: doc.title,
+		username: typeof mashery_info !== 'undefined' && mashery_info && mashery_info.username ? mashery_info.username : null,
+		userProfile: sessionStorage.getItem('masheryUserProfile')
+	};
+
+	// Remove page from the DOM
+	page.remove();
+
+};
+// Setup mashery variables
+setupMashery(document);
+
+// Make sure placeholder loaded
+if (!document.querySelector('#app')) {
+	loadPlaceholder();
+}
+
+// Remove the default CSS
+removeCSS('localdev.css'); // Remove localdev specific CSS. Do not use on production sites.
+removeCSS('Mashery-base.css'); // Remove the base Mashery CSS
+removeCSS('mashery-blue.css'); // Remove the base Mashery CSS
+removeCSS('print-defaults.css'); // Remove the default print CSS
+
+// If the IODocs page, also remove IODocs specific CSS
+if ( mashery.contentType === 'ioDocs') {
+	removeCSS('Iodocs/style.css');
+	removeCSS('alpaca.min.css');
+}
+
+// Get the content
+getContent(window.mashery.contentType);
 var loadPortal = (function () {
 
 	'use strict';
@@ -222,12 +735,12 @@ var loadPortal = (function () {
 			 * The layout for the page displaying a users API keys.
 			 */
 			accountKeys: function () {
-				var template = '<h1>{{content.headingMyApiKeys}}</h1><ul id="nav-account">{{content.navItemsAccount}}</ul>';
+				var template = 	'<h1>{{content.headingMyApiKeys}}</h1><ul id="nav-account">{{content.navItemsAccount}}</ul>';
 				if (Object.keys(mashery.content.main).length > 0 ) {
-					mashery.content.main.forEach(function (plan) {
+					mashery.content.main.forEach((function (plan) {
 						template += '<h2>' + plan.name + '</h2>';
 						if (plan.keys.length > 0) {
-							plan.keys.forEach(function (key) {
+							plan.keys.forEach((function (key) {
 								var secret = key.secret ? '<li>Secret: ' + key.secret + '</li>' : '';
 								template +=
 									'<p><strong>' + key.application + '</strong></p>' +
@@ -239,14 +752,14 @@ var loadPortal = (function () {
 									'</ul>' +
 									key.limits +
 									'<p><a class="btn btn-delete-key" id="btn-delete-key" href="' + key.delete + '">Delete This Key</a></p>';
-							});
+							}));
 						} else {
 							template += '<p>{{content.noPlanKeys}}</p>';
 							if (mashery.content.secondary) {
-								template += '<p><a class="btn btn-get-key" id="' + m$.sanitizeClass(plan.name, 'btn-get-key') + '"  href="' + mashery.content.secondary + '">Get a Key for ' + plan.name + '</a></p>';
+								template += '<p><a class="btn btn-get-key" id="' + sanitizeClass(plan.name, 'btn-get-key') + '"  href="' + mashery.content.secondary + '">Get a Key for ' + plan.name + '</a></p>';
 							}
 						}
-					});
+					}));
 				} else {
 					template += '{{content.noKeys}}';
 					if (mashery.content.secondary) {
@@ -263,7 +776,7 @@ var loadPortal = (function () {
 			accountApps: function () {
 				var template = 	'<h1>{{content.headingMyApps}}</h1><ul id="nav-account">{{content.navItemsAccount}}</ul>';
 				if (Object.keys(mashery.content.main).length > 0) {
-					mashery.content.main.forEach(function (app) {
+					mashery.content.main.forEach((function (app) {
 						template +=
 							'<h2>' + app.application + '</h2>' +
 							'<ul>' +
@@ -272,10 +785,10 @@ var loadPortal = (function () {
 								'<li>Created: ' + app.created + '</li>' +
 							'</ul>' +
 							'<p>' +
-						'<a class="btn btn-edit-app" id="' + m$.sanitizeClass(app.application, 'btn-edit-app') + '" href="' + app.edit + '">Edit This App</a>' +
-						'<a class="btn btn-delete-app" id="' + m$.sanitizeClass(app.application, 'btn-delete-app') + '" href="' + app.delete + '">Delete This App</a>' +
+						'<a class="btn btn-edit-app" id="' + sanitizeClass(app.application, 'btn-edit-app') + '" href="' + app.edit + '">Edit This App</a>' +
+						'<a class="btn btn-delete-app" id="' + sanitizeClass(app.application, 'btn-delete-app') + '" href="' + app.delete + '">Delete This App</a>' +
 							'</p>';
-					});
+					}));
 				} else {
 					template += '{{content.noApps}}';
 				}
@@ -442,7 +955,7 @@ var loadPortal = (function () {
 				var template = '<h1>{{content.heading}}</h1>';
 				if (window.mashery.content.main) {
 					template += '<p>{{content.meta}}</p>';
-					window.mashery.content.main.forEach(function (result) {
+					window.mashery.content.main.forEach((function (result) {
 						template +=
 							'<div class="search-result">' +
 								'<h2 class="no-margin-bottom"><a href="' + result.url + '">' + result.title + '</a></h2>' +
@@ -452,7 +965,7 @@ var loadPortal = (function () {
 									'<a href="' + result.url + '">' + result.url + '</a>' +
 								'</p>' +
 							'</div>';
-					});
+					}));
 					template += '<div class="search-pagination">';
 					if (window.mashery.content.secondary.pagePrevious) {
 						template += '<a href="' + window.mashery.content.secondary.pagePrevious + '">{{content.pagePrevious}}</a>';
@@ -1736,7 +2249,7 @@ var loadPortal = (function () {
 		title: {
 			placeholder: '{{mashery.title}}',
 			text: function () {
-				var heading = m$.get('h1');
+				var heading = document.querySelector('h1');
 				return (heading ? heading.innerHTML.trim() : window.mashery.title.replace(window.mashery.area + ' - ', '').replace(window.mashery.area, ''));
 			}
 		},
@@ -1867,6 +2380,61 @@ var loadPortal = (function () {
 	//
 
 	/**
+	* Merge two or more objects. Returns a new object.
+	* Set the first argument to `true` for a deep or recursive merge
+	* @private
+	* @param   {Object} objects The objects to merge together
+	* @returns {Object}         Merged values of defaults and options
+	*/
+	var extend = function () {
+
+		// Variables
+		var extended = {};
+		var deep = false;
+		var i = 0;
+		var length = arguments.length;
+
+		// Merge the object into the extended object
+		var merge = function ( obj ) {
+			for ( var prop in obj ) {
+				if ( Object.prototype.hasOwnProperty.call( obj, prop ) ) {
+					// If deep merge and property is an object, merge properties
+					if ( Object.prototype.toString.call(obj[prop]) === '[object Object]' ) {
+						extended[prop] = extend( true, extended[prop], obj[prop] );
+					} else {
+						extended[prop] = obj[prop];
+					}
+				}
+			}
+		};
+
+		// Loop through each object and conduct a merge
+		for ( ; i < length; i++ ) {
+			var obj = arguments[i];
+			merge(obj);
+		}
+
+		return extended;
+
+	};
+
+	/**
+	 * Simulate a click event.
+	 * @public
+	 * @param {Element} elem  the element to simulate a click on
+	 */
+	var simulateClick = function (elem) {
+		// Create our event (with options)
+		var evt = new MouseEvent('click', {
+			bubbles: true,
+			cancelable: true,
+			view: window
+		});
+		// If cancelled, don't dispatch our event
+		var canceled = !elem.dispatchEvent(evt);
+	};
+
+	/**
 	 * Replaces placeholders with real content
 	 * @param {String} template The template string
 	 * @param {String} local    A local placeholder to use, if any
@@ -1876,20 +2444,20 @@ var loadPortal = (function () {
 		if (local) {
 			var tempLocal = /account/.test(local) ? 'account' : local;
 			if (localPlaceholders[tempLocal]) {
-				localPlaceholders[tempLocal].forEach(function (placeholder) {
+				localPlaceholders[tempLocal].forEach((function (placeholder) {
 					if(!placeholder.placeholder || !placeholder.text) return;
 					template = template.replace(new RegExp(placeholder.placeholder, 'g'), placeholder.text);
-				});
+				}));
 			}
 		}
-		paths.forEach(function (path) {
+		paths.forEach((function (path) {
 			if (!path.placeholder || !path.url) return;
 			template = template.replace(new RegExp(path.placeholder, 'g'), path.url);
-		});
-		globalPlaceholders.forEach(function (placeholder) {
+		}));
+		globalPlaceholders.forEach((function (placeholder) {
 			if (!placeholder.placeholder || !placeholder.text) return;
 			template = template.replace(new RegExp(placeholder.placeholder, 'g'), placeholder.text);
-		});
+		}));
 		return template;
 	};
 
@@ -1940,9 +2508,9 @@ var loadPortal = (function () {
 	 */
 	var getNavItems = function (items) {
 		var template = '';
-		items.forEach(function (item) {
+		items.forEach((function (item) {
 			template += '<li><a href="' + decodeURIComponent(item.url) + '">' + item.label + '</a></li>';
-		});
+		}));
 		return template;
 	};
 
@@ -1954,9 +2522,9 @@ var loadPortal = (function () {
 	var inject = function (type, atts) {
 		var ref = window.document.getElementsByTagName('script')[0];
 		var elem = document.createElement(type);
-		atts.forEach(function (value, key) {
+		atts.forEach((function (value, key) {
 			elem.setAttribute(key, value);
-		});
+		}));
 		ref.parentNode.insertBefore(elem, ref);
 	};
 
@@ -1968,17 +2536,17 @@ var loadPortal = (function () {
 	 * @param {Function} after    The callback to run after rendering
 	 */
 	var render = function (selector, key, before, after) {
-		var content = m$.get(selector);
+		var content = document.querySelector(selector);
 		if (!content) return;
 		if (before) {
 			before();
 		}
 		content.innerHTML = settings.templates[key] ? replacePlaceholders(settings.templates[key], key) : '';
 		if (['page','docs'].indexOf(window.mashery.contentType !== -1)) {
-			var junk = m$.getAll('#header-edit, #main .section .section-meta');
-			junk.forEach(function (item) {
+			var junk = document.querySelectorAll('#header-edit, #main .section .section-meta');
+			junk.forEach((function (item) {
 				item.remove();
-			})
+			}))
 		}
 		if (after) {
 			after();
@@ -1991,7 +2559,7 @@ var loadPortal = (function () {
 	 */
 	var verifyLoggedIn = function () {
 		if (['logout', 'memberRemoveSuccess'].indexOf(window.mashery.contentType) === -1) return;
-		var loggedIn = m$.get('#mashery-logout-form', window.mashery.dom);
+		var loggedIn = window.mashery.dom.querySelector('#mashery-logout-form');
 		if (loggedIn) return;
 		window.mashery.loggedIn = false;
 		window.mashery.username = null;
@@ -2001,14 +2569,26 @@ var loadPortal = (function () {
 	};
 
 	/**
+	 * Sanitize a string for use as a class
+	 * @url Regex pattern: http://stackoverflow.com/a/9635698/1293256
+	 * @param {String} id      The string to convert into a class
+	 * @param {String} prefix  A prefix to use before the class [optionals]
+	 */
+	var sanitizeClass = function (id, prefix) {
+		if (!id) return '';
+		prefix = prefix ? prefix + '-' : '';
+		return prefix + id.replace(/^[^a-z]+|[^\w:.-]+/gi, '-').toLowerCase();
+	};
+
+	/**
 	 * Add class hooks for styling to the DOM, and a global JS variable for conditional functions
 	 */
 	exports.addStyleHooks = function () {
-		var wrapper = m$.get('#app-wrapper');
+		var wrapper = document.querySelector('#app-wrapper');
 		if (!wrapper) return;
 		var path = ['/', '/home'].indexOf(window.location.pathname.toLowerCase()) === -1 ? window.location.pathname.slice(1) : 'home';
-		wrapper.className = m$.sanitizeClass(window.mashery.contentType, 'category') + ' ' + m$.sanitizeClass(path, 'single');
-		window.mashery.contentId = m$.sanitizeClass(path);
+		wrapper.className = sanitizeClass(window.mashery.contentType, 'category') + ' ' + sanitizeClass(path, 'single');
+		window.mashery.contentId = sanitizeClass(path);
 	};
 
 	/**
@@ -2053,7 +2633,7 @@ var loadPortal = (function () {
 	 * @param {String} key  The content type
 	 */
 	exports.renderContent = function (id, key) {
-		var content = m$.get(id);
+		var content = document.querySelector(id);
 		if (!content) return;
 		settings.callbacks.beforeRenderFooter();
 		content.innerHTML = settings.templates[key] ? replacePlaceholders(settings.templates[key]) : '';
@@ -2064,17 +2644,17 @@ var loadPortal = (function () {
 	 * Load IO Docs scripts if they're not already present
 	 */
 	var loadIODocsScripts = function () {
-		loadJS('/public/Mashery/scripts/Iodocs/prettify.js', function () {
-			loadJS('/public/Mashery/scripts/Mashery/beautify.js', function () {
-				loadJS('/public/Mashery/scripts/vendor/alpaca.min.js', function () {
-					loadJS('/public/Mashery/scripts/Iodocs/utilities.js', function () {
-						loadJS('/public/Mashery/scripts/Iodocs/iodocs.js', function () {
+		loadJS('/public/Mashery/scripts/Iodocs/prettify.js', (function () {
+			loadJS('/public/Mashery/scripts/Mashery/beautify.js', (function () {
+				loadJS('/public/Mashery/scripts/vendor/alpaca.min.js', (function () {
+					loadJS('/public/Mashery/scripts/Iodocs/utilities.js', (function () {
+						loadJS('/public/Mashery/scripts/Iodocs/iodocs.js', (function () {
 							loadJS('/public/Mashery/scripts/Mashery/ace/ace.js');
-						}, true);
-					}, true);
-				}, true);
-			}, true);
-		}, true);
+						}), true);
+					}), true);
+				}), true);
+			}), true);
+		}), true);
 	}
 
 	/**
@@ -2136,7 +2716,7 @@ var loadPortal = (function () {
 	 * Inject the logout form into the DOM
 	 */
 	var renderLogout = function () {
-		if (!window.mashery.logout || m$.get('#mashery-logout-form')) return;
+		if (!window.mashery.logout || document.querySelector('#mashery-logout-form')) return;
 		document.body.insertBefore(window.mashery.logout, document.body.lastChild);
 	};
 
@@ -2144,12 +2724,12 @@ var loadPortal = (function () {
 	 * Inject the remove member form into the DOM on remove member page
 	 */
 	var renderMemberRemove = function () {
-		if (window.mashery.contentType !== 'memberRemove' || m$.get('#member-remove-form')) return;
-		var form = m$.get('.main form', window.mashery.dom);
+		if (window.mashery.contentType !== 'memberRemove' || document.querySelector('#member-remove-form')) return;
+		var form = window.mashery.dom.querySelector('.main form');
 		if (!form) return;
 		form.id = 'member-remove-form';
 		form.setAttribute('hidden', 'hidden');
-		var submit = m$.get('#process', form);
+		var submit = form.querySelector('#process');
 		if (submit) {
 			submit.setAttribute('onclick', 'return confirm("' + localPlaceholders.memberRemove.popup.text() + '")');
 		}
@@ -2163,7 +2743,7 @@ var loadPortal = (function () {
 		if (window.location.hash) {
 			window.location.hash = window.location.hash;
 		} else {
-			m$.get('#app').focus();
+			document.querySelector('#app').focus();
 		}
 	};
 
@@ -2180,9 +2760,9 @@ var loadPortal = (function () {
 	 * Render the Mashery Made logo (if missing)
 	 */
 	exports.renderMasheryMade = function () {
-		var masheryMade = m$.get('#mashery-made-logo');
+		var masheryMade = document.querySelector('#mashery-made-logo');
 		if (masheryMade) return;
-		var app = m$.get('#app');
+		var app = document.querySelector('#app');
 		if (!app) return;
 		var mashMade = document.createElement('div');
 		mashMade.innerHTML = '<p>x</p><div id="mashery-made"><div class="container"><p>' + globalPlaceholders.masheryMade.text + '</p></div></div>';
@@ -2194,9 +2774,9 @@ var loadPortal = (function () {
 	 */
 	exports.renderTOS = function () {
 		if (['register', 'join'].indexOf(window.mashery.contentType) === -1) return;
-		var tos = m$.get('#registration-terms-of-service');
+		var tos = document.querySelector('#registration-terms-of-service');
 		if (tos) return;
-		var reg = m$.get('form[action*="/member/register"]');
+		var reg = document.querySelector('form[action*="/member/register"]');
 		if (!reg) return;
 		var div = document.createElement('div');
 		div.innerHTML = '<p>x</p>' + replacePlaceholders(globalPlaceholders.registerTerms.text, 'register');
@@ -2234,7 +2814,7 @@ var loadPortal = (function () {
 	 * @param {Event} event The click event
 	 */
 	var processLogout = function (event) {
-		var logout = m$.get('#mashery-logout-form');
+		var logout = document.querySelector('#mashery-logout-form');
 		if (!logout) return;
 		event.preventDefault();
 		logout.submit();
@@ -2265,15 +2845,15 @@ var loadPortal = (function () {
 		atomic.ajax({
 			url: url,
 			responseType: 'document'
-		}).success(function (data) {
+		}).success((function (data) {
 			renderWithAjax(data, url, pushState);
-		}).error(function (data, xhr) {
+		})).error((function (data, xhr) {
 			if (xhr.status === 404) {
 				renderWithAjax(data, url, pushState);
 				return;
 			}
 			window.location = url;
-		});
+		}));
 	};
 
 	/**
@@ -2304,10 +2884,10 @@ var loadPortal = (function () {
 	 * @param {Event} event The click event
 	 */
 	var processMemberRemove = function (event) {
-		var remove = m$.get('#member-remove-form #process');
+		var remove = document.querySelector('#member-remove-form #process');
 		if (!remove || window.mashery.contentType !== 'memberRemove') return;
 		event.preventDefault();
-		m$.click(remove);
+		simulateClick(remove);
 	};
 
 	/**
@@ -2348,7 +2928,7 @@ var loadPortal = (function () {
 	 */
 	var submitHandler = function (event) {
 		if (!event.target.closest('#search-form')) return;
-		var input = m$.get('#search-input', event.target);
+		var input = event.target.querySelector('#search-input');
 		if (!input) return;
 		event.preventDefault();
 		fetchContent(paths.search.url + '?q=' + encodeURIComponent(input.value), true);
@@ -2361,10 +2941,10 @@ var loadPortal = (function () {
 	*/
 	exports.init = function (options) {
 
-		loadJS('https://cdn.polyfill.io/v2/polyfill.min.js?features=default', function () {
+		loadJS('https://cdn.polyfill.io/v2/polyfill.min.js?features=default', (function () {
 
 			// Merge user options with defaults
-			settings = m$.extend( defaults, options || {} );
+			settings = extend( defaults, options || {} );
 
 			// Run callback before initializing
 			exports.callbacks.beforeInit();
@@ -2373,17 +2953,17 @@ var loadPortal = (function () {
 			exports.renderPortal();
 
 			// Listen for click events
-			m$.on('click', clickHandler);
+			document.addEventListener('click', clickHandler, false);
 
 			if (settings.ajax) {
-				m$.on('popstate', popstateHandler);
-				m$.on('submit', submitHandler);
+				window.addEventListener('popstate', popstateHandler, false);
+				window.addEventListener('submit', submitHandler, false);
 			}
 
 			// Run callback after initializing
 			exports.callbacks.afterInit();
 
-		});
+		}));
 
 	};
 

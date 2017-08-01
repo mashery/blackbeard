@@ -1,10 +1,3 @@
-/*!
- * blackbeard v0.2.0: Future portal layout
- * (c) 2017 Chris Ferdinandi
- * BSD-3-Clause License
- * http://github.com/mashery/blackbeard
- */
-
 var m$ = (function () {
 
 	'use strict';
@@ -35,7 +28,7 @@ var m$ = (function () {
 		Object.defineProperties(Object.prototype, {
 			'forEach': {
 				value: function (callback) {
-					if (this === null) {
+					if (this == null) {
 						throw new TypeError('Not an object');
 					}
 					var obj = this;
@@ -55,27 +48,15 @@ var m$ = (function () {
 	// Methods
 	//
 
-	/**
-	 * Get the first matching element
-	 * @param  {String} selector  The selector to match against
-	 * @param  {Node}   scope     The element to search inside [optional, defaults to document]
-	 * @return {Node}             The element
-	 */
 	m$.get = function (selector, scope) {
 		scope = scope || document;
-		return scope.querySelector(selector) || document.createElement('null');
+		return scope.querySelector(selector) || document.createElement('_');
 	};
 
-	/**
-	 * Get the all matching elements
-	 * @param {String} selector  The selector to match against
-	 * @param {Node}   scope     The element to search inside [optional, defaults to document]
-	 * @param {Array}            An array of matching elements
-	 */
 	m$.getAll = function (selector, scope) {
 		scope = scope || document;
 		return Array.prototype.slice.call(scope.querySelectorAll(selector));
-	};
+	}
 
 	/**
 	 * Simulate a click event.
@@ -93,13 +74,6 @@ var m$ = (function () {
 		var canceled = !elem.dispatchEvent(evt);
 	};
 
-	/**
-	 * Add an event listener
-	 * @param {String}   event    The event type
-	 * @param {Node}     elem     The element to run the event on [optional, defaults to window]
-	 * @param {Function} callback The function to run on the event
-	 * @param {Boolean}  capture  If true, for bubbling on non-bubbling event
-	 */
 	m$.on = function (event, elem, callback, capture) {
 		if (typeof (elem) === 'function') {
 			capture = callback;
@@ -110,13 +84,6 @@ var m$ = (function () {
 		elem.addEventListener(event, callback, capture);
 	};
 
-	/**
-	 * Remove an event listener (if a named function was used to set it up)
-	 * @param {String}   event    The event type
-	 * @param {Node}     elem     The element to run the event on [optional, defaults to window]
-	 * @param {Function} callback The function to run on the event
-	 * @param {Boolean}  capture  If true, for bubbling on non-bubbling event
-	 */
 	m$.off = function (event, elem, callback, capture) {
 		if (typeof (elem) === 'function') {
 			capture = callback;
@@ -128,14 +95,88 @@ var m$ = (function () {
 	};
 
 	/**
-	 * Add a query string to a URL
-	 * @param  {String} url   The URL
-	 * @param  {String} key   The query string key
-	 * @param  {String} value The query string value
-	 * @return {String}       The URL with query string
+	 * Load a JS file asynchronously.
+	 * @author @scottjehl, Filament Group, Inc.
+	 * @license MIT
+	 * @link https://github.com/filamentgroup/loadJS
+	 * @param  {String}   src       URL of script to load.
+	 * @param  {Function} callback  Callback to run on completion.
+	 * @param  {Boolean}  reload    If true, reload the script if it's already in the DOM
+	 * @return {Node}               The script
 	 */
+	m$.loadJS = function (src, callback, reload) {
+		'use strict';
+		var existing = document.querySelector('script[src*="' + src + '"]');
+		if (existing) {
+			if (!reload) {
+				if (callback && typeof (callback) === 'function') {
+					callback();
+				}
+				return;
+			}
+			existing.parentNode.removeChild(existing);
+		}
+		var ref = window.document.getElementsByTagName('script')[0];
+		var script = window.document.createElement('script');
+		script.src = src;
+		ref.parentNode.insertBefore(script, ref);
+		if (callback && typeof (callback) === 'function') {
+			script.onload = callback;
+		}
+		return script;
+	};
+
+	/**
+	 * loadCSS: load a CSS file asynchronously.
+	 * @copyright 2014 @scottjehl, Filament Group, Inc.
+	 * @license MIT
+	 * @link https://github.com/filamentgroup/loadCSS
+	 * @param  {String} href    The URL for your CSS file
+	 * @param  {Node}   before  The element to use as a reference for injecting your <link> [optional]
+	 * @param  {String} media   The stylesheet media type [optional, default: all]
+	 * @return {Node}           The stylesheet
+	 */
+	m$.loadCSS = function (href, before, media) {
+		// Bail if stylesheet already exists
+		if (document.querySelector('link[href*="' + href + '"]')) return;
+		// Arguments explained:
+		// `href` is the URL for your CSS file.
+		// `before` optionally defines the element we'll use as a reference for injecting our <link>
+		// By default, `before` uses the first <script> element in the page.
+		// However, since the order in which stylesheets are referenced matters, you might need a more specific location in your document.
+		// If so, pass a different reference element to the `before` argument and it'll insert before that instead
+		// note: `insertBefore` is used instead of `appendChild`, for safety re: http://www.paulirish.com/2011/surefire-dom-element-insertion/
+		var ss = window.document.createElement('link');
+		var ref = before || window.document.getElementsByTagName('script')[0];
+		var sheets = window.document.styleSheets;
+		ss.rel = 'stylesheet';
+		ss.href = href;
+		// temporarily, set media to something non-matching to ensure it'll fetch without blocking render
+		ss.media = 'only x';
+		// inject link
+		ref.parentNode.insertBefore(ss, ref);
+		// This function sets the link's media back to `all` so that the stylesheet applies once it loads
+		// It is designed to poll until document.styleSheets includes the new sheet.
+		function toggleMedia() {
+			var defined;
+			for (var i = 0; i < sheets.length; i++) {
+				if (sheets[i].href && sheets[i].href.indexOf(href) > -1) {
+					defined = true;
+				}
+			}
+			if (defined) {
+				ss.media = media || 'all';
+			}
+			else {
+				setTimeout(toggleMedia);
+			}
+		}
+		toggleMedia();
+		return ss;
+	};
+
 	m$.addQueryString = function (url, key, value) {
-		return url + (/[\?]/.test(url) ? '&' : '?') + key + '=' + value;
+		return (/[\?]/.test(url) ? '&' : '?') + key + '=' + value;
 	};
 
 	/**

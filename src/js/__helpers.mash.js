@@ -28,7 +28,7 @@ var m$ = (function () {
 		Object.defineProperties(Object.prototype, {
 			'forEach': {
 				value: function (callback) {
-					if (this == null) {
+					if (this === null) {
 						throw new TypeError('Not an object');
 					}
 					var obj = this;
@@ -48,15 +48,27 @@ var m$ = (function () {
 	// Methods
 	//
 
+	/**
+	 * Get the first matching element
+	 * @param  {String} selector  The selector to match against
+	 * @param  {Node}   scope     The element to search inside [optional, defaults to document]
+	 * @return {Node}             The element
+	 */
 	m$.get = function (selector, scope) {
 		scope = scope || document;
-		return scope.querySelector(selector) || document.createElement('_');
+		return scope.querySelector(selector) || document.createElement('null');
 	};
 
+	/**
+	 * Get the all matching elements
+	 * @param {String} selector  The selector to match against
+	 * @param {Node}   scope     The element to search inside [optional, defaults to document]
+	 * @param {Array}            An array of matching elements
+	 */
 	m$.getAll = function (selector, scope) {
 		scope = scope || document;
 		return Array.prototype.slice.call(scope.querySelectorAll(selector));
-	}
+	};
 
 	/**
 	 * Simulate a click event.
@@ -74,6 +86,13 @@ var m$ = (function () {
 		var canceled = !elem.dispatchEvent(evt);
 	};
 
+	/**
+	 * Add an event listener
+	 * @param {String}   event    The event type
+	 * @param {Node}     elem     The element to run the event on [optional, defaults to window]
+	 * @param {Function} callback The function to run on the event
+	 * @param {Boolean}  capture  If true, for bubbling on non-bubbling event
+	 */
 	m$.on = function (event, elem, callback, capture) {
 		if (typeof (elem) === 'function') {
 			capture = callback;
@@ -84,6 +103,13 @@ var m$ = (function () {
 		elem.addEventListener(event, callback, capture);
 	};
 
+	/**
+	 * Remove an event listener (if a named function was used to set it up)
+	 * @param {String}   event    The event type
+	 * @param {Node}     elem     The element to run the event on [optional, defaults to window]
+	 * @param {Function} callback The function to run on the event
+	 * @param {Boolean}  capture  If true, for bubbling on non-bubbling event
+	 */
 	m$.off = function (event, elem, callback, capture) {
 		if (typeof (elem) === 'function') {
 			capture = callback;
@@ -94,8 +120,15 @@ var m$ = (function () {
 		elem.removeEventListener(event, callback, capture);
 	};
 
+	/**
+	 * Add a query string to a URL
+	 * @param  {String} url   The URL
+	 * @param  {String} key   The query string key
+	 * @param  {String} value The query string value
+	 * @return {String}       The URL with query string
+	 */
 	m$.addQueryString = function (url, key, value) {
-		return (/[\?]/.test(url) ? '&' : '?') + key + '=' + value;
+		return url + (/[\?]/.test(url) ? '&' : '?') + key + '=' + value;
 	};
 
 	/**
