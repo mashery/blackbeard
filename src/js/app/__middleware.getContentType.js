@@ -1,111 +1,308 @@
+/**
+ * Get the Portal content type
+ * @param {Node} elem  The DOM element with the content
+ */
 var getContentType = function (elem) {
 
-	var type = null;
-	var h1 = m$('#main h1.first', elem)
-	h1 = h1 ? h1.innerHTML : '';
+	'use strict';
 
+	//
+	// Variables
+	//
+
+	var h1 = m$.get('#main h1.first', elem);
+	h1 = h1 ? h1.innerHTML : '';
+	var type;
+
+
+	//
+	// Get content type
+	//
+
+	// 404
 	if (elem.classList.contains('not-found') || (h1 && /Not Found/.test(h1)) ) {
 		type = 'fourOhFour';
-	} else if (elem.classList.contains('please-login')) {
-		type = 'pleaseLogin';
-	} else if (elem.classList.contains('page-page')) {
+	}
+
+	// Must be logged in to view this content
+	else if (elem.classList.contains('please-login') || elem.classList.contains('permission-denied')) {
+		type = 'noAccess';
+	}
+
+	// Custom Pages
+	else if (elem.classList.contains('page-page')) {
 		type = 'page';
-	} else if (elem.classList.contains('page-docs')) {
+	}
+
+	// Documentation
+	else if (elem.classList.contains('page-docs')) {
 		type = 'docs';
-	} else if (elem.classList.contains('page-ioDocs')) {
+	}
+
+	// IO Docs
+	else if (elem.classList.contains('page-ioDocs')) {
 		type = 'ioDocs';
-	} else if (elem.classList.contains('page-forum')) {
+	}
+
+	// Forum
+	else if (elem.classList.contains('page-forum')) {
+		// Topics
 		if (elem.classList.contains('topics')) {
 			type = 'forumTopics';
-		} else if (elem.classList.contains('topic-add')) {
+		}
+
+		// Add a topic
+		else if (elem.classList.contains('topic-add')) {
 			type = 'forumAddTopic';
-		} else if (elem.classList.contains('read')) {
+		}
+
+		// Individual Topic
+		else if (elem.classList.contains('read')) {
 			type = 'forumSingle';
-		} else if (elem.classList.contains('recent')) {
+		}
+
+		// Recent Topics
+		else if (elem.classList.contains('recent')) {
 			type = 'forumRecent';
-		} else {
+		}
+
+		// All/Main
+		else {
 			type = 'forumAll';
 		}
-	} else if (elem.classList.contains('page-blog')){
+
+	}
+
+	// Blog
+	else if (elem.classList.contains('page-blog')){
+
+		// All Posts
 		if (elem.classList.contains('browse')) {
 			type = 'blogAll';
-		} else {
+		}
+
+		// Single Post
+		else {
 			type = 'blogSingle';
 		}
-	} else if (elem.classList.contains('page-apps')) {
+
+	}
+
+	// Apps and Keys
+	else if (elem.classList.contains('page-apps')) {
+
+		// My Keys
 		if (elem.classList.contains('mykeys')) {
 			type = 'accountKeys';
-		} else if (elem.classList.contains('myapps')) {
+		}
+
+		// My Applications
+		else if (elem.classList.contains('myapps')) {
 			type = 'accountApps';
-		} else if (elem.classList.contains('register')) {
+		}
+
+		// App Registration
+		else if (elem.classList.contains('register')) {
+
+			// Edit an App
 			if (m$.get('#application-edit', elem)) {
 				type = 'appRegister';
-			} else {
+			}
+
+			// Successful registration
+			else {
 				type = 'appRegisterSuccess';
 			}
+
 		}
-	} else if (elem.classList.contains('page-member')) {
+
+	}
+
+	// Account Pages
+	else if (elem.classList.contains('page-member')) {
+
+		// Change Email
 		if (elem.classList.contains('email')) {
-			type = 'accountEmail';
-		} else if (elem.classList.contains('passwd')) {
+
+			// Change Email Success
+			if (m$.get('#myaccount .success', elem)) {
+				type = 'accountEmailSuccess';
+			}
+
+			// Change Email Form
+			else {
+				type = 'accountEmail';
+			}
+
+		}
+
+		// Change Password
+		else if (elem.classList.contains('passwd')) {
+
+			// Change Password Success
+			if (m$.get('#myaccount .success', elem)) {
+				type = 'accountPasswordSuccess';
+			}
+
+			// Change Password Form
+			else {
 			type = 'accountPassword';
-		} else if (elem.classList.contains('register')) {
+			}
+
+		}
+
+		// Register Account
+		else if (elem.classList.contains('register')) {
+
+			// Confirmation Email Sent
 			if (/Registration Almost Complete/.test(h1)) {
 				type = 'registerSent';
-			} else {
+			}
+
+			// Register for a Ne Account
+			else {
 				type = 'register';
 			}
-		} else if (elem.classList.contains('resend-confirmation')) {
+		}
+
+		// Resend Registration Confirmation Email
+		else if (elem.classList.contains('resend-confirmation')) {
+
+			// Email Sent
 			if (m$.get('ul.success', elem)) {
 				type = 'registerResendSuccess';
-			} else {
+			}
+
+			// Send Email Form
+			else {
 				type = 'registerResend';
 			}
-		} else if (elem.classList.contains('remove')) {
+
+		}
+
+		// Remove Membership
+		else if (elem.classList.contains('remove')) {
+
+			// Removed Successfully
 			if (/You have been removed!/.test(m$.get('.main .section-body', elem).innerHTML)) {
 				type = 'memberRemoveSuccess';
-			} else {
+			}
+
+			// Remove Membership Form
+			else {
 				type = 'memberRemove';
 			}
-		} else if (elem.classList.contains('lost')) {
+
+		}
+
+		// Lost Password
+		else if (elem.classList.contains('lost')) {
+
+			// Reset Email Sent
 			if (/E-mail Sent/.test(m$.get('h2', elem).innerHTML)) {
 				type = 'lostPasswordReset';
-			} else {
+			}
+
+			// Reset Form
+			else {
 				type = 'lostPassword';
 			}
-		} else if (elem.classList.contains('lost-username')) {
+
+		}
+
+		// Lost Username
+		else if (elem.classList.contains('lost-username')) {
+
+			// Reset Email Sent
 			if (/E-mail Sent/.test(m$.get('h2', elem).innerHTML)) {
 				type = 'lostUsernameReset';
-			} else {
+			}
+
+			// Reset Form
+			else {
 				type = 'lostUsername';
 			}
-		} else if (elem.classList.contains('join') || elem.classList.contains('confirm')) {
+
+		}
+
+		// Join/Confirm Membership (for existing Mashery users)
+		else if (elem.classList.contains('join') || elem.classList.contains('confirm')) {
+
+			// Join Success
 			if (/Registration Successful/.test(h1)) {
 				type = 'joinSuccess';
-			} else {
+			}
+
+			// Join Form
+			else {
 				type = 'join';
 			}
-		} else {
+		}
+
+		// Request secret visibility
+		else if (elem.classList.contains('request-display-key-info')) {
+			type = 'showSecret';
+		}
+
+		// Secret visibility success
+		else if (elem.classList.contains('reset-key-info')) {
+			type = 'showSecretSuccess';
+		}
+
+		// Secrets already visible
+		else if (elem.classList.contains('error')) {
+			type = 'showSecretError';
+		}
+
+		// Manage My Account
+		else {
 			type = 'accountManage';
 		}
-	} else if (elem.classList.contains('page-profile')) {
+	}
+
+	// User Profiles
+	else if (elem.classList.contains('page-profile')) {
 		type = 'profile';
-	} else if (elem.classList.contains('page-login')) {
+	}
+
+	// Signin Page
+	else if (elem.classList.contains('page-login')) {
 		type = 'signin';
-	} else if (elem.classList.contains('page-search')) {
+	}
+
+	// Search
+	else if (elem.classList.contains('page-search')) {
 		type = 'search';
-	} else if (elem.classList.contains('page-logout')) {
+	}
+
+	// Logout
+	else if (elem.classList.contains('page-logout')) {
+
+		// Logout Failed
 		if (m$.get('#user-nav .account', elem)) {
 			type = 'logoutFail';
-		} else {
+		}
+
+		// Logged Out
+		else {
 			type = 'logout';
 		}
-	} else if (elem.classList.contains('page-contact')) {
+
+	}
+
+	// Contact Us
+	else if (elem.classList.contains('page-contact')) {
+
+		// Contact Form
 		if (m$.get('#main form', elem)) {
 			type = 'contact';
-		} else {
+		}
+
+		// Contact Success
+		else {
 			type = 'contactSuccess';
 		}
+
 	}
 
 	return type;

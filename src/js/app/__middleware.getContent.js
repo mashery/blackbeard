@@ -1,8 +1,13 @@
+/**
+ * Convert nav items into a JS object
+ * @param {String} selector The selector for the nav menu in the DOM
+ */
 var getNav = function (selector) {
 
 	// Variables
 	var nav = [];
 	var items = m$.getAll(selector, mashery.dom);
+	var form;
 
 	// Generate items object
 	for (var i = 0; i < items.length; i++) {
@@ -16,92 +21,122 @@ var getNav = function (selector) {
 
 };
 
+/**
+ * If user profile link isn't stored in localStorage, fetch it with Ajax
+ */
 var fetchUserProfile = function () {
+
+	// Bail if profile URL is already stored
 	if (window.mashery.userProfile) return;
+
+	// Otherwise, grab it from the account page
 	atomic.ajax({
 		url: '/member/edit',
 		responseType: 'document'
 	}).success(function (data) {
+
+		// Get the user profile link
 		var userProfile = m$.get('.actions .public-profile.action', data);
 		if (!userProfile) return;
+
+		// Get the href
 		userProfile = userProfile.getAttribute('href');
+
+		// Update the URL state
 		window.mashery.userProfile = userProfile;
 		sessionStorage.setItem('masheryUserProfile', userProfile);
+
+		// Update the link in the DOM
 		var profileLink = m$.get('a[href*="/profile/profile/"]');
 		if (!profileLink) return;
 		profileLink.href = userProfile;
+
 	});
 };
 
+/**
+ * Scrape content from the default layout
+ * @param {String} type  The content type for the page
+ */
 var getContent = function (type) {
 
 	// Cache mashery objects
 	var dom = window.mashery.dom;
 	var content = window.mashery.content;
 
-	// Add primary nav
+
+	//
+	// Universal Content
+	//
+
+	// Primary nav
 	content.navPrimary = getNav('#local a');
 
-	// Add secondary nav
+	// Secondary nav
 	content.navSecondary = getNav('#footer > ul a');
 
-	// type = page
+
+	//
+	// Conditional Content
+	//
+
+	// Custom Pages
 	if (type === 'page') {
 		content.main = m$.get('#main', dom).innerHTML;
 	}
 
-	// type = docs
-	if (type === 'docs') {
+	// Documentation
+	else if (type === 'docs') {
 		content.main = m$.get('#main', dom).innerHTML;
 		content.secondary = m$.get('#sub ul', dom).innerHTML;
 	}
 
-	// type = signin
-	if (type === 'signin') {
+	// Sign In Page
+	else if (type === 'signin') {
 		var signinForm = m$.get('#signin form', dom);
 		content.main = '<form action="' + signinForm.action + '" method="post" enctype="multipart/form-data">' + signinForm.innerHTML + '</form>';
 	}
 
-	// type = register
-	if (type === 'register') {
+	// Registration
+	else if (type === 'register') {
 		var regForm = m$.get('#member-register', dom);
 		content.main = '<form action="' + regForm.action + '" method="post" enctype="multipart/form-data">' + regForm.innerHTML + '</form>';
 	}
 
-	// type = register-confirm
-	if (type === 'registerSent') {
+	// Registration Confirmation
+	else if (type === 'registerSent') {
 		var email = m$.get('#main p', dom);
 		content.main = email ? email.innerHTML.replace('We have sent a confirmation e-mail to you at this address: ', '') : null;
 	}
 
-	// type = resend-confirmation
-	if (type === 'registerResend') {
-		var form = m$.get('#resend-confirmation', dom);
+	// Resend Confirmation Email
+	else if (type === 'registerResend') {
+		form = m$.get('#resend-confirmation', dom);
 		content.main = '<form action="' + form.getAttribute('action') + '" method="post" enctype="multipart/form-data" id="resend-confirmation">' + form.innerHTML + '</form>';
 		content.main = content.main.replace('<legend>Resend your account confirmation email.</legend>', '');
 	}
 
-	// type = join
-	if (type === 'join') {
-		var form = m$.get('#member-edit', dom);
+	// Join for Existing Mashery Members
+	else if (type === 'join') {
+		form = m$.get('#member-edit', dom);
 		content.main = '<form action="' + form.getAttribute('action') + '" method="post" enctype="multipart/form-data" id="member-edit">' + form.innerHTML + '</form>';
 		content.main = content.main.replace('<legend>Additional Information</legend>', '');
 	}
 
-	// type = join-success
-	if (type === 'joinSuccess') {
+	// Join Successful
+	else if (type === 'joinSuccess') {
 		var username = m$.get('#main .section-body p', dom);
 		content.main = username ? username.innerHTML.replace('You have successfully registered as <strong>', '').replace('</strong>.', '').trim() : null;
 	}
 
-	// type = account-keys
-	// @todo verify that there's only one app per key
-	if (type === 'accountKeys') {
+	// My keys
+	else if (type === 'accountKeys') {
 
 		// Get elements
 		var keys = m$.getAll('.main .section-body h2, .main .section-body div.key', dom);
 		var getKeys = m$.get('.action.new-key', dom); // @todo check if user can register at all based on this link
 
+		// Push each key to an object
 		if (keys.length > 0) {
 			content.main = {};
 			content.secondary = getKeys ? getKeys.getAttribute('href') : null;
@@ -134,9 +169,8 @@ var getContent = function (type) {
 
 	}
 
-	// type = account-apps
-	// nav, create apps link, no apps message, app content/table
-	if (type === 'accountApps') {
+	// My Apps
+	else if (type === 'accountApps') {
 
 		// Get elements
 		var apps = m$.getAll('.main .application', dom);
@@ -160,16 +194,16 @@ var getContent = function (type) {
 
 	}
 
-	// type = app-register
-	if (type === 'appRegister') {
-		var form = m$.get('#application-edit', dom);
+	// Register Application
+	else if (type === 'appRegister') {
+		form = m$.get('#application-edit', dom);
 		var table = m$.get('#main .section-body table', dom);
 		content.main = '<form action="' + form.getAttribute('action') + '" method="post" enctype="multipart/form-data" id="application-edit">' + form.innerHTML + '</form>';
 		content.secondary = table ? '<table>' + table.innerHTML + '</table>' : null;
-	};
+	}
 
-	// type = account-manage
-	if (type === 'accountManage') {
+	// Manage Account
+	else if (type === 'accountManage') {
 		var accountForm = m$.get('#member-edit', dom);
 		var userProfile = m$.get('.actions .public-profile.action', dom);
 		content.main = '<form action="' + accountForm.getAttribute('action') + '" method="post" enctype="multipart/form-data" id="member-edit">' + accountForm.innerHTML + '</form>';
@@ -181,16 +215,16 @@ var getContent = function (type) {
 		}
 	}
 
-	// type = account-email
-	if (type === 'accountEmail') {
+	// Change Email
+	else if (type === 'accountEmail') {
 		var emailForm = m$.get('.main form', dom);
 		if (!emailForm) return;
 		content.main = '<form action="' + emailForm.getAttribute('action') + '" method="post" enctype="multipart/form-data">' + emailForm.innerHTML + '</form>';
 		fetchUserProfile();
 	}
 
-	// type = account-password
-	if (type === 'accountPassword') {
+	// Change Password
+	else if (type === 'accountPassword') {
 		var passwordForm = m$.get('.main form', dom);
 		if (!passwordForm) return;
 		content.main = '<form action="' + passwordForm.getAttribute('action') + '" method="post" enctype="multipart/form-data">' + passwordForm.innerHTML + '</form>';
@@ -198,8 +232,8 @@ var getContent = function (type) {
 		fetchUserProfile();
 	}
 
-	// type = profile
-	if (type === 'profile') {
+	// User Profiles
+	else if (type === 'profile') {
 		var data = m$.getAll('.user-information dd', dom);
 		var activity = m$.get('table.recent-activity', dom);
 		var admin = m$.get('a[href*="/r/member/"]', dom);
@@ -213,8 +247,8 @@ var getContent = function (type) {
 		};
 	}
 
-	// type = ioDocs
-	if (type === 'ioDocs') {
+	// IO Docs
+	else if (type === 'ioDocs') {
 		var junk = m$.getAll('#main h1, #main .introText, #main .endpoint ul.actions, #apiTitle', dom);
 		var apiID = m$.get('#apiId', dom);
 		junk.forEach(function (item) {
@@ -229,22 +263,24 @@ var getContent = function (type) {
 		content.main = m$.get('#main', dom).innerHTML;
 	}
 
-	// type = lost-password
-	if (type === 'lostPassword') {
-		var form = m$.get('#lost form', dom);
+	// Reset Password
+	else if (type === 'lostPassword') {
+		form = m$.get('#lost form', dom);
 		content.main = '<form action="' + form.getAttribute('action') + '" method="post" enctype="multipart/form-data">' + form.innerHTML + '</form>';
 		content.main = content.main.replace('<legend>Lost Password</legend>', '');
 	}
 
-	// type = lost-username
-	if (type === 'lostUsername') {
-		var form = m$.get('#lost form', dom);
+	// Reset Username
+	else if (type === 'lostUsername') {
+		form = m$.get('#lost form', dom);
 		content.main = '<form action="' + form.getAttribute('action') + '" method="post" enctype="multipart/form-data">' + form.innerHTML + '</form>';
 		content.main = content.main.replace('<legend>E-mail yourself your username</legend>', '');
 	}
 
-	// type = search
-	if (type === 'search') {
+	// Search Results
+	else if (type === 'search') {
+
+		// If there are no results
 		if (m$.get('.no-result', dom)) {
 			content.main = null;
 			content.secondary = {
@@ -252,8 +288,11 @@ var getContent = function (type) {
 				last: 0,
 				total: 0,
 				query: m$.get('.no-result b', dom).innerHTML.trim()
-			}
-		} else {
+			};
+		}
+
+		// If there are results
+		else {
 			var results = m$.getAll('.section-body .result', dom);
 			var meta = m$.getAll('.result-info b', dom);
 			var paging = m$.getAll('.result-paging a', dom);
@@ -285,24 +324,17 @@ var getContent = function (type) {
 				}
 			});
 		}
+
 	}
 
-	// type = contact
-	if (type === 'contact') {
-		var form = m$.get('#main form', dom);
+	// Contact Us
+	else if (type === 'contact') {
+		form = m$.get('#main form', dom);
 		content.main = '<form action="' + form.getAttribute('action') + '" method="post" enctype="multipart/form-data">' + form.innerHTML + '</form>';
 	}
 
-	// =======
+	// @todo Forum
 
-	// type = forum {IGNORE}
-	// recent topics link, categories RSS, categories OL
-
-	// type = blog-all
-	// RSS
-	// foreach: article link/title, user link, date, content, comments link
-
-	// type = blog-single
-	// title, user link, date, content, comment count, comment box
+	// @todo Blog
 
 };

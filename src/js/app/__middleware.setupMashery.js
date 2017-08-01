@@ -1,3 +1,7 @@
+/**
+ * Setup global mashery variable on page render
+ * @param {Node} doc  The page document
+ */
 var setupMashery = function (doc) {
 
 	// Get the default page
@@ -21,7 +25,7 @@ var setupMashery = function (doc) {
 		},
 		contentId: null,
 		contentType: getContentType(doc.body),
-		dashboard: dashboard ? dashboard : null,
+		dashboard: dashboard ? dashboard.getAttribute('href') : null,
 		dom: dom,
 		isAdmin: m$.get('#user-nav .dashboard.toggle', dom) ? true : false,
 		loggedIn: m$.get('#mashery-logout-form', dom) ? true : false,

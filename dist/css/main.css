@@ -2002,6 +2002,20 @@ div.error {
 }
 
 /**
+ * @section Mashtips
+ * Styling for .mashtip elements
+ */
+/* line 10, src/sass/components/_mashtips.scss */
+.mashtip:before {
+  content: "(";
+}
+
+/* line 14, src/sass/components/_mashtips.scss */
+.mashtip:after {
+  content: ")";
+}
+
+/**
  * @section Overrides
  * Nudge and tweak alignment, spacing, and visibility.
  */
@@ -2045,7 +2059,7 @@ div.error {
  * Text sizes
  */
 /* line 49, src/sass/components/_overrides.scss */
-.text-small {
+.text-small, .mashtip {
   font-size: 0.9375em;
 }
 
@@ -2066,7 +2080,7 @@ div.error {
  * Text colors
  */
 /* line 67, src/sass/components/_overrides.scss */
-.text-muted {
+.text-muted, .mashtip {
   color: #808080;
 }
 

@@ -1,0 +1,17 @@
+/**
+ * @section Mashtips
+ * Styling for .mashtip elements
+ */
+
+.mashtip {
+	@extend .text-small;
+	@extend .text-muted;
+
+	&:before {
+		content: "(";
+	}
+
+	&:after {
+		content: ")";
+	}
+}

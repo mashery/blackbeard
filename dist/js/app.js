@@ -5,6 +5,244 @@
  * http://github.com/mashery/blackbeard
  */
 
+(function (root, factory) {
+	if (typeof define === 'function' && define.amd) {
+		define([], factory(root));
+	} else if (typeof exports === 'object') {
+		module.exports = factory(root);
+	} else {
+		root.atomic = factory(root);
+	}
+})(typeof global !== 'undefined' ? global : this.window || this.global, (function (root) {
+
+	'use strict';
+
+	//
+	// Variables
+	//
+
+	var atomic = {}; // Object for public APIs
+	var supports = !!root.XMLHttpRequest && !!root.JSON; // Feature test
+	var settings;
+
+	// Default settings
+	var defaults = {
+		type: 'GET',
+		url: null,
+		data: {},
+		callback: null,
+		headers: {
+			'Content-type': 'application/x-www-form-urlencoded'
+		},
+		responseType: 'text',
+		withCredentials: false
+	};
+
+
+	//
+	// Methods
+	//
+
+	/**
+	 * Merge two or more objects. Returns a new object.
+	 * @private
+	 * @param {Boolean}  deep     If true, do a deep (or recursive) merge [optional]
+	 * @param {Object}   objects  The objects to merge together
+	 * @returns {Object}          Merged values of defaults and options
+	 */
+	var extend = function () {
+
+		// Setup extended object
+		var extended = {};
+
+		// Merge the object into the extended object
+		var merge = function (obj) {
+			for ( var prop in obj ) {
+				if ( Object.prototype.hasOwnProperty.call( obj, prop ) ) {
+					if ( Object.prototype.toString.call(obj[prop]) === '[object Object]' ) {
+						extended[prop] = extend( true, extended[prop], obj[prop] );
+					} else {
+						extended[prop] = obj[prop];
+					}
+				}
+			}
+		};
+
+		// Loop through each object and conduct a merge
+		for (var i = 0; i < arguments.length; i++) {
+			var obj = arguments[i];
+			merge(obj);
+		}
+
+		return extended;
+
+	};
+
+	/**
+	 * Parse text response into JSON
+	 * @private
+	 * @param  {String} req The response
+	 * @return {Array}      A JSON Object of the responseText, plus the orginal response
+	 */
+	var parse = function (req) {
+		var result;
+		if (settings.responseType !== 'text' && settings.responseType !== '') {
+			return [req.response, req];
+		}
+		try {
+			result = JSON.parse(req.responseText);
+		} catch (e) {
+			result = req.responseText;
+		}
+		return [result, req];
+	};
+
+	/**
+	 * Convert an object into a query string
+	 * @private
+	 * @@link  https://blog.garstasio.com/you-dont-need-jquery/ajax/
+	 * @param  {Object} obj The object
+	 * @return {String}     The query string
+	 */
+	var param = function (obj) {
+		var encodedString = '';
+		for (var prop in obj) {
+			if (obj.hasOwnProperty(prop)) {
+				if (encodedString.length > 0) {
+					encodedString += '&';
+				}
+				encodedString += encodeURI(prop + '=' + obj[prop]);
+			}
+		}
+		return encodedString;
+	};
+
+	/**
+	 * Make an XML HTTP request
+	 * @private
+	 * @return {Object} Chained success/error/always methods
+	 */
+	var xhr = function () {
+
+		// Our default methods
+		var methods = {
+			success: function () {},
+			error: function () {},
+			always: function () {}
+		};
+
+		// Override defaults with user methods and setup chaining
+		var atomXHR = {
+			success: function (callback) {
+				methods.success = callback;
+				return atomXHR;
+			},
+			error: function (callback) {
+				methods.error = callback;
+				return atomXHR;
+			},
+			always: function (callback) {
+				methods.always = callback;
+				return atomXHR;
+			}
+		};
+
+		// Create our HTTP request
+		var request = new XMLHttpRequest();
+
+		// Setup our listener to process compeleted requests
+		request.onreadystatechange = function () {
+
+			// Only run if the request is complete
+			if ( request.readyState !== 4 ) return;
+
+			// Parse the response text
+			var req = parse(request);
+
+			// Process the response
+			if (request.status >= 200 && request.status < 300) {
+				// If successful
+				methods.success.apply(methods, req);
+			} else {
+				// If failed
+				methods.error.apply(methods, req);
+			}
+
+			// Run always
+			methods.always.apply(methods, req);
+
+		};
+
+		// Setup our HTTP request
+		request.open(settings.type, settings.url, true);
+		request.responseType = settings.responseType;
+
+		// Add headers
+		for (var header in settings.headers) {
+			if (settings.headers.hasOwnProperty(header)) {
+				request.setRequestHeader(header, settings.headers[header]);
+			}
+		}
+
+		// Add withCredentials
+		if (settings.withCredentials) {
+			request.withCredentials = true;
+		}
+
+		// Send the request
+		request.send(param(settings.data));
+
+		return atomXHR;
+	};
+
+	/**
+	 * Make a JSONP request
+	 * @private
+	 * @return {[type]} [description]
+	 */
+	var jsonp = function () {
+		// Create script with the url and callback
+		var ref = root.document.getElementsByTagName( 'script' )[ 0 ];
+		var script = root.document.createElement( 'script' );
+		settings.data.callback = settings.callback;
+		script.src = settings.url + (settings.url.indexOf( '?' ) + 1 ? '&' : '?') + param(settings.data);
+
+		// Insert script tag into the DOM (append to <head>)
+		ref.parentNode.insertBefore( script, ref );
+
+		// After the script is loaded and executed, remove it
+		script.onload = function () {
+			this.remove();
+		};
+	};
+
+	/**
+	 * Make an Ajax request
+	 * @public
+	 * @param  {Object} options  User settings
+	 * @return {String|Object}   The Ajax request response
+	 */
+	atomic.ajax = function (options) {
+
+		// feature test
+		if ( !supports ) return;
+
+		// Merge user options with defaults
+		settings = extend( defaults, options || {} );
+
+		// Make our Ajax or JSONP request
+		return ( settings.type.toLowerCase() === 'jsonp' ? jsonp() : xhr() );
+
+	};
+
+
+	//
+	// Public APIs
+	//
+
+	return atomic;
+
+}));
 var m$ = (function () {
 
 	'use strict';
@@ -118,6 +356,81 @@ var m$ = (function () {
 	};
 
 	/**
+	 * Load a JS file asynchronously.
+	 * @author @scottjehl, Filament Group, Inc.
+	 * @license MIT
+	 * @link https://github.com/filamentgroup/loadJS
+	 * @param  {String}   src       URL of script to load.
+	 * @param  {Function} callback  Callback to run on completion.
+	 * @return {String}             The script URL.
+	 */
+	m$.loadJS = function (src, callback, reload) {
+		var existing = document.querySelector('script[src*="' + src + '"]');
+		if (existing) {
+			if (!reload) {
+				if (callback && typeof (callback) === 'function') {
+					callback();
+				}
+				return;
+			}
+			existing.parentNode.removeChild(existing);
+		}
+		var ref = window.document.getElementsByTagName('script')[0];
+		var script = window.document.createElement('script');
+		script.src = src;
+		ref.parentNode.insertBefore(script, ref);
+		if (callback && typeof (callback) === 'function') {
+			script.onload = callback;
+		}
+		return script;
+	};
+
+	/**
+	 * Load a CSS file asynchronously
+	 * @copyright @scottjehl, Filament Group, Inc.
+	 * @license MIT
+	 * @param {String} href    The URL for your CSS file
+	 * @param {Node}   before  Element to use as a reference for injecting the <link> [optional]
+	 * @param {String} media   Stylesheet media type [optional, defaults to 'all']
+	 */
+	m$.loadCSS = function (href, before, media) {
+		// Arguments explained:
+		// `href` is the URL for your CSS file.
+		// `before` optionally defines the element we'll use as a reference for injecting our <link>
+		// By default, `before` uses the first <script> element in the page.
+		// However, since the order in which stylesheets are referenced matters, you might need a more specific location in your document.
+		// If so, pass a different reference element to the `before` argument and it'll insert before that instead
+		// note: `insertBefore` is used instead of `appendChild`, for safety re: http://www.paulirish.com/2011/surefire-dom-element-insertion/
+		var ss = window.document.createElement('link');
+		var ref = before || window.document.getElementsByTagName('script')[0];
+		var sheets = window.document.styleSheets;
+		ss.rel = 'stylesheet';
+		ss.href = href;
+		// temporarily, set media to something non-matching to ensure it'll fetch without blocking render
+		ss.media = 'only x';
+		// inject link
+		ref.parentNode.insertBefore(ss, ref);
+		// This function sets the link's media back to `all` so that the stylesheet applies once it loads
+		// It is designed to poll until document.styleSheets includes the new sheet.
+		function toggleMedia() {
+			var defined;
+			for (var i = 0; i < sheets.length; i++) {
+				if (sheets[i].href && sheets[i].href.indexOf(href) > -1) {
+					defined = true;
+				}
+			}
+			if (defined) {
+				ss.media = media || 'all';
+			}
+			else {
+				setTimeout(toggleMedia);
+			}
+		}
+		toggleMedia();
+		return ss;
+	};
+
+	/**
 	 * Add a query string to a URL
 	 * @param  {String} url   The URL
 	 * @param  {String} key   The query string key
@@ -154,6 +467,27 @@ var m$ = (function () {
 	};
 
 	/**
+	 * Inject HTML elements into the <head>
+	 * @param {String} type The HTML element type
+	 * @param {Object} atts The attributes and values for the element
+	 */
+	m$.inject = function (type, atts) {
+
+		// Variables
+		var ref = window.document.getElementsByTagName('script')[0];
+		var elem = document.createElement(type);
+
+		// Loop through each attribute
+		atts.forEach((function (value, key) {
+			elem.setAttribute(key, value);
+		}));
+
+		// Inject into the <head>
+		ref.before(elem);
+
+	};
+
+	/**
 	 * Merge two or more objects together.
 	 * @param   {Boolean}  deep     If true, do a deep (or recursive) merge [optional]
 	 * @param   {Object}   objects  The objects to merge together
@@ -174,12 +508,12 @@ var m$ = (function () {
 
 		// Merge the object into the extended object
 		var merge = function (obj) {
-			obj.forEach((function(prop) {
+			obj.forEach((function(prop, key) {
 				// If deep merge and property is an object, merge properties
 				if (deep && Object.prototype.toString.call(obj[prop]) === '[object Object]') {
-					extended[prop] = extend(true, extended[prop], prop);
+					extended[key] = extend(true, extended[key], prop);
 				} else {
-					extended[prop] = prop;
+					extended[key] = prop;
 				}
 			}));
 		};
@@ -201,11 +535,16 @@ var m$ = (function () {
 	return m$;
 
 })();
+/**
+ * Convert nav items into a JS object
+ * @param {String} selector The selector for the nav menu in the DOM
+ */
 var getNav = function (selector) {
 
 	// Variables
 	var nav = [];
 	var items = m$.getAll(selector, mashery.dom);
+	var form;
 
 	// Generate items object
 	for (var i = 0; i < items.length; i++) {
@@ -219,92 +558,122 @@ var getNav = function (selector) {
 
 };
 
+/**
+ * If user profile link isn't stored in localStorage, fetch it with Ajax
+ */
 var fetchUserProfile = function () {
+
+	// Bail if profile URL is already stored
 	if (window.mashery.userProfile) return;
+
+	// Otherwise, grab it from the account page
 	atomic.ajax({
 		url: '/member/edit',
 		responseType: 'document'
 	}).success((function (data) {
+
+		// Get the user profile link
 		var userProfile = m$.get('.actions .public-profile.action', data);
 		if (!userProfile) return;
+
+		// Get the href
 		userProfile = userProfile.getAttribute('href');
+
+		// Update the URL state
 		window.mashery.userProfile = userProfile;
 		sessionStorage.setItem('masheryUserProfile', userProfile);
+
+		// Update the link in the DOM
 		var profileLink = m$.get('a[href*="/profile/profile/"]');
 		if (!profileLink) return;
 		profileLink.href = userProfile;
+
 	}));
 };
 
+/**
+ * Scrape content from the default layout
+ * @param {String} type  The content type for the page
+ */
 var getContent = function (type) {
 
 	// Cache mashery objects
 	var dom = window.mashery.dom;
 	var content = window.mashery.content;
 
-	// Add primary nav
+
+	//
+	// Universal Content
+	//
+
+	// Primary nav
 	content.navPrimary = getNav('#local a');
 
-	// Add secondary nav
+	// Secondary nav
 	content.navSecondary = getNav('#footer > ul a');
 
-	// type = page
+
+	//
+	// Conditional Content
+	//
+
+	// Custom Pages
 	if (type === 'page') {
 		content.main = m$.get('#main', dom).innerHTML;
 	}
 
-	// type = docs
-	if (type === 'docs') {
+	// Documentation
+	else if (type === 'docs') {
 		content.main = m$.get('#main', dom).innerHTML;
 		content.secondary = m$.get('#sub ul', dom).innerHTML;
 	}
 
-	// type = signin
-	if (type === 'signin') {
+	// Sign In Page
+	else if (type === 'signin') {
 		var signinForm = m$.get('#signin form', dom);
 		content.main = '<form action="' + signinForm.action + '" method="post" enctype="multipart/form-data">' + signinForm.innerHTML + '</form>';
 	}
 
-	// type = register
-	if (type === 'register') {
+	// Registration
+	else if (type === 'register') {
 		var regForm = m$.get('#member-register', dom);
 		content.main = '<form action="' + regForm.action + '" method="post" enctype="multipart/form-data">' + regForm.innerHTML + '</form>';
 	}
 
-	// type = register-confirm
-	if (type === 'registerSent') {
+	// Registration Confirmation
+	else if (type === 'registerSent') {
 		var email = m$.get('#main p', dom);
 		content.main = email ? email.innerHTML.replace('We have sent a confirmation e-mail to you at this address: ', '') : null;
 	}
 
-	// type = resend-confirmation
-	if (type === 'registerResend') {
-		var form = m$.get('#resend-confirmation', dom);
+	// Resend Confirmation Email
+	else if (type === 'registerResend') {
+		form = m$.get('#resend-confirmation', dom);
 		content.main = '<form action="' + form.getAttribute('action') + '" method="post" enctype="multipart/form-data" id="resend-confirmation">' + form.innerHTML + '</form>';
 		content.main = content.main.replace('<legend>Resend your account confirmation email.</legend>', '');
 	}
 
-	// type = join
-	if (type === 'join') {
-		var form = m$.get('#member-edit', dom);
+	// Join for Existing Mashery Members
+	else if (type === 'join') {
+		form = m$.get('#member-edit', dom);
 		content.main = '<form action="' + form.getAttribute('action') + '" method="post" enctype="multipart/form-data" id="member-edit">' + form.innerHTML + '</form>';
 		content.main = content.main.replace('<legend>Additional Information</legend>', '');
 	}
 
-	// type = join-success
-	if (type === 'joinSuccess') {
+	// Join Successful
+	else if (type === 'joinSuccess') {
 		var username = m$.get('#main .section-body p', dom);
 		content.main = username ? username.innerHTML.replace('You have successfully registered as <strong>', '').replace('</strong>.', '').trim() : null;
 	}
 
-	// type = account-keys
-	// @todo verify that there's only one app per key
-	if (type === 'accountKeys') {
+	// My keys
+	else if (type === 'accountKeys') {
 
 		// Get elements
 		var keys = m$.getAll('.main .section-body h2, .main .section-body div.key', dom);
 		var getKeys = m$.get('.action.new-key', dom); // @todo check if user can register at all based on this link
 
+		// Push each key to an object
 		if (keys.length > 0) {
 			content.main = {};
 			content.secondary = getKeys ? getKeys.getAttribute('href') : null;
@@ -337,9 +706,8 @@ var getContent = function (type) {
 
 	}
 
-	// type = account-apps
-	// nav, create apps link, no apps message, app content/table
-	if (type === 'accountApps') {
+	// My Apps
+	else if (type === 'accountApps') {
 
 		// Get elements
 		var apps = m$.getAll('.main .application', dom);
@@ -363,16 +731,16 @@ var getContent = function (type) {
 
 	}
 
-	// type = app-register
-	if (type === 'appRegister') {
-		var form = m$.get('#application-edit', dom);
+	// Register Application
+	else if (type === 'appRegister') {
+		form = m$.get('#application-edit', dom);
 		var table = m$.get('#main .section-body table', dom);
 		content.main = '<form action="' + form.getAttribute('action') + '" method="post" enctype="multipart/form-data" id="application-edit">' + form.innerHTML + '</form>';
 		content.secondary = table ? '<table>' + table.innerHTML + '</table>' : null;
-	};
+	}
 
-	// type = account-manage
-	if (type === 'accountManage') {
+	// Manage Account
+	else if (type === 'accountManage') {
 		var accountForm = m$.get('#member-edit', dom);
 		var userProfile = m$.get('.actions .public-profile.action', dom);
 		content.main = '<form action="' + accountForm.getAttribute('action') + '" method="post" enctype="multipart/form-data" id="member-edit">' + accountForm.innerHTML + '</form>';
@@ -384,16 +752,16 @@ var getContent = function (type) {
 		}
 	}
 
-	// type = account-email
-	if (type === 'accountEmail') {
+	// Change Email
+	else if (type === 'accountEmail') {
 		var emailForm = m$.get('.main form', dom);
 		if (!emailForm) return;
 		content.main = '<form action="' + emailForm.getAttribute('action') + '" method="post" enctype="multipart/form-data">' + emailForm.innerHTML + '</form>';
 		fetchUserProfile();
 	}
 
-	// type = account-password
-	if (type === 'accountPassword') {
+	// Change Password
+	else if (type === 'accountPassword') {
 		var passwordForm = m$.get('.main form', dom);
 		if (!passwordForm) return;
 		content.main = '<form action="' + passwordForm.getAttribute('action') + '" method="post" enctype="multipart/form-data">' + passwordForm.innerHTML + '</form>';
@@ -401,8 +769,8 @@ var getContent = function (type) {
 		fetchUserProfile();
 	}
 
-	// type = profile
-	if (type === 'profile') {
+	// User Profiles
+	else if (type === 'profile') {
 		var data = m$.getAll('.user-information dd', dom);
 		var activity = m$.get('table.recent-activity', dom);
 		var admin = m$.get('a[href*="/r/member/"]', dom);
@@ -416,8 +784,8 @@ var getContent = function (type) {
 		};
 	}
 
-	// type = ioDocs
-	if (type === 'ioDocs') {
+	// IO Docs
+	else if (type === 'ioDocs') {
 		var junk = m$.getAll('#main h1, #main .introText, #main .endpoint ul.actions, #apiTitle', dom);
 		var apiID = m$.get('#apiId', dom);
 		junk.forEach((function (item) {
@@ -432,22 +800,24 @@ var getContent = function (type) {
 		content.main = m$.get('#main', dom).innerHTML;
 	}
 
-	// type = lost-password
-	if (type === 'lostPassword') {
-		var form = m$.get('#lost form', dom);
+	// Reset Password
+	else if (type === 'lostPassword') {
+		form = m$.get('#lost form', dom);
 		content.main = '<form action="' + form.getAttribute('action') + '" method="post" enctype="multipart/form-data">' + form.innerHTML + '</form>';
 		content.main = content.main.replace('<legend>Lost Password</legend>', '');
 	}
 
-	// type = lost-username
-	if (type === 'lostUsername') {
-		var form = m$.get('#lost form', dom);
+	// Reset Username
+	else if (type === 'lostUsername') {
+		form = m$.get('#lost form', dom);
 		content.main = '<form action="' + form.getAttribute('action') + '" method="post" enctype="multipart/form-data">' + form.innerHTML + '</form>';
 		content.main = content.main.replace('<legend>E-mail yourself your username</legend>', '');
 	}
 
-	// type = search
-	if (type === 'search') {
+	// Search Results
+	else if (type === 'search') {
+
+		// If there are no results
 		if (m$.get('.no-result', dom)) {
 			content.main = null;
 			content.secondary = {
@@ -455,8 +825,11 @@ var getContent = function (type) {
 				last: 0,
 				total: 0,
 				query: m$.get('.no-result b', dom).innerHTML.trim()
-			}
-		} else {
+			};
+		}
+
+		// If there are results
+		else {
 			var results = m$.getAll('.section-body .result', dom);
 			var meta = m$.getAll('.result-info b', dom);
 			var paging = m$.getAll('.result-paging a', dom);
@@ -488,135 +861,325 @@ var getContent = function (type) {
 				}
 			}));
 		}
+
 	}
 
-	// type = contact
-	if (type === 'contact') {
-		var form = m$.get('#main form', dom);
+	// Contact Us
+	else if (type === 'contact') {
+		form = m$.get('#main form', dom);
 		content.main = '<form action="' + form.getAttribute('action') + '" method="post" enctype="multipart/form-data">' + form.innerHTML + '</form>';
 	}
 
-	// =======
+	// @todo Forum
 
-	// type = forum {IGNORE}
-	// recent topics link, categories RSS, categories OL
-
-	// type = blog-all
-	// RSS
-	// foreach: article link/title, user link, date, content, comments link
-
-	// type = blog-single
-	// title, user link, date, content, comment count, comment box
+	// @todo Blog
 
 };
+/**
+ * Get the Portal content type
+ * @param {Node} elem  The DOM element with the content
+ */
 var getContentType = function (elem) {
 
-	var type = null;
-	var h1 = m$('#main h1.first', elem)
-	h1 = h1 ? h1.innerHTML : '';
+	'use strict';
 
+	//
+	// Variables
+	//
+
+	var h1 = m$.get('#main h1.first', elem);
+	h1 = h1 ? h1.innerHTML : '';
+	var type;
+
+
+	//
+	// Get content type
+	//
+
+	// 404
 	if (elem.classList.contains('not-found') || (h1 && /Not Found/.test(h1)) ) {
 		type = 'fourOhFour';
-	} else if (elem.classList.contains('please-login')) {
-		type = 'pleaseLogin';
-	} else if (elem.classList.contains('page-page')) {
+	}
+
+	// Must be logged in to view this content
+	else if (elem.classList.contains('please-login') || elem.classList.contains('permission-denied')) {
+		type = 'noAccess';
+	}
+
+	// Custom Pages
+	else if (elem.classList.contains('page-page')) {
 		type = 'page';
-	} else if (elem.classList.contains('page-docs')) {
+	}
+
+	// Documentation
+	else if (elem.classList.contains('page-docs')) {
 		type = 'docs';
-	} else if (elem.classList.contains('page-ioDocs')) {
+	}
+
+	// IO Docs
+	else if (elem.classList.contains('page-ioDocs')) {
 		type = 'ioDocs';
-	} else if (elem.classList.contains('page-forum')) {
+	}
+
+	// Forum
+	else if (elem.classList.contains('page-forum')) {
+		// Topics
 		if (elem.classList.contains('topics')) {
 			type = 'forumTopics';
-		} else if (elem.classList.contains('topic-add')) {
+		}
+
+		// Add a topic
+		else if (elem.classList.contains('topic-add')) {
 			type = 'forumAddTopic';
-		} else if (elem.classList.contains('read')) {
+		}
+
+		// Individual Topic
+		else if (elem.classList.contains('read')) {
 			type = 'forumSingle';
-		} else if (elem.classList.contains('recent')) {
+		}
+
+		// Recent Topics
+		else if (elem.classList.contains('recent')) {
 			type = 'forumRecent';
-		} else {
+		}
+
+		// All/Main
+		else {
 			type = 'forumAll';
 		}
-	} else if (elem.classList.contains('page-blog')){
+
+	}
+
+	// Blog
+	else if (elem.classList.contains('page-blog')){
+
+		// All Posts
 		if (elem.classList.contains('browse')) {
 			type = 'blogAll';
-		} else {
+		}
+
+		// Single Post
+		else {
 			type = 'blogSingle';
 		}
-	} else if (elem.classList.contains('page-apps')) {
+
+	}
+
+	// Apps and Keys
+	else if (elem.classList.contains('page-apps')) {
+
+		// My Keys
 		if (elem.classList.contains('mykeys')) {
 			type = 'accountKeys';
-		} else if (elem.classList.contains('myapps')) {
+		}
+
+		// My Applications
+		else if (elem.classList.contains('myapps')) {
 			type = 'accountApps';
-		} else if (elem.classList.contains('register')) {
+		}
+
+		// App Registration
+		else if (elem.classList.contains('register')) {
+
+			// Edit an App
 			if (m$.get('#application-edit', elem)) {
 				type = 'appRegister';
-			} else {
+			}
+
+			// Successful registration
+			else {
 				type = 'appRegisterSuccess';
 			}
+
 		}
-	} else if (elem.classList.contains('page-member')) {
+
+	}
+
+	// Account Pages
+	else if (elem.classList.contains('page-member')) {
+
+		// Change Email
 		if (elem.classList.contains('email')) {
-			type = 'accountEmail';
-		} else if (elem.classList.contains('passwd')) {
+
+			// Change Email Success
+			if (m$.get('#myaccount .success', elem)) {
+				type = 'accountEmailSuccess';
+			}
+
+			// Change Email Form
+			else {
+				type = 'accountEmail';
+			}
+
+		}
+
+		// Change Password
+		else if (elem.classList.contains('passwd')) {
+
+			// Change Password Success
+			if (m$.get('#myaccount .success', elem)) {
+				type = 'accountPasswordSuccess';
+			}
+
+			// Change Password Form
+			else {
 			type = 'accountPassword';
-		} else if (elem.classList.contains('register')) {
+			}
+
+		}
+
+		// Register Account
+		else if (elem.classList.contains('register')) {
+
+			// Confirmation Email Sent
 			if (/Registration Almost Complete/.test(h1)) {
 				type = 'registerSent';
-			} else {
+			}
+
+			// Register for a Ne Account
+			else {
 				type = 'register';
 			}
-		} else if (elem.classList.contains('resend-confirmation')) {
+		}
+
+		// Resend Registration Confirmation Email
+		else if (elem.classList.contains('resend-confirmation')) {
+
+			// Email Sent
 			if (m$.get('ul.success', elem)) {
 				type = 'registerResendSuccess';
-			} else {
+			}
+
+			// Send Email Form
+			else {
 				type = 'registerResend';
 			}
-		} else if (elem.classList.contains('remove')) {
+
+		}
+
+		// Remove Membership
+		else if (elem.classList.contains('remove')) {
+
+			// Removed Successfully
 			if (/You have been removed!/.test(m$.get('.main .section-body', elem).innerHTML)) {
 				type = 'memberRemoveSuccess';
-			} else {
+			}
+
+			// Remove Membership Form
+			else {
 				type = 'memberRemove';
 			}
-		} else if (elem.classList.contains('lost')) {
+
+		}
+
+		// Lost Password
+		else if (elem.classList.contains('lost')) {
+
+			// Reset Email Sent
 			if (/E-mail Sent/.test(m$.get('h2', elem).innerHTML)) {
 				type = 'lostPasswordReset';
-			} else {
+			}
+
+			// Reset Form
+			else {
 				type = 'lostPassword';
 			}
-		} else if (elem.classList.contains('lost-username')) {
+
+		}
+
+		// Lost Username
+		else if (elem.classList.contains('lost-username')) {
+
+			// Reset Email Sent
 			if (/E-mail Sent/.test(m$.get('h2', elem).innerHTML)) {
 				type = 'lostUsernameReset';
-			} else {
+			}
+
+			// Reset Form
+			else {
 				type = 'lostUsername';
 			}
-		} else if (elem.classList.contains('join') || elem.classList.contains('confirm')) {
+
+		}
+
+		// Join/Confirm Membership (for existing Mashery users)
+		else if (elem.classList.contains('join') || elem.classList.contains('confirm')) {
+
+			// Join Success
 			if (/Registration Successful/.test(h1)) {
 				type = 'joinSuccess';
-			} else {
+			}
+
+			// Join Form
+			else {
 				type = 'join';
 			}
-		} else {
+		}
+
+		// Request secret visibility
+		else if (elem.classList.contains('request-display-key-info')) {
+			type = 'showSecret';
+		}
+
+		// Secret visibility success
+		else if (elem.classList.contains('reset-key-info')) {
+			type = 'showSecretSuccess';
+		}
+
+		// Secrets already visible
+		else if (elem.classList.contains('error')) {
+			type = 'showSecretError';
+		}
+
+		// Manage My Account
+		else {
 			type = 'accountManage';
 		}
-	} else if (elem.classList.contains('page-profile')) {
+	}
+
+	// User Profiles
+	else if (elem.classList.contains('page-profile')) {
 		type = 'profile';
-	} else if (elem.classList.contains('page-login')) {
+	}
+
+	// Signin Page
+	else if (elem.classList.contains('page-login')) {
 		type = 'signin';
-	} else if (elem.classList.contains('page-search')) {
+	}
+
+	// Search
+	else if (elem.classList.contains('page-search')) {
 		type = 'search';
-	} else if (elem.classList.contains('page-logout')) {
+	}
+
+	// Logout
+	else if (elem.classList.contains('page-logout')) {
+
+		// Logout Failed
 		if (m$.get('#user-nav .account', elem)) {
 			type = 'logoutFail';
-		} else {
+		}
+
+		// Logged Out
+		else {
 			type = 'logout';
 		}
-	} else if (elem.classList.contains('page-contact')) {
+
+	}
+
+	// Contact Us
+	else if (elem.classList.contains('page-contact')) {
+
+		// Contact Form
 		if (m$.get('#main form', elem)) {
 			type = 'contact';
-		} else {
+		}
+
+		// Contact Success
+		else {
 			type = 'contactSuccess';
 		}
+
 	}
 
 	return type;
@@ -639,6 +1202,10 @@ var removeCSS = function (filename) {
 		link.remove();
 	}));
 };
+/**
+ * Setup global mashery variable on page render
+ * @param {Node} doc  The page document
+ */
 var setupMashery = function (doc) {
 
 	// Get the default page
@@ -662,7 +1229,7 @@ var setupMashery = function (doc) {
 		},
 		contentId: null,
 		contentType: getContentType(doc.body),
-		dashboard: dashboard ? dashboard : null,
+		dashboard: dashboard ? dashboard.getAttribute('href') : null,
 		dom: dom,
 		isAdmin: m$.get('#user-nav .dashboard.toggle', dom) ? true : false,
 		loggedIn: m$.get('#mashery-logout-form', dom) ? true : false,
@@ -714,7 +1281,7 @@ var loadPortal = (function () {
 	var exports = {};
 
 	// Ignore on Ajax page load
-	var ajaxIgnore = '.clear-results, h4 .select-all, #toggleEndpoints, #toggleMethods';
+	var ajaxIgnore = '.clear-results, h4 .select-all, #toggleEndpoints, #toggleMethods, [href*="/io-docs"]';
 
 	// Setup internally global variables
 	var settings, main, data;
@@ -763,53 +1330,192 @@ var loadPortal = (function () {
 		templates: {
 
 			/**
-			 * Base layout
-			 * The markup structure that all of the content will get loaded into.
+			 * My Apps
+			 * The layout for the page displaying a users registered applications.
 			 */
-			layout:	'<a class="screen-reader screen-reader-focusable" href="#main">Skip to content</a>' +
-					'{{layout.navUser}}' +
-					'{{layout.navPrimary}}' +
-					'{{layout.main}}' +
-					'<footer class="footer" id="footer">' +
-						'{{layout.footer1}}' +
-						'{{layout.navSecondary}}' +
-						'{{layout.footer2}}' +
-					'</footer>',
-
-			/**
-			 * User Navigation
-			 * The navigation menu for sign in, registration, account, and logout links.
-			 */
-			userNav:	'<div class="nav-user container" id="nav-user">' +
-							'<ul class="nav-user-list list-inline text-small text-muted padding-top-small padding-bottom-small no-margin-bottom text-right" id="nav-user-list">' +
-								'{{content.navItemsUser}}' +
+			accountApps: function () {
+				var template = 	'<h1>{{content.headingMyApps}}</h1><ul id="nav-account">{{content.navItemsAccount}}</ul>';
+				if (Object.keys(mashery.content.main).length > 0) {
+					mashery.content.main.forEach((function (app) {
+						template +=
+							'<h2>' + app.application + '</h2>' +
+							'<ul>' +
+								'<li>API: ' + (app.api ? app.api : 'None') + '</li>' +
+								'<li>Key: ' + (app.key ? app.key : 'None') + '</li>' +
+								'<li>Created: ' + app.created + '</li>' +
 							'</ul>' +
-						'</div>',
+							'<p>' +
+						'<a class="btn btn-edit-app" id="' + m$.sanitizeClass(app.application, 'btn-edit-app') + '" href="' + app.edit + '">Edit This App</a>' +
+						'<a class="btn btn-delete-app" id="' + m$.sanitizeClass(app.application, 'btn-delete-app') + '" href="' + app.delete + '">Delete This App</a>' +
+							'</p>';
+					}));
+				} else {
+					template += '{{content.noApps}}';
+				}
+				if (mashery.content.secondary) {
+					template += '<p><a class="btn btn-get-app" id="btn-get-app" href="' + window.mashery.content.secondary + '">Create a New App</a></p>';
+				}
+				return '<div class="main container container-small" id="main">' + template + '</div>';
+			},
 
 			/**
-			 * Primary Navigation
-			 * The primary navigation content for the Portal.
+			 * My Account: Email
+			 * The layout for the page where users can change their Mashery email address.
 			 */
-			primaryNav:	'<div class="nav-primary nav-wrap nav-collapse container padding-top-small padding-bottom-small" id="nav-primary">' +
-							'<a id="logo" class="logo" href="/">{{content.logo}}</a>' +
-							'<a role="button" class="nav-toggle" id="nav-primary-toggle" data-nav-toggle="#nav-primary-menu" href="#">Menu</a>' +
-							'<div class="nav-menu" id="nav-primary-menu">' +
-								'<ul class="nav" id="nav-primary-list">' +
-									'{{content.navItemsPrimary}}' +
-									'<li>{{content.searchForm}}</li>' +
-								'</ul>' +
-							'</div>' +
-						'</div>',
-
-			/**
-			 * Secondary Navigation
-			 * The secondary navigation for the Portal, often included in the footer.
-			 */
-			secondaryNav:	'<div class="nav-secondary container" id="nav-secondary">' +
-								'<ul id="nav-secondary-list">' +
-									'{{content.navItemsSecondary}}' +
-								'</ul>' +
+			accountEmail:	'<div class="main container container-small" id="main">' +
+								'<h1>{{content.headingChangeEmail}}</h1>' +
+								'<ul id="nav-account">{{content.navItemsAccount}}</ul>' +
+								'<ul id="nav-mashery-account">{{content.navItemsMasheryAccount}}</ul>' +
+								'{{content.main}}' +
 							'</div>',
+
+			/**
+			 * My Account: Email Success
+			 * The layout for the page confirming email change was successful
+			 */
+			accountEmailSuccess:	'<div class="main container container-small" id="main">' +
+									'<h1>{{content.headingChangeEmailSuccess}}</h1>' +
+									'<ul id="nav-account">{{content.navItemsAccount}}</ul>' +
+									'<ul id="nav-mashery-account">{{content.navItemsMasheryAccount}}</ul>' +
+									'{{content.emailChanged}}' +
+								'</div>',
+
+			/**
+			 * My Keys
+			 * The layout for the page displaying a users API keys.
+			 */
+			accountKeys: function () {
+				var template = '<h1>{{content.headingMyApiKeys}}</h1><ul id="nav-account">{{content.navItemsAccount}}</ul>';
+				if (Object.keys(mashery.content.main).length > 0 ) {
+					mashery.content.main.forEach((function (plan) {
+						template += '<h2>' + plan.name + '</h2>';
+						if (plan.keys.length > 0) {
+							plan.keys.forEach((function (key) {
+								var secret = key.secret ? '<li>Secret: ' + key.secret + '</li>' : '';
+								template +=
+									'<p><strong>' + key.application + '</strong></p>' +
+									'<ul>' +
+										'<li>Key: ' + key.key + '</li>' +
+										secret +
+										'<li>Status: ' + key.status + '</li>' +
+										'<li>Created: ' + key.created + '</li>' +
+									'</ul>' +
+									key.limits +
+									'<p><a class="btn btn-delete-key" id="btn-delete-key" href="' + key.delete + '">Delete This Key</a></p>';
+							}));
+						} else {
+							template += '<p>{{content.noPlanKeys}}</p>';
+							if (mashery.content.secondary) {
+								template += '<p><a class="btn btn-get-key" id="' + m$.sanitizeClass(plan.name, 'btn-get-key') + '"  href="' + mashery.content.secondary + '">Get a Key for ' + plan.name + '</a></p>';
+							}
+						}
+					}));
+				} else {
+					template += '{{content.noKeys}}';
+					if (mashery.content.secondary) {
+						template += '<p><a class="btn btn-get-key" id="btn-get-key" href="' + mashery.content.secondary + '">Get API Keys</a></p>';
+					}
+				}
+				return '<div class="main container container-small" id="main">' + template + '</div>';
+			},
+
+			/**
+			 * My Account
+			 * The layout for the page where users can manage their Mashery Account details.
+			 */
+			accountManage:	'<div class="main container container-small" id="main">' +
+								'<h1>{{content.headingAccount}}</h1>' +
+								'<ul id="nav-account">{{content.navItemsAccount}}</ul>' +
+								'<ul id="nav-mashery-account">{{content.navItemsMasheryAccount}}</ul>' +
+								'<h2>{{content.headingAccountInfo}}</h2>' +
+								'{{content.main}}' +
+							'</div>',
+
+			/**
+			 * My Account: Password
+			 * The layout for the page where users can change their Mashery password.
+			 */
+			accountPassword:	'<div class="main container container-small" id="main">' +
+									'<h1>{{content.headingChangePassword}}</h1>' +
+									'<ul id="nav-account">{{content.navItemsAccount}}</ul>' +
+									'<ul id="nav-mashery-account">{{content.navItemsMasheryAccount}}</ul>' +
+									'{{content.main}}' +
+								'</div>',
+
+			/**
+			 * My Account: Password
+			 * The layout for the page where users can change their Mashery password.
+			 */
+			accountPasswordSuccess:	'<div class="main container container-small" id="main">' +
+										'<h1>{{content.headingChangePasswordSuccess}}</h1>' +
+										'<ul id="nav-account">{{content.navItemsAccount}}</ul>' +
+										'<ul id="nav-mashery-account">{{content.navItemsMasheryAccount}}</ul>' +
+										'{{content.passwordChanged}}' +
+									'</div>',
+
+			/**
+			 * App Registration
+			 * The layout for the app registration page.
+			 */
+			appRegister:	'<div class="main container container-small" id="main">' +
+									'<h1>{{content.heading}}</h1>' +
+									'<p>{{content.subheading}}</p>' +
+									'{{content.main}}' +
+								'</div>',
+
+			/**
+			 * App Registration Success
+			 * The layout for the message that's displayed after an application is successfully registered.
+			 */
+			appRegisterSuccess:	'<div class="main container container-small" id="main">' +
+									'<h1>{{content.heading}}</h1>' +
+									'{{content.main}}' +
+								'</div>',
+
+			/**
+			 * Blog: All Posts
+			 * The layout for the page where all blog posts are listed.
+			 * @todo Create this layout
+			 */
+			blogAll: '<div class="main container" id="main"><p>Blog content needs to get created.</p></div>',
+
+			/**
+			 * Blog: Single Post
+			 * The layout for individual blog posts.
+			 * @todo Create this layout
+			 */
+			blogSingle: '<div class="main container" id="main"><p>Blog content needs to get created.</p></div>',
+
+			/**
+			 * Contact
+			 * The layout for the contact page.
+			 */
+			contact:	'<div class="main container container-small" id="main">' +
+							'<h1>{{content.heading}}</h1>' +
+							'<p>{{content.subheading}}</p>' +
+							'{{content.main}}' +
+						'</div>',
+
+			/**
+			 * Contact Success
+			 * The layout for the message displayed after a contact form is successfully submitted.
+			 */
+			contactSuccess:	'<div class="main container container-small" id="main">' +
+								'<h1>{{content.heading}}</h1>' +
+								'<p>{{content.main}}</p>' +
+							'</div>',
+
+			/**
+			 * Documentation
+			 * The layout for API documentation.
+			 * This page includes an automatically generated navigation menu.
+			 */
+			docs:	'<div class="main container" id="main">' +
+						'<div class="row">' +
+							'<div class="grid-two-thirds">{{content.main}}</div>' +
+							'<div class="grid-third"><h2>In the Docs</h2><ul>{{content.secondary}}</ul></div>' +
+						'</div>' +
+					'</div>',
 
 			/**
 			 * Footer 1
@@ -826,6 +1532,156 @@ var loadPortal = (function () {
 						'</div>',
 
 			/**
+			 * Forum: All Topics
+			 * The layout for the main forum page where all topics are listed.
+			 * @todo Create this layout
+			 */
+			forumAll: '<div class="main container" id="main"><p>The forum content needs to get created.</p></div>',
+
+
+			/**
+			 * 404
+			 * The layout for 404 pages.
+			 */
+			fourOhFour:	'<div class="main container container-small" id="main">' +
+							'<h1>{{content.heading}}</h1>' +
+							'{{content.main}}' +
+						'</div>',
+
+			/**
+			 * IO Docs
+			 * The layout for the IO Docs page.
+			 */
+			ioDocs:	'<div class="main container container-small" id="main">' +
+						'<h1>{{content.heading}}</h1>' +
+						'<p>{{content.subheading}}</p>' +
+						'{{content.main}}' +
+					'</div>',
+
+			/**
+			 * Join
+			 * The layout for existing Mashery users signing into an area for the first time.
+			 * Mashery Terms of Use *must* be displayed on this page, and will be automatically injected if you omit them.
+			 */
+			join:	'<div class="main container container-small" id="main">' +
+						'<h1>{{content.heading}}</h1>' +
+						'<p>{{content.subheading}}</p>' +
+						'{{content.main}}' +
+						'{{content.terms}}' +
+					'</div>',
+
+			/**
+			 * Join Success
+			 * The layout for the page confirming that an existing Mashery user has joined a new area.
+			 * @todo Convert the text into variables
+			 */
+			joinSuccess:	'<div class="main container container-small" id="main">' +
+								'<h1>{{content.heading}}</h1>' +
+								'<p>You have successfully registered as {{content.main}}. Read our <a href="/docs">API documentation</a> to get started. You can view your keys and applications under <a href="{{path.keys}}">My Account</a>.</p>' +
+							'</div>',
+
+			/**
+			 * Base layout
+			 * The markup structure that all of the content will get loaded into.
+			 */
+			layout:	'<a class="screen-reader screen-reader-focusable" href="#main">Skip to content</a>' +
+					'{{layout.navUser}}' +
+					'{{layout.navPrimary}}' +
+					'{{layout.main}}' +
+					'<footer class="footer" id="footer">' +
+						'{{layout.footer1}}' +
+						'{{layout.navSecondary}}' +
+						'{{layout.footer2}}' +
+					'</footer>',
+
+			/**
+			 * Logout Success
+			 * The layout for the page shown after a user logs out.
+			 */
+			logout:	'<div class="main container container-small" id="main">' +
+						'<h1>{{content.heading}}</h1>' +
+						'<p>{{content.main}}</p>' +
+					'</div>',
+
+			/**
+			 * Logout Failed
+			 * The layout for the page shown when a logout was unsuccessful.
+			 */
+			logoutFail:	'<div class="main container container-small" id="main">' +
+							'<h1>{{content.heading}}</h1>' +
+							'<p>{{content.main}}</p>' +
+						'</div>',
+
+			/**
+			 * Lost Password Request
+			 * The layout for the page where users can request their password be reset.
+			 */
+			lostPassword:	'<div class="main container container-small" id="main">' +
+								'<h1>{{content.heading}}</h1>' +
+								'<p>{{content.subheading}}</p>' +
+								'{{content.main}}' +
+							'</div>',
+
+			/**
+			 * Lost Password Reset
+			 * The layout for the page shown after a password reset email is sent to the user.
+			 */
+			lostPasswordReset:	'<div class="main container container-small" id="main">' +
+									'<h1>{{content.heading}}</h1>' +
+									'<p>{{content.main}}</p>' +
+								'</div>',
+
+			/**
+			 * Lost Username Request
+			 * The layout for the page where users can request their username be reset.
+			 */
+			lostUsername:	'<div class="main container container-small" id="main">' +
+								'<h1>{{content.heading}}</h1>' +
+								'<p>{{content.subheading}}</p>' +
+								'{{content.main}}' +
+							'</div>',
+
+			/**
+			 * Lost Username Reset
+			 * The layout for the page where users can reset their username.
+			 */
+			lostUsernameReset:	'<div class="main container container-small" id="main">' +
+									'<h1>{{content.heading}}</h1>' +
+									'<p>{{content.main}}</p>' +
+								'</div>',
+
+			/**
+			 * Remove Membership
+			 * The layout for the page where users can remove their membership from this Portal.
+			 */
+			memberRemove:	'<div class="main container container-small" id="main">' +
+								'<h1>{{content.heading}}</h1>' +
+								'<p>{{content.main}}</p>' +
+								'<p>' +
+									'<a class="btn btn-remove-member-confirm" id="btn-remove-member-confirm" href="{{path.removeMember}}">{{content.confirm}}</a>' +
+									'<a class="btn btn-remove-member-cancel" id="btn-remove-member-cancel" href="{{path.account}}">{{content.cancel}}</a>' +
+								'</p>' +
+							'</div>',
+
+			/**
+			 * Remove Membership Success
+			 * The layout for the page shown when user membership was successfully removed.
+			 */
+			memberRemoveSuccess:	'<div class="main container container-small" id="main">' +
+										'<h1>{{content.heading}}</h1>' +
+										'<p>{{content.main}}</p>' +
+									'</div>',
+
+			/**
+			 * No Access
+			 * Layout for when the user does not have permission to view the page
+			 */
+			noAccess:	'<div class="main container container-small" id="main">' +
+							'<h1>{{content.heading}}</h1>' +
+							'<p>{{content.main}}</p>' +
+						'</div>',
+
+			/**
 			 * Custom Pages
 			 * The layout for custom pages.
 			 */
@@ -834,33 +1690,46 @@ var loadPortal = (function () {
 					'</div>',
 
 			/**
-			 * Documentation
-			 * The layout for API documentation.
-			 * This page includes an automatically generated navigation menu.
+			 * User Profiles
+			 * The layout for user profile pages.
 			 */
-			docs:	'<div class="main container" id="main">' +
-						'<div class="row">' +
-							'<div class="grid-two-thirds">{{content.main}}</div>' +
-							'<div class="grid-third"><h2>In the Docs</h2><ul>{{content.secondary}}</ul></div>' +
-						'</div>' +
-					'</div>',
+			profile: function () {
+				// @todo convert these strings into context-specific placeholders
+				var template = '<h1>{{content.heading}}</h1>';
+				if (window.mashery.content.main.admin) {
+					template += '<p><a href="' + window.mashery.content.main.admin + '">View administrative profile for ' + window.mashery.content.main.name + '</a></p>';
+				}
+				template +=	'<h2>{{content.headingUserInfo}}</h2>' +
+							'<ul>';
+							if (window.mashery.content.main.website) {
+								template += '<li><strong>{{content.userWebsite}}</strong> <a href="' + window.mashery.content.main.website + '">' + window.mashery.content.main.website + '</a></li>';
+							}
+							if (window.mashery.content.main.blog) {
+								template += '<li><strong>{{content.userBlog}}</strong> <a href="' + window.mashery.content.main.blog + '">' + window.mashery.content.main.blog + '</a></li>';
+							}
+							template += '<li><strong>{{content.userRegistered}}</strong> ' + window.mashery.content.main.registered + '</li>';
+				template +=	'</ul>';
+				if (window.mashery.content.main.activity) {
+					template += '<h2>{{content.headingActivity}}</h2>' +
+					window.mashery.content.main.activity;
+				}
+				return '<div class="main container" id="main">' + template + '</div>';
+			},
 
 			/**
-			 * Sign In
-			 * The layout for the sign in page.
+			 * Primary Navigation
+			 * The primary navigation content for the Portal.
 			 */
-			signin:	'<div class="main container" id="main">' +
-						'<div class="row">' +
-							'<div class="grid-half">' +
-								'<h1>{{content.heading}}</h1>' +
-								'{{content.subheading}}' +
-								'{{content.form}}' +
+			primaryNav:	'<div class="nav-primary nav-wrap nav-collapse container padding-top-small padding-bottom-small" id="nav-primary">' +
+							'<a id="logo" class="logo" href="/">{{content.logo}}</a>' +
+							'<a role="button" class="nav-toggle" id="nav-primary-toggle" data-nav-toggle="#nav-primary-menu" href="#">Menu</a>' +
+							'<div class="nav-menu" id="nav-primary-menu">' +
+								'<ul class="nav" id="nav-primary-list">' +
+									'{{content.navItemsPrimary}}' +
+									'<li>{{content.searchForm}}</li>' +
+								'</ul>' +
 							'</div>' +
-							'<div class="grid-half">' +
-								'{{content.about}}' +
-							'</div>' +
-						'</div>' +
-					'</div>',
+						'</div>',
 
 			/**
 			 * Registration
@@ -912,245 +1781,6 @@ var loadPortal = (function () {
 									'</div>',
 
 			/**
-			 * Join
-			 * The layout for existing Mashery users signing into an area for the first time.
-			 * Mashery Terms of Use *must* be displayed on this page, and will be automatically injected if you omit them.
-			 */
-			join:	'<div class="main container container-small" id="main">' +
-						'<h1>{{content.heading}}</h1>' +
-						'<p>{{content.subheading}}</p>' +
-						'{{content.main}}' +
-						'{{content.terms}}' +
-					'</div>',
-
-			/**
-			 * Join Success
-			 * The layout for the page confirming that an existing Mashery user has joined a new area.
-			 * @todo Convert the text into variables
-			 */
-			joinSuccess:	'<div class="main container container-small" id="main">' +
-								'<h1>{{content.heading}}</h1>' +
-								'<p>You have successfully registered as {{content.main}}. Read our <a href="/docs">API documentation</a> to get started. You can view your keys and applications under <a href="{{path.keys}}">My Account</a>.</p>' +
-							'</div>',
-
-			/**
-			 * My Keys
-			 * The layout for the page displaying a users API keys.
-			 */
-			accountKeys: function () {
-				var template = '<h1>{{content.headingMyApiKeys}}</h1><ul id="nav-account">{{content.navItemsAccount}}</ul>';
-				if (Object.keys(mashery.content.main).length > 0 ) {
-					mashery.content.main.forEach((function (plan) {
-						template += '<h2>' + plan.name + '</h2>';
-						if (plan.keys.length > 0) {
-							plan.keys.forEach((function (key) {
-								var secret = key.secret ? '<li>Secret: ' + key.secret + '</li>' : '';
-								template +=
-									'<p><strong>' + key.application + '</strong></p>' +
-									'<ul>' +
-										'<li>Key: ' + key.key + '</li>' +
-										secret +
-										'<li>Status: ' + key.status + '</li>' +
-										'<li>Created: ' + key.created + '</li>' +
-									'</ul>' +
-									key.limits +
-									'<p><a class="btn btn-delete-key" id="btn-delete-key" href="' + key.delete + '">Delete This Key</a></p>';
-							}));
-						} else {
-							template += '<p>{{content.noPlanKeys}}</p>';
-							if (mashery.content.secondary) {
-								template += '<p><a class="btn btn-get-key" id="' + m$.sanitizeClass(plan.name, 'btn-get-key') + '"  href="' + mashery.content.secondary + '">Get a Key for ' + plan.name + '</a></p>';
-							}
-						}
-					}));
-				} else {
-					template += '{{content.noKeys}}';
-					if (mashery.content.secondary) {
-						template += '<p><a class="btn btn-get-key" id="btn-get-key" href="' + mashery.content.secondary + '">Get API Keys</a></p>';
-					}
-				}
-				return '<div class="main container container-small" id="main">' + template + '</div>';
-			},
-
-			/**
-			 * My Apps
-			 * The layout for the page displaying a users registered applications.
-			 */
-			accountApps: function () {
-				var template = 	'<h1>{{content.headingMyApps}}</h1><ul id="nav-account">{{content.navItemsAccount}}</ul>';
-				if (Object.keys(mashery.content.main).length > 0) {
-					mashery.content.main.forEach((function (app) {
-						template +=
-							'<h2>' + app.application + '</h2>' +
-							'<ul>' +
-								'<li>API: ' + (app.api ? app.api : 'None') + '</li>' +
-								'<li>Key: ' + (app.key ? app.key : 'None') + '</li>' +
-								'<li>Created: ' + app.created + '</li>' +
-							'</ul>' +
-							'<p>' +
-						'<a class="btn btn-edit-app" id="' + m$.sanitizeClass(app.application, 'btn-edit-app') + '" href="' + app.edit + '">Edit This App</a>' +
-						'<a class="btn btn-delete-app" id="' + m$.sanitizeClass(app.application, 'btn-delete-app') + '" href="' + app.delete + '">Delete This App</a>' +
-							'</p>';
-					}));
-				} else {
-					template += '{{content.noApps}}';
-				}
-				if (mashery.content.secondary) {
-					template += '<p><a class="btn btn-get-app" id="btn-get-app" href="' + window.mashery.content.secondary + '">Create a New App</a></p>';
-				}
-				return '<div class="main container container-small" id="main">' + template + '</div>';
-			},
-
-			/**
-			 * My Account
-			 * The layout for the page where users can manage their Mashery Account details.
-			 */
-			accountManage:	'<div class="main container container-small" id="main">' +
-								'<h1>{{content.headingAccount}}</h1>' +
-								'<ul id="nav-account">{{content.navItemsAccount}}</ul>' +
-								'<ul id="nav-mashery-account">{{content.navItemsMasheryAccount}}</ul>' +
-								'<h2>{{content.headingAccountInfo}}</h2>' +
-								'{{content.main}}' +
-							'</div>',
-
-			/**
-			 * My Account: Email
-			 * The layout for the page where users can change their Mashery email address.
-			 */
-			accountEmail:	'<div class="main container container-small" id="main">' +
-								'<h1>{{content.headingChangeEmail}}</h1>' +
-								'<ul id="nav-account">{{content.navItemsAccount}}</ul>' +
-								'<ul id="nav-mashery-account">{{content.navItemsMasheryAccount}}</ul>' +
-								'{{content.main}}' +
-							'</div>',
-
-			/**
-			 * My Account: Password
-			 * The layout for the page where users can change their Mashery password.
-			 */
-			accountPassword:	'<div class="main container container-small" id="main">' +
-									'<h1>{{content.headingChangePassword}}</h1>' +
-									'<ul id="nav-account">{{content.navItemsAccount}}</ul>' +
-									'<ul id="nav-mashery-account">{{content.navItemsMasheryAccount}}</ul>' +
-									'{{content.main}}' +
-								'</div>',
-
-			/**
-			 * User Profiles
-			 * The layout for user profile pages.
-			 */
-			profile: function () {
-				// @todo convert these strings into context-specific placeholders
-				var template = '<h1>{{content.heading}}</h1>';
-				if (window.mashery.content.main.admin) {
-					template += '<p><a href="' + window.mashery.content.main.admin + '">View administrative profile for ' + window.mashery.content.main.name + '</a></p>';
-				}
-				template +=	'<h2>{{content.headingUserInfo}}</h2>' +
-							'<ul>';
-							if (window.mashery.content.main.website) {
-								template += '<li><strong>{{content.userWebsite}}</strong> <a href="' + window.mashery.content.main.website + '">' + window.mashery.content.main.website + '</a></li>';
-							}
-							if (window.mashery.content.main.blog) {
-								template += '<li><strong>{{content.userBlog}}</strong> <a href="' + window.mashery.content.main.blog + '">' + window.mashery.content.main.blog + '</a></li>';
-							}
-							template += '<li><strong>{{content.userRegistered}}</strong> ' + window.mashery.content.main.registered + '</li>';
-				template +=	'</ul>';
-				if (window.mashery.content.main.activity) {
-					template += '<h2>{{content.headingActivity}}</h2>' +
-					window.mashery.content.main.activity;
-				}
-				return '<div class="main container" id="main">' + template + '</div>';
-			},
-
-			/**
-			 * Logout Success
-			 * The layout for the page shown after a user logs out.
-			 */
-			logout:	'<div class="main container container-small" id="main">' +
-						'<h1>{{content.heading}}</h1>' +
-						'<p>{{content.main}}</p>' +
-					'</div>',
-
-			/**
-			 * Logout Failed
-			 * The layout for the page shown when a logout was unsuccessful.
-			 */
-			logoutFail:	'<div class="main container container-small" id="main">' +
-							'<h1>{{content.heading}}</h1>' +
-							'<p>{{content.main}}</p>' +
-						'</div>',
-
-			/**
-			 * Remove Membership
-			 * The layout for the page where users can remove their membership from this Portal.
-			 */
-			memberRemove:	'<div class="main container container-small" id="main">' +
-								'<h1>{{content.heading}}</h1>' +
-								'<p>{{content.main}}</p>' +
-								'<p>' +
-									'<a class="btn btn-remove-member-confirm" id="btn-remove-member-confirm" href="{{path.removeMember}}">{{content.confirm}}</a>' +
-									'<a class="btn btn-remove-member-cancel" id="btn-remove-member-cancel" href="{{path.account}}">{{content.cancel}}</a>' +
-								'</p>' +
-							'</div>',
-
-			/**
-			 * Remove Membership Success
-			 * The layout for the page shown when user membership was successfully removed.
-			 */
-			memberRemoveSuccess:	'<div class="main container container-small" id="main">' +
-										'<h1>{{content.heading}}</h1>' +
-										'<p>{{content.main}}</p>' +
-									'</div>',
-
-			/**
-			 * IO Docs
-			 * The layout for the IO Docs page.
-			 */
-			ioDocs:	'<div class="main container container-small" id="main">' +
-						'<h1>{{content.heading}}</h1>' +
-						'<p>{{content.subheading}}</p>' +
-						'{{content.main}}' +
-					'</div>',
-
-			/**
-			 * Lost Password Request
-			 * The layout for the page where users can request their password be reset.
-			 */
-			lostPassword:	'<div class="main container container-small" id="main">' +
-								'<h1>{{content.heading}}</h1>' +
-								'<p>{{content.subheading}}</p>' +
-								'{{content.main}}' +
-							'</div>',
-
-			/**
-			 * Lost Password Reset
-			 * The layout for the page shown after a password reset email is sent to the user.
-			 */
-			lostPasswordReset:	'<div class="main container container-small" id="main">' +
-									'<h1>{{content.heading}}</h1>' +
-									'<p>{{content.main}}</p>' +
-								'</div>',
-
-			/**
-			 * Lost Username Request
-			 * The layout for the page where users can request their username be reset.
-			 */
-			lostUsername:	'<div class="main container container-small" id="main">' +
-								'<h1>{{content.heading}}</h1>' +
-								'<p>{{content.subheading}}</p>' +
-								'{{content.main}}' +
-							'</div>',
-
-			/**
-			 * Lost Username Reset
-			 * The layout for the page where users can reset their username.
-			 */
-			lostUsernameReset:	'<div class="main container container-small" id="main">' +
-									'<h1>{{content.heading}}</h1>' +
-									'<p>{{content.main}}</p>' +
-								'</div>',
-
-			/**
 			 * Search
 			 * The layout for search results.
 			 */
@@ -1188,72 +1818,69 @@ var loadPortal = (function () {
 			},
 
 			/**
-			 * Contact
-			 * The layout for the contact page.
+			 * Secondary Navigation
+			 * The secondary navigation for the Portal, often included in the footer.
 			 */
-			contact:	'<div class="main container container-small" id="main">' +
+			secondaryNav:	'<div class="nav-secondary container" id="nav-secondary">' +
+								'<ul id="nav-secondary-list">' +
+									'{{content.navItemsSecondary}}' +
+								'</ul>' +
+							'</div>',
+
+			/**
+			 * Secret Visibility
+			 * Show key secrets for 30 days.
+			 */
+			showSecret:	'<div class="main container container-small" id="main">' +
 							'<h1>{{content.heading}}</h1>' +
-							'<p>{{content.subheading}}</p>' +
 							'{{content.main}}' +
 						'</div>',
 
 			/**
-			 * Contact Success
-			 * The layout for the message displayed after a contact form is successfully submitted.
+			 * Secret Visibility: Success
+			 * Key secrets will be shown.
 			 */
-			contactSuccess:	'<div class="main container container-small" id="main">' +
+			showSecretSuccess:	'<div class="main container container-small" id="main">' +
+									'<h1>{{content.heading}}</h1>' +
+									'{{content.main}}' +
+								'</div>',
+
+			/**
+			 * Secret Visibility; Error
+			 * Key secrets already shown.
+			 */
+			showSecretError:	'<div class="main container container-small" id="main">' +
+									'<h1>{{content.heading}}</h1>' +
+									'{{content.main}}' +
+								'</div>',
+
+			/**
+			 * Sign In
+			 * The layout for the sign in page.
+			 */
+			signin:	'<div class="main container" id="main">' +
+						'<div class="row">' +
+							'<div class="grid-half">' +
 								'<h1>{{content.heading}}</h1>' +
-								'<p>{{content.main}}</p>' +
-							'</div>',
+								'{{content.subheading}}' +
+								'{{content.form}}' +
+							'</div>' +
+							'<div class="grid-half">' +
+								'{{content.about}}' +
+							'</div>' +
+						'</div>' +
+					'</div>',
 
 			/**
-			 * App Registration
-			 * The layout for the app registration page.
+			 * User Navigation
+			 * The navigation menu for sign in, registration, account, and logout links.
 			 */
-			appRegister:	'<div class="main container container-small" id="main">' +
-									'<h1>{{content.heading}}</h1>' +
-									'<p>{{content.subheading}}</p>' +
-									'{{content.main}}' +
-								'</div>',
+			userNav:	'<div class="nav-user container" id="nav-user">' +
+							'<ul class="nav-user-list list-inline text-small text-muted padding-top-small padding-bottom-small no-margin-bottom text-right" id="nav-user-list">' +
+								'{{content.navItemsUser}}' +
+							'</ul>' +
+						'</div>'
 
-			/**
-			 * App Registration Success
-			 * The layout for the message that's displayed after an application is successfully registered.
-			 */
-			appRegisterSuccess:	'<div class="main container container-small" id="main">' +
-									'<h1>{{content.heading}}</h1>' +
-									'{{content.main}}' +
-								'</div>',
-
-			/**
-			 * Forum: All Topics
-			 * The layout for the main forum page where all topics are listed.
-			 * @todo Create this layout
-			 */
-			forumAll: '<div class="main container" id="main"><p>The forum content needs to get created.</p></div>',
-
-			/**
-			 * Blog: All Posts
-			 * The layout for the page where all blog posts are listed.
-			 * @todo Create this layout
-			 */
-			blogAll: '<div class="main container" id="main"><p>Blog content needs to get created.</p></div>',
-
-			/**
-			 * Blog: Single Post
-			 * The layout for individual blog posts.
-			 * @todo Create this layout
-			 */
-			blogSingle: '<div class="main container" id="main"><p>Blog content needs to get created.</p></div>',
-
-			/**
-			 * 404
-			 * The layout for 404 pages.
-			 */
-			fourOhFour:	'<div class="main container container-small" id="main">' +
-						'<h1>{{content.heading}}</h1>' +
-						'{{content.main}}' +
-					'</div>'
 		},
 
 		/**
@@ -1263,34 +1890,22 @@ var loadPortal = (function () {
 		labels: {
 
 			/**
-			 * Title Attribute
-			 * Displayed in the web browser tab.
-			 */
-			title: '{{mashery.title}} | {{mashery.area}}',
-
-			/**
-			 * User Navigation
-			 * The navigation menu where users sign in, register, view their account, and log out.
-			 */
-			userNav: {
-				signin: 'Sign In', // "Sign In" link
-				register: 'Register', // "Register" link
-				account: 'My Account', // "My Account" link
-				dashboard: 'Dashboard', // "Dashboard" link (for admins only)
-				signout: 'Sign Out', // "Sign Out" link
-			},
-
-			/**
 			 * My Account
 			 * All of the account pages, including Keys, Apps, Mashery Account, Change Email, Change Password, and Remove Membership
 			 */
 			account: {
+
+				// Headings
 				headingMyApiKeys: 'My API Keys', // The "My Keys" page heading
 				headingMyApps: 'My Apps', // The "My Apps" page heading
 				headingAccount: 'Manage Account', // The "Manage Account" page heading
 				headingAccountInfo: 'Account Information', // The "Account Information" subheading on the "Manage Account" page
 				headingChangeEmail: 'Change Email', // The "Change Email" page heading
+				headingChangeEmailSuccess: 'Email Successfully Changed', // The "Change Email Success" page heading
 				headingChangePassword: 'Change Password', // The "Change Password" page heading
+				headingChangePasswordSuccess: 'Password Successfully Changed', // The "Change Password Success" page heading
+
+				// Navigation Labels
 				keys: 'Keys', // The account nav label for "My Keys"
 				apps: 'Applications', // The account nav label for "My Applications"
 				account: 'Manage Account', // The account nav label for "Manage Account"
@@ -1298,82 +1913,71 @@ var loadPortal = (function () {
 				changePassword: 'Change Password', // The account nav label for "Change Password"
 				viewProfile: 'View My Public Profile', // The account nav label for "View My Profile"
 				removeMembership: 'Remove Membership from {{mashery.area}}', // The account nav label for "Remove Membership"
+
+				// Messages
 				noKeys: 'You don\'t have any keys yet.', // The message to display when a user has no keys
 				noPlanKeys: 'You have not been issued keys for this API.', // The message to display when a user has no keys for a specific plan
 				noApps: 'You don\'t have any apps yet.', // The message to display when a user has no apps
+				emailChanged: '<p>An email confirming your change has been sent to the address you provided with your username. Please check your spam folder if you don\'t see it in your inbox.</p>',
+				passwordChanged: '<p>An email confirming your change has been sent to the address you provided with your username. If you use this account on other Mashery powered portals, remember to use your new password.</p>'
+
 			},
 
 			/**
-			 * User Profile
-			 * The user profile page
+			 * App Registration
+			 * The page to register an application
 			 */
-			profile: {
-				heading: '{{mashery.username}}', // The primary heading
-				headingUserInfo: 'User Information', // The "User Information" subheading
-				headingActivity: 'Recent Activity', // The "User Activity" subheading
-				userWebsite: 'Website:', // The user website label
-				userBlog: 'Blog:', // The user blog label
-				userRegistered: 'Registered:' // The label for the date the user registered
+			appRegister: {
+				heading: 'Register an Application', // The heading
+				subheading: 'Get a key and register your application using the form below to start working with our APIs.' // The message shown above the form
 			},
 
 			/**
-			 * Sign In
-			 * The sign in page.
+			 * App Registration Success
+			 * The page shown after an app has been successfully registered.
 			 */
-			signin: {
-				heading: 'Sign In', // The heading
-				subheading: '<p>Sign in to {{mashery.area}} using your Mashery ID.</p>', // The message above the sign in form
-				submit: 'Sign In', // The submit button text @todo: does not work yet
+			appRegisterSuccess: {
+				heading: 'Your application was registered!', // The heading
 
-				// The sidebar content
-				sidebar:	'<h2>Register</h2>' +
-							'<p><a href="{{path.register}}">Create an account</a> to access stagingcs9.mashery.com. Your account information can then be used to access other APIs on the Mashery API Network.</p>' +
-
-							'<h2>What is Mashery?</h2>' +
-							'<p><a href="http://mashery.com">Mashery</a> powers APIs of leading brands in retail, media, business services, software, and more. By signing in to a Mashery powered portal, you can gain access to Mashery\'s base of API providers. All with a single Mashery ID.</p>' +
-
-							'<p><a class="btn btn-user-register" id="btn-user-register" href="{{path.register}}">Register a Mashery ID</a></p>',
+				// The message
+				main:	'<p>An email has been sent to you with your key and application details. You can also view them at any time from the <a href="{{path.keys}}">My Account</a> page.</p>' +
+						'<p>To get started using your API keys, dig into <a href="{{path.docs}}">our documentation</a>. We look forward to seeing what you create!</p>',
 			},
 
 			/**
-			 * User Registration
-			 * The user registration page.
+			 * Contact
+			 * The contact form page
 			 */
-			register: {
-				heading: 'Register for an Account', // The heading
-				subheading: '<p>Register a new Mashery ID to access {{mashery.area}}.</p>', // The message above the form
-				submit: 'Register', // The submit button text @todo: does not work yet
-				privacyPolicy: '', // A custom privacy policy link or message [optional]
-
-				// The sidebar content
-				sidebar:	'<h2>No Spam Guarantee</h2>' +
-							'<p>We hate spam. We love our users. We promise to never sell or share any of your private information.</p>'
+			contact: {
+				heading: 'Contact Us', // The heading
+				subheading: 'Contact us using the form below.' // The message shown above the form
 			},
 
 			/**
-			 * User Registration: Email Sent
-			 * The registration email confirmation page.
+			 * Contact Success
+			 * The page shown after a contact form is successfully submitted.
 			 */
-			registerSent: {
-				heading: 'Registration Almost Complete' // The heading
+			contactSuccess: {
+				heading: 'Thanks for your submission!', // The heading
+				main: 'Your message will be forwarded to the appropriate group.' // The message
 			},
 
 			/**
-			 * User Registration: Email Resend
-			 * The page to request a new registration confirmation email.
+			 * 404
+			 * The 404 page.
 			 */
-			registerResend: {
-				heading: 'Resend Your Confirmation Email', // The heading
-				subheading: 'Enter your username and email address to have your registration confirmation email resent to you.' // The message above the form
+			fourOhFour: {
+				heading: 'Unable to find this page', // The heading
+				main: '<p>We\'re unable to find this page. Sorry! Please check the URL, or contact us to report a broken link.</p>' // The message
 			},
 
 			/**
-			 * User Registration: Email Resent
-			 * The page after a registration confirmation email was successfully resent.
+			 * IO Docs
+			 * The IO Docs page
 			 */
-			registerResendSuccess: {
-				heading: 'Success', // The heading
-				main: 'Your confirmation email was resent.' // The message
+			ioDocs: {
+				heading: 'Interactive API', // The heading
+				subheading: 'Test our API services with IO-Docs, our interactive API documentation.' // The message displayed before the content
 			},
 
 			/**
@@ -1409,36 +2013,6 @@ var loadPortal = (function () {
 			logoutFail: {
 				heading: 'Sign Out Failed', // The heading
 				main: 'Your attempt to sign out failed. <a href="{{path.logout}}">Please try again.</a>' // The message
-			},
-
-			/**
-			 * Remove Membership
-			 * The page for users to remove their membership from this Portal.
-			 */
-			memberRemove: {
-				heading: 'Remove membership from {{mashery.area}}', // The heading
-				main: 'Removing membership disables your account and you will not be able to register again using the same username. All your keys will be deactivated.', // The message
-				confirm: 'Remove Membership', // The "confirm remove membership" button label
-				cancel: 'Cancel', // The "cancel removal" button label
-				popup: 'Please confirm that you wish to permanently disable your membership with this service.' // The message to display on the "confirm removal" popup modal
-			},
-
-			/**
-			 * Remove Membership Success
-			 * The page shown after a user successfully removes their membership.
-			 */
-			memberRemoveSuccess: {
-				heading: 'Your account has been removed.', // The heading
-				main: 'Enjoy the rest of your day!' // The message
-			},
-
-			/**
-			 * IO Docs
-			 * The IO Docs page
-			 */
-			ioDocs: {
-				heading: 'Interactive API', // The heading
-				subheading: 'Test our API services with IO-Docs, our interactive API documentation.' // The message displayed before the content
 			},
 
 			/**
@@ -1478,13 +2052,115 @@ var loadPortal = (function () {
 			},
 
 			/**
+			 * Remove Membership
+			 * The page for users to remove their membership from this Portal.
+			 */
+			memberRemove: {
+
+				// Content
+				heading: 'Remove membership from {{mashery.area}}', // The heading
+				main: 'Removing membership disables your account and you will not be able to register again using the same username. All your keys will be deactivated.', // The message
+
+				// Labels
+				confirm: 'Remove Membership', // The "confirm remove membership" button label
+				cancel: 'Cancel', // The "cancel removal" button label
+				popup: 'Please confirm that you wish to permanently disable your membership with this service.' // The message to display on the "confirm removal" popup modal
+
+			},
+
+			/**
+			 * Remove Membership Success
+			 * The page shown after a user successfully removes their membership.
+			 */
+			memberRemoveSuccess: {
+				heading: 'Your account has been removed.', // The heading
+				main: 'Enjoy the rest of your day!' // The message
+			},
+
+			/**
+			 * No Access
+			 * The page shown when user doesn't have access to the content
+			 */
+			noAccess: {
+				heading: 'You don\'t have access to this content', // The heading
+				main: '<p>If you\'re not logged in yet, try <a href="{{paths.signin}}">logging in</a> or <a href="{{path.register}}">registering for an account</a>.</p>' // The message
+			},
+
+			/**
+			 * User Profile
+			 * The user profile page
+			 */
+			profile: {
+
+				// Headings
+				heading: '{{mashery.username}}', // The primary heading
+				headingUserInfo: 'User Information', // The "User Information" subheading
+				headingActivity: 'Recent Activity', // The "User Activity" subheading
+
+				// Content
+				userWebsite: 'Website:', // The user website label
+				userBlog: 'Blog:', // The user blog label
+				userRegistered: 'Registered:' // The label for the date the user registered
+
+			},
+
+			/**
+			 * User Registration
+			 * The user registration page.
+			 */
+			register: {
+
+				// Primary Content
+				heading: 'Register for an Account', // The heading
+				subheading: '<p>Register a new Mashery ID to access {{mashery.area}}.</p>', // The message above the form
+				privacyPolicy: '', // A custom privacy policy link or message [optional]
+
+				// The sidebar content
+				sidebar:	'<h2>No Spam Guarantee</h2>' +
+							'<p>We hate spam. We love our users. We promise to never sell or share any of your private information.</p>',
+
+				// Labels
+				submit: 'Register' // The submit button text @todo: does not work yet
+			},
+
+			/**
+			 * User Registration: Email Sent
+			 * The registration email confirmation page.
+			 */
+			registerSent: {
+				heading: 'Registration Almost Complete' // The heading
+			},
+
+			/**
+			 * User Registration: Email Resend
+			 * The page to request a new registration confirmation email.
+			 */
+			registerResend: {
+				heading: 'Resend Your Confirmation Email', // The heading
+				subheading: 'Enter your username and email address to have your registration confirmation email resent to you.' // The message above the form
+			},
+
+			/**
+			 * User Registration: Email Resent
+			 * The page after a registration confirmation email was successfully resent.
+			 */
+			registerResendSuccess: {
+				heading: 'Success', // The heading
+				main: 'Your confirmation email was resent.' // The message
+			},
+
+			/**
 			 * Search
 			 * Search form and results content.
 			 */
 			search: {
-				heading: 'Search Results for "{{content.query}}"', // The search results page heading
-				placeholder: 'Search...', // The search form placeholder attribute text
+
+				// Search form
 				button: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 32 32"><title>Search</title><path d="M31.008 27.231l-7.58-6.447c-.784-.705-1.622-1.029-2.299-.998a11.954 11.954 0 0 0 2.87-7.787c0-6.627-5.373-12-12-12s-12 5.373-12 12 5.373 12 12 12c2.972 0 5.691-1.081 7.787-2.87-.031.677.293 1.515.998 2.299l6.447 7.58c1.104 1.226 2.907 1.33 4.007.23s.997-2.903-.23-4.007zM12 20a8 8 0 1 1 0-16 8 8 0 0 1 0 16z"/></svg>', // The search for button text
+				placeholder: 'Search...', // The search form placeholder attribute text
+
+				// Search results
+				heading: 'Search Results for "{{content.query}}"', // The search results page heading
 				meta: 'Showing {{content.first}} to {{content.last}} of {{content.total}} results for "{{content.query}}"', // The meta data to show above search results
 				noResults: 'Your search for "{{content.query}}" returned no results.', // The message to display when no results are found
 				pagePrevious: '&larr; Previous Page', // The previous page link
@@ -1493,51 +2169,74 @@ var loadPortal = (function () {
 			},
 
 			/**
-			 * Contact
-			 * The contact form page
+			 * Reveal Key Secret
 			 */
-			contact: {
-				heading: 'Contact Us', // The heading
-				subheading: 'Contact us using the form below.' // The message shown above the form
+			showSecret: {
+				heading: 'Email Sent',
+				main: '<p>An email has been sent to the email address associated with your account. Click on the link in the email to display all of your shared secrets for 30 days. Please check your spam folder if you don\'t see it in your inbox.</p>'
 			},
 
 			/**
-			 * Contact Success
-			 * The page shown after a contact form is successfully submitted.
+			 * Reveal Key Secret: Success
 			 */
-			contactSuccess: {
-				heading: 'Thanks for your submission!', // The heading
-				main: 'Your message will be forwarded to the appropriate group.' // The message
+			showSecretSuccess: {
+				heading: 'Your shared secrets are now visible',
+				main: '<p>Shared secrets will be visible for the next 30 days. After 30 days, they will be hidden again for PCI compliance.</p>'
 			},
 
 			/**
-			 * App Registration
-			 * The page to register an application
+			 * Reveal Key Secret: Already Visible
 			 */
-			appRegister: {
-				heading: 'Register an Application', // The heading
-				subheading: 'Get a key and register your application using the form below to start working with our APIs.' // The message shown above the form
+			showSecretError: {
+				heading: 'Your shared secrets are already visible',
+				main: '<p><a href="{{path.keys}}">Click here</a> to view them.</p>'
 			},
 
 			/**
-			 * App Registration Success
-			 * The page shown after an app has been successfully registered.
+			 * Sign In
+			 * The sign in page.
 			 */
-			appRegisterSuccess: {
-				heading: 'Your application was registered!', // The heading
+			signin: {
 
-				// The message
-				main:	'<p>An email has been sent to you with your key and application details. You can also view them at any time from the <a href="{{path.keys}}">My Account</a> page.</p>' +
-						'<p>To get started using your API keys, dig into <a href="{{path.docs}}">our documentation</a>. We look forward to seeing what you create!</p>',
+				// Content
+				heading: 'Sign In', // The heading
+				subheading: '<p>Sign in to {{mashery.area}} using your Mashery ID.</p>', // The message above the sign in form
+
+				// The sidebar content
+				sidebar:	'<h2>Register</h2>' +
+							'<p><a href="{{path.register}}">Create an account</a> to access stagingcs9.mashery.com. Your account information can then be used to access other APIs on the Mashery API Network.</p>' +
+
+							'<h2>What is Mashery?</h2>' +
+							'<p><a href="http://mashery.com">Mashery</a> powers APIs of leading brands in retail, media, business services, software, and more. By signing in to a Mashery powered portal, you can gain access to Mashery\'s base of API providers. All with a single Mashery ID.</p>' +
+
+							'<p><a class="btn btn-user-register" id="btn-user-register" href="{{path.register}}">Register a Mashery ID</a></p>',
+
+				// Labels
+				submit: 'Sign In', // The submit button text @todo: does not work yet
+
 			},
 
 			/**
-			 * 404
-			 * The 404 page.
+			 * Title Attribute
+			 * Displayed in the web browser tab.
 			 */
-			fourOhFour: {
-				heading: 'Unable to find this page', // The heading
-				main: '<p>We\'re unable to find this page. Sorry! Please check the URL, or contact us to report a broken link.</p>' // The message
+			title: '{{mashery.title}} | {{mashery.area}}',
+
+			/**
+			 * User Navigation
+			 * The navigation menu where users sign in, register, view their account, and log out.
+			 */
+			userNav: {
+
+				// Logged Out
+				signin: 'Sign In', // "Sign In" link
+				register: 'Register', // "Register" link
+
+				// Logged In
+				account: 'My Account', // "My Account" link
+				dashboard: 'Dashboard', // "Dashboard" link (for admins only)
+				signout: 'Sign Out', // "Sign Out" link
+
 			}
 
 		},
@@ -1548,10 +2247,10 @@ var loadPortal = (function () {
 		 * They allow you to hook into and extend the functionality of your Portal.
 		 */
 		callbacks: {
-			beforeInit: function () {}, // Before the
-			afterInit: function () {},
-			beforeRender: function () {}, // Before any rendering begings
-			afterRender: function () {}, // After all page rendering is complete
+			beforeInit: function () {}, // Before the first render
+			afterInit: function () {}, // After the first render
+			beforeRender: function () {}, // Before each page render
+			afterRender: function () {}, // After each page render
 			beforeRenderLayout: function () {}, // Before the layout is rendered
 			afterRenderLayout: function () {}, // After the layout is rendered
 			beforeRenderUserNav: function () {}, // Before the user nav is rendered
@@ -1574,39 +2273,6 @@ var loadPortal = (function () {
 	 */
 	var paths = {
 
-		// Documentation
-		docs: {
-			placeholder: '{{path.docs}}',
-			url: '/docs'
-		},
-
-		// Sign In
-		signin: {
-			placeholder: '{{path.signin}}',
-			url: function () {
-				// Get the URL dynamically since it varies based on configuration and includes a redirect back to the current page
-				return window.mashery.login.url + window.mashery.login.redirect;
-			},
-		},
-
-		// User Registration
-		register: {
-			placeholder: '{{path.register}}',
-			url: '/member/register'
-		},
-
-		// User Registration Resent
-		registerResendConfirmation: {
-			placeholder: '{{path.registerResendConfirmation}}',
-			url: '/member/resend-confirmation'
-		},
-
-		// My Account
-		accountManage: {
-			placeholder: '{{path.account}}',
-			url: '/member/edit'
-		},
-
 		// My Apps
 		accountApps: {
 			placeholder: '{{path.apps}}',
@@ -1617,6 +2283,12 @@ var loadPortal = (function () {
 		accountKeys: {
 			placeholder: '{{path.keys}}',
 			url: '/apps/mykeys'
+		},
+
+		// My Account
+		accountManage: {
+			placeholder: '{{path.account}}',
+			url: '/member/edit'
 		},
 
 		// Change My Email
@@ -1631,26 +2303,10 @@ var loadPortal = (function () {
 			url: '/member/passwd'
 		},
 
-		// View My Profile
-		viewProfile: {
-			placeholder: '{{path.viewProfile}}',
-			url: function () {
-				// Varies by user. Grabbed dynamically.
-				return (window.mashery.userProfile ? window.mashery.userProfile : '/profile/profile');
-			}
-		},
-
-		// Remove Membership
-		removeMembership: {
-			placeholder: '{{path.removeMembership}}',
-			url: '/member/remove'
-		},
-
-		// Trigger Remove Member
-		// Special link that submits the remove member form
-		memberRemove: {
-			placeholder: '{{path.removeMember}}',
-			url: '/member/remove?action=removeMember'
+		// Contact
+		contact: {
+			placeholder: '{{path.contact}}',
+			url: '/contact'
 		},
 
 		// Dashboard
@@ -1658,14 +2314,14 @@ var loadPortal = (function () {
 			placeholder: '{{path.dashboard}}',
 			url: function () {
 				// Grabbed dynamically
-				return (window.mashery.dashboard ? window.mashery.dashboard : '#')
+				return (window.mashery.dashboard ? window.mashery.dashboard : '#');
 			}
 		},
 
-		// Logout
-		logout: {
-			placeholder: '{{path.logout}}',
-			url: '/logout/logout'
+		// Documentation
+		docs: {
+			placeholder: '{{path.docs}}',
+			url: '/docs'
 		},
 
 		// IO Docs
@@ -1674,16 +2330,10 @@ var loadPortal = (function () {
 			url: '/io-docs'
 		},
 
-		// Contact
-		contact: {
-			placeholder: '{{path.contact}}',
-			url: '/contact'
-		},
-
-		// Search Results
-		search: {
-			placeholder: '{{path.search}}',
-			url: '/search'
+		// Logout
+		logout: {
+			placeholder: '{{path.logout}}',
+			url: '/logout/logout'
 		},
 
 		// Password Request
@@ -1696,7 +2346,57 @@ var loadPortal = (function () {
 		lostUsername: {
 			placeholder: '{{path.lostUsername}}',
 			url: '/member/lost-username'
+		},
+
+		// Trigger Remove Member
+		// Special link that submits the remove member form
+		memberRemove: {
+			placeholder: '{{path.removeMember}}',
+			url: '/member/remove?action=removeMember'
+		},
+
+		// User Registration
+		register: {
+			placeholder: '{{path.register}}',
+			url: '/member/register'
+		},
+
+		// User Registration Resent
+		registerResendConfirmation: {
+			placeholder: '{{path.registerResendConfirmation}}',
+			url: '/member/resend-confirmation'
+		},
+
+		// Remove Membership
+		removeMembership: {
+			placeholder: '{{path.removeMembership}}',
+			url: '/member/remove'
+		},
+
+		// Search Results
+		search: {
+			placeholder: '{{path.search}}',
+			url: '/search'
+		},
+
+		// Sign In
+		signin: {
+			placeholder: '{{path.signin}}',
+			url: function () {
+				// Get the URL dynamically since it varies based on configuration and includes a redirect back to the current page
+				return window.mashery.login.url + window.mashery.login.redirect;
+			},
+		},
+
+		// View My Profile
+		viewProfile: {
+			placeholder: '{{path.viewProfile}}',
+			url: function () {
+				// Varies by user. Grabbed dynamically.
+				return (window.mashery.userProfile ? window.mashery.userProfile : '/profile/profile');
+			}
 		}
+
 	};
 
 	/**
@@ -1704,219 +2404,23 @@ var loadPortal = (function () {
 	 * Holds placeholders specific to certain pages
 	 */
 	var localPlaceholders = {
-		// The layout
-		layout: {
-
-			// User Nav
-			navUser: {
-				placeholder: '{{layout.navUser}}',
-				text: '<nav id="nav-user-wrapper"></nav>'
-			},
-
-			// Primary Nav
-			navPrimary: {
-				placeholder: '{{layout.navPrimary}}',
-				text: '<nav id="nav-primary-wrapper"></nav>'
-			},
-
-			// Secondary Nav
-			navSecondary: {
-				placeholder: '{{layout.navSecondary}}',
-				text: '<nav id="nav-secondary-wrapper"></nav>'
-			},
-
-			// Main Content
-			main: {
-				placeholder: '{{layout.main}}',
-				text: '<!-- tabindex="-1" hack for skipnav link: https://code.google.com/p/chromium/issues/detail?id=37721 -->' + '<main class="tabindex" tabindex="-1" id="main-wrapper"></main>'
-			},
-
-			// Footer 1
-			footer1: {
-				placeholder: '{{layout.footer1}}',
-				text: '<div id="footer-1-wrapper"></div>'
-			},
-
-			// Footer 2
-			footer2: {
-				placeholder: '{{layout.footer2}}',
-				text: '<div id="footer-2-wrapper"></div>'
-			}
-		},
-
-		// Sign In
-		signin: {
-
-			// Heading
-			heading: {
-				placeholder: '{{content.heading}}',
-				text: function () {
-					return settings.labels.signin.heading;
-				}
-			},
-
-			// Subheading
-			subheading: {
-				placeholder: '{{content.subheading}}',
-				text: function () {
-					return settings.labels.signin.subheading;
-				}
-			},
-
-			// Sign In Form
-			form: {
-				placeholder: '{{content.form}}',
-				text: function () {
-					return window.mashery.content.main;
-				}
-			},
-
-			// Sign In About Info/Sidebar
-			about: {
-				placeholder: '{{content.about}}',
-				text: function () {
-					return settings.labels.signin.sidebar;
-				}
-			}
-		},
-
-		// User Registration
-		register: {
-
-			// Heading
-			heading: {
-				placeholder: '{{content.heading}}',
-				text: function () {
-					return settings.labels.register.heading;
-				}
-			},
-
-			// Subheadin
-			subheading: {
-				placeholder: '{{content.subheading}}',
-				text: function () {
-					return settings.labels.register.subheading;
-				}
-			},
-
-			// Form
-			form: {
-				placeholder: '{{content.form}}',
-				text: function () {
-					return window.mashery.content.main;
-				}
-			},
-
-			// About/Sidebar Content
-			about: {
-				placeholder: '{{content.about}}',
-				text: function () {
-					return settings.labels.register.sidebar;
-				}
-			}
-
-		},
-
-		// Registration Confirmation
-		registerSent: {
-
-			// Heading
-			heading: {
-				placeholder: '{{content.heading}}',
-				text: function () {
-					return settings.labels.registerSent.heading;
-				}
-			}
-		},
-
-		// Resend Registration Confirmation
-		registerResend: {
-
-			// Heading
-			heading: {
-				placeholder: '{{content.heading}}',
-				text: function () {
-					return settings.labels.registerResend.heading;
-				}
-			},
-
-			// Subheading
-			subheading: {
-				placeholder: '{{content.subheading}}',
-				text: function () {
-					return settings.labels.registerResend.subheading;
-				}
-			}
-		},
-
-		// Registration Confirmation Successfully Resent
-		registerResendSuccess: {
-
-			// Heading
-			heading: {
-				placeholder: '{{content.heading}}',
-				text: function () {
-					return settings.labels.registerResendSuccess.heading;
-				}
-			},
-
-			// Main Content
-			main: {
-				placeholder: '{{content.main}}',
-				text: function () {
-					return settings.labels.registerResendSuccess.main;
-				}
-			}
-		},
-
-		// Join Area for Existing Mashery Users
-		join: {
-
-			// Heading
-			heading: {
-				placeholder: '{{content.heading}}',
-				text: function () {
-					return settings.labels.join.heading;
-				}
-			},
-
-			// Subheading
-			subheading: {
-				placeholder: '{{content.subheading}}',
-				text: function () {
-					return settings.labels.join.subheading;
-				}
-			}
-		},
-
-		// Join Successful
-		joinSuccess: {
-
-			// Heading
-			heading: {
-				placeholder: '{{content.heading}}',
-				text: function () {
-					return settings.labels.joinSuccess.heading;
-				}
-			}
-		},
 
 		// Account pages
 		account: {
 
-			// My Keys Heading
-			headingMyApiKeys: {
-				placeholder: '{{content.headingMyApiKeys}}',
+			// My Account Nav Label
+			account: {
+				placeholder: '{{content.account}}',
 				text: function () {
-					return settings.labels.account.headingMyApiKeys;
+					return settings.labels.account.account;
 				}
 			},
 
-			// My Apps Heading
-			headingMyApps: {
-				placeholder: '{{content.headingMyApps}}',
+			// My Apps Nav Label
+			apps: {
+				placeholder: '{{content.apps}}',
 				text: function () {
-					return settings.labels.account.headingMyApps;
+					return settings.labels.account.apps;
 				}
 			},
 
@@ -1944,11 +2448,43 @@ var loadPortal = (function () {
 				}
 			},
 
+			// Change My Email Success Heading
+			headingChangeEmailSuccess: {
+				placeholder: '{{content.headingChangeEmailSuccess}}',
+				text: function () {
+					return settings.labels.account.headingChangeEmailSuccess;
+				}
+			},
+
 			// Change My Password Heading
 			headingChangePassword: {
 				placeholder: '{{content.headingChangePassword}}',
 				text: function () {
 					return settings.labels.account.headingChangePassword;
+				}
+			},
+
+			// Change My Password Success Heading
+			headingChangePasswordSuccess: {
+				placeholder: '{{content.headingChangePasswordSuccess}}',
+				text: function () {
+					return settings.labels.account.headingChangePasswordSuccess;
+				}
+			},
+
+			// My Keys Heading
+			headingMyApiKeys: {
+				placeholder: '{{content.headingMyApiKeys}}',
+				text: function () {
+					return settings.labels.account.headingMyApiKeys;
+				}
+			},
+
+			// My Apps Heading
+			headingMyApps: {
+				placeholder: '{{content.headingMyApps}}',
+				text: function () {
+					return settings.labels.account.headingMyApps;
 				}
 			},
 
@@ -1960,19 +2496,11 @@ var loadPortal = (function () {
 				}
 			},
 
-			// My Apps Nav Label
-			apps: {
-				placeholder: '{{content.apps}}',
+			// No Applications Message
+			noApps: {
+				placeholder: '{{content.noApps}}',
 				text: function () {
-					return settings.labels.account.apps;
-				}
-			},
-
-			// My Account Nav Label
-			account: {
-				placeholder: '{{content.account}}',
-				text: function () {
-					return settings.labels.account.account;
+					return settings.labels.account.noApps;
 				}
 			},
 
@@ -1992,13 +2520,436 @@ var loadPortal = (function () {
 				}
 			},
 
-			// No Applications Message
-			noApps: {
-				placeholder: '{{content.noApps}}',
+			// Email successfully changed message
+			emailChanged: {
+				placeholder: '{{content.emailChanged}}',
 				text: function () {
-					return settings.labels.account.noApps;
+					return settings.labels.account.emailChanged;
+				}
+			},
+
+			// Password successfully changed message
+			passwordChanged: {
+				placeholder: '{{content.passwordChanged}}',
+				text: function () {
+					return settings.labels.account.passwordChanged;
 				}
 			}
+
+		},
+
+		// App Registration
+		appRegister: {
+
+			// Heading
+			heading: {
+				placeholder: '{{content.heading}}',
+				text: function () {
+					return settings.labels.appRegister.heading;
+				}
+			},
+
+			// Subheading
+			subheading: {
+				placeholder: '{{content.subheading}}',
+				text: function () {
+					return settings.labels.appRegister.subheading;
+				}
+			}
+
+		},
+
+		// App Registration Success
+		appRegisterSuccess: {
+
+			// Heading
+			heading: {
+				placeholder: '{{content.heading}}',
+				text: function () {
+					return settings.labels.appRegisterSuccess.heading;
+				}
+			},
+
+			// Main Content
+			main: {
+				placeholder: '{{content.main}}',
+				text: function () {
+					return settings.labels.appRegisterSuccess.main;
+				}
+			}
+
+		},
+
+		// Contact
+		contact: {
+
+			// Heading
+			heading: {
+				placeholder: '{{content.heading}}',
+				text: function () {
+					return settings.labels.contact.heading;
+				}
+			},
+
+			// Subheading
+			subheading: {
+				placeholder: '{{content.subheading}}',
+				text: function () {
+					return settings.labels.contact.subheading;
+				}
+			}
+
+		},
+
+		// Contact Success
+		contactSuccess: {
+
+			// Heading
+			heading: {
+				placeholder: '{{content.heading}}',
+				text: function () {
+					return settings.labels.contactSuccess.heading;
+				}
+			},
+
+			// Main Content
+			main: {
+				placeholder: '{{content.main}}',
+				text: function () {
+					return settings.labels.contactSuccess.main;
+				}
+			}
+
+		},
+
+		// 404 Page
+		fourOhFour: {
+
+			// Heading
+			heading: {
+				placeholder: '{{content.heading}}',
+				text: function () {
+					return settings.labels.fourOhFour.heading;
+				}
+			},
+
+			// Main Content
+			main: {
+				placeholder: '{{content.main}}',
+				text: function () {
+					return settings.labels.fourOhFour.main;
+				}
+			}
+
+		},
+
+		// IO Docs
+		ioDocs: {
+
+			// Heading
+			heading: {
+				placeholder: '{{content.heading}}',
+				text: function () {
+					return settings.labels.ioDocs.heading;
+				}
+			},
+
+			// Subheading
+			subheading: {
+				placeholder: '{{content.subheading}}',
+				text: function () {
+					return settings.labels.ioDocs.subheading;
+				}
+			}
+
+		},
+
+		// Join Area for Existing Mashery Users
+		join: {
+
+			// Heading
+			heading: {
+				placeholder: '{{content.heading}}',
+				text: function () {
+					return settings.labels.join.heading;
+				}
+			},
+
+			// Subheading
+			subheading: {
+				placeholder: '{{content.subheading}}',
+				text: function () {
+					return settings.labels.join.subheading;
+				}
+			}
+
+		},
+
+		// Join Successful
+		joinSuccess: {
+
+			// Heading
+			heading: {
+				placeholder: '{{content.heading}}',
+				text: function () {
+					return settings.labels.joinSuccess.heading;
+				}
+			}
+
+		},
+
+		// The layout
+		layout: {
+
+			// Footer 1
+			footer1: {
+				placeholder: '{{layout.footer1}}',
+				text: '<div id="footer-1-wrapper"></div>'
+			},
+
+			// Footer 2
+			footer2: {
+				placeholder: '{{layout.footer2}}',
+				text: '<div id="footer-2-wrapper"></div>'
+			},
+
+			// Main Content
+			main: {
+				placeholder: '{{layout.main}}',
+				text: '<!-- tabindex="-1" hack for skipnav link: https://code.google.com/p/chromium/issues/detail?id=37721 -->' + '<main class="tabindex" tabindex="-1" id="main-wrapper"></main>'
+			},
+
+			// Primary Nav
+			navPrimary: {
+				placeholder: '{{layout.navPrimary}}',
+				text: '<nav id="nav-primary-wrapper"></nav>'
+			},
+
+			// Secondary Nav
+			navSecondary: {
+				placeholder: '{{layout.navSecondary}}',
+				text: '<nav id="nav-secondary-wrapper"></nav>'
+			},
+
+			// User Nav
+			navUser: {
+				placeholder: '{{layout.navUser}}',
+				text: '<nav id="nav-user-wrapper"></nav>'
+			}
+
+		},
+
+		// Logout Successful
+		logout: {
+
+			// Heading
+			heading: {
+				placeholder: '{{content.heading}}',
+				text: function () {
+					return settings.labels.logout.heading;
+				}
+			},
+
+			// Main Content
+			main: {
+				placeholder: '{{content.main}}',
+				text: function () {
+					return settings.labels.logout.main;
+				}
+			}
+
+		},
+
+		// Logout Failed
+		logoutFail: {
+
+			// Heading
+			heading: {
+				placeholder: '{{content.heading}}',
+				text: function () {
+					return settings.labels.logoutFail.heading;
+				}
+			},
+
+			// Main Content
+			main: {
+				placeholder: '{{content.main}}',
+				text: function () {
+					return settings.labels.logoutFail.main;
+				}
+			}
+
+		},
+
+		// Lost Password Request
+		lostPassword: {
+
+			// Heading
+			heading: {
+				placeholder: '{{content.heading}}',
+				text: function () {
+					return settings.labels.lostPassword.heading;
+				}
+			},
+
+			// Subheading
+			subheading: {
+				placeholder: '{{content.subheading}}',
+				text: function () {
+					return settings.labels.lostPassword.subheading;
+				}
+			}
+
+		},
+
+		// Lost Password Reset
+		lostPasswordReset: {
+
+			// Heading
+			heading: {
+				placeholder: '{{content.heading}}',
+				text: function () {
+					return settings.labels.lostPasswordReset.heading;
+				}
+			},
+
+			// Main Content
+			main: {
+				placeholder: '{{content.main}}',
+				text: function () {
+					return settings.labels.lostPasswordReset.main;
+				}
+			}
+
+		},
+
+		// Lost Username Request
+		lostUsername: {
+
+			// Heading
+			heading: {
+				placeholder: '{{content.heading}}',
+				text: function () {
+					return settings.labels.lostUsername.heading;
+				}
+			},
+
+			// Subheading
+			subheading: {
+				placeholder: '{{content.subheading}}',
+				text: function () {
+					return settings.labels.lostUsername.subheading;
+				}
+			}
+
+		},
+
+		// Lost Username Reset
+		lostUsernameReset: {
+
+			// Heading
+			heading: {
+				placeholder: '{{content.heading}}',
+				text: function () {
+					return settings.labels.lostUsernameReset.heading;
+				}
+			},
+
+			// Main Content
+			main: {
+				placeholder: '{{content.main}}',
+				text: function () {
+					return settings.labels.lostUsernameReset.main;
+				}
+			}
+
+		},
+
+		// Remove Membership
+		memberRemove: {
+
+			// Cancel Button Text
+			cancel: {
+				placeholder: '{{content.cancel}}',
+				text: function () {
+					return settings.labels.memberRemove.cancel;
+				}
+			},
+
+			// Confirm Button Text
+			confirm: {
+				placeholder: '{{content.confirm}}',
+				text: function () {
+					return settings.labels.memberRemove.confirm;
+				}
+			},
+
+			// Heading
+			heading: {
+				placeholder: '{{content.heading}}',
+				text: function () {
+					return settings.labels.memberRemove.heading;
+				}
+			},
+
+			// Main Content
+			main: {
+				placeholder: '{{content.main}}',
+				text: function () {
+					return settings.labels.memberRemove.main;
+				}
+			},
+
+			// Pop Up Confirmation Text
+			popup: {
+				placeholder: '{{content.popup}}',
+				text: function () {
+					return settings.labels.memberRemove.popup;
+				}
+			}
+
+		},
+
+		// Member Successfully Removed
+		memberRemoveSuccess: {
+
+			// Heading
+			heading: {
+				placeholder: '{{content.heading}}',
+				text: function () {
+					return settings.labels.memberRemoveSuccess.heading;
+				}
+			},
+
+			// Main Content
+			main: {
+				placeholder: '{{content.main}}',
+				text: function () {
+					return settings.labels.memberRemoveSuccess.main;
+				}
+			}
+
+		},
+
+		// No Access to this Content
+		noAccess: {
+
+			// Heading
+			heading: {
+				placeholder: '{{content.heading}}',
+				text: function () {
+					return settings.labels.noAccess.heading;
+				}
+			},
+
+			// Main Content
+			main: {
+				placeholder: '{{content.main}}',
+				text: function () {
+					return settings.labels.noAccess.main;
+				}
+			}
+
 		},
 
 		// User Profiles
@@ -2050,121 +3001,68 @@ var loadPortal = (function () {
 				text: function () {
 					return settings.labels.profile.userRegistered;
 				}
-			},
+			}
+
 		},
 
-		// Logout Successful
-		logout: {
+		// User Registration
+		register: {
+
+			// About/Sidebar Content
+			about: {
+				placeholder: '{{content.about}}',
+				text: function () {
+					return settings.labels.register.sidebar;
+				}
+			},
+
+			// Form
+			form: {
+				placeholder: '{{content.form}}',
+				text: function () {
+					return window.mashery.content.main;
+				}
+			},
 
 			// Heading
 			heading: {
 				placeholder: '{{content.heading}}',
 				text: function () {
-					return settings.labels.logout.heading;
+					return settings.labels.register.heading;
 				}
 			},
 
-			// Main Content
-			main: {
-				placeholder: '{{content.main}}',
+			// Subheadin
+			subheading: {
+				placeholder: '{{content.subheading}}',
 				text: function () {
-					return settings.labels.logout.main;
+					return settings.labels.register.subheading;
 				}
 			}
+
 		},
 
-		// Logout Failed
-		logoutFail: {
+		// Registration Confirmation
+		registerSent: {
 
 			// Heading
 			heading: {
 				placeholder: '{{content.heading}}',
 				text: function () {
-					return settings.labels.logoutFail.heading;
-				}
-			},
-
-			// Main Content
-			main: {
-				placeholder: '{{content.main}}',
-				text: function () {
-					return settings.labels.logoutFail.main;
+					return settings.labels.registerSent.heading;
 				}
 			}
+
 		},
 
-		// Remove Membership
-		memberRemove: {
+		// Resend Registration Confirmation
+		registerResend: {
 
 			// Heading
 			heading: {
 				placeholder: '{{content.heading}}',
 				text: function () {
-					return settings.labels.memberRemove.heading;
-				}
-			},
-
-			// Main Content
-			main: {
-				placeholder: '{{content.main}}',
-				text: function () {
-					return settings.labels.memberRemove.main;
-				}
-			},
-
-			// Confirm Button Text
-			confirm: {
-				placeholder: '{{content.confirm}}',
-				text: function () {
-					return settings.labels.memberRemove.confirm;
-				}
-			},
-
-			// Cancel Button Text
-			cancel: {
-				placeholder: '{{content.cancel}}',
-				text: function () {
-					return settings.labels.memberRemove.cancel;
-				}
-			},
-
-			// Pop Up Confirmation Text
-			popup: {
-				placeholder: '{{content.popup}}',
-				text: function () {
-					return settings.labels.memberRemove.popup;
-				}
-			}
-		},
-
-		// Member Successfully Removed
-		memberRemoveSuccess: {
-
-			// Heading
-			heading: {
-				placeholder: '{{content.heading}}',
-				text: function () {
-					return settings.labels.memberRemoveSuccess.heading;
-				}
-			},
-
-			// Main Content
-			main: {
-				placeholder: '{{content.main}}',
-				text: function () {
-					return settings.labels.memberRemoveSuccess.main;
-				}
-			}
-		},
-
-		// IO Docs
-		ioDocs: {
-
-			// Heading
-			heading: {
-				placeholder: '{{content.heading}}',
-				text: function () {
-					return settings.labels.ioDocs.heading;
+					return settings.labels.registerResend.heading;
 				}
 			},
 
@@ -2172,39 +3070,20 @@ var loadPortal = (function () {
 			subheading: {
 				placeholder: '{{content.subheading}}',
 				text: function () {
-					return settings.labels.ioDocs.subheading;
+					return settings.labels.registerResend.subheading;
 				}
 			}
+
 		},
 
-		// Lost Password Request
-		lostPassword: {
+		// Registration Confirmation Successfully Resent
+		registerResendSuccess: {
 
 			// Heading
 			heading: {
 				placeholder: '{{content.heading}}',
 				text: function () {
-					return settings.labels.lostPassword.heading;
-				}
-			},
-
-			// Subheading
-			subheading: {
-				placeholder: '{{content.subheading}}',
-				text: function () {
-					return settings.labels.lostPassword.subheading;
-				}
-			}
-		},
-
-		// Lost Password Reset
-		lostPasswordReset: {
-
-			// Heading
-			heading: {
-				placeholder: '{{content.heading}}',
-				text: function () {
-					return settings.labels.lostPasswordReset.heading;
+					return settings.labels.registerResendSuccess.heading;
 				}
 			},
 
@@ -2212,49 +3091,10 @@ var loadPortal = (function () {
 			main: {
 				placeholder: '{{content.main}}',
 				text: function () {
-					return settings.labels.lostPasswordReset.main;
+					return settings.labels.registerResendSuccess.main;
 				}
 			}
-		},
 
-		// Lost Username Request
-		lostUsername: {
-
-			// Heading
-			heading: {
-				placeholder: '{{content.heading}}',
-				text: function () {
-					return settings.labels.lostUsername.heading;
-				}
-			},
-
-			// Subheading
-			subheading: {
-				placeholder: '{{content.subheading}}',
-				text: function () {
-					return settings.labels.lostUsername.subheading;
-				}
-			}
-		},
-
-		// Lost Username Reset
-		lostUsernameReset: {
-
-			// Heading
-			heading: {
-				placeholder: '{{content.heading}}',
-				text: function () {
-					return settings.labels.lostUsernameReset.heading;
-				}
-			},
-
-			// Main Content
-			main: {
-				placeholder: '{{content.main}}',
-				text: function () {
-					return settings.labels.lostUsernameReset.main;
-				}
-			}
 		},
 
 		// Search Form and Results
@@ -2339,16 +3179,96 @@ var loadPortal = (function () {
 					return settings.labels.search.pageDivider;
 				}
 			}
+
 		},
 
-		// Contact
-		contact: {
+		// Show Secret
+		showSecret: {
 
 			// Heading
 			heading: {
 				placeholder: '{{content.heading}}',
 				text: function () {
-					return settings.labels.contact.heading;
+					return settings.labels.showSecret.heading;
+				}
+			},
+
+			// Main Content
+			main: {
+				placeholder: '{{content.main}}',
+				text: function () {
+					return settings.labels.showSecret.main;
+				}
+			}
+
+		},
+
+		// Show Secret: Success
+		showSecretSuccess: {
+
+			// Heading
+			heading: {
+				placeholder: '{{content.heading}}',
+				text: function () {
+					return settings.labels.showSecretSuccess.heading;
+				}
+			},
+
+			// Main Content
+			main: {
+				placeholder: '{{content.main}}',
+				text: function () {
+					return settings.labels.showSecretSuccess.main;
+				}
+			}
+
+		},
+
+		// Show Secret: Error
+		showSecretError: {
+
+			// Heading
+			heading: {
+				placeholder: '{{content.heading}}',
+				text: function () {
+					return settings.labels.showSecretError.heading;
+				}
+			},
+
+			// Main Content
+			main: {
+				placeholder: '{{content.main}}',
+				text: function () {
+					return settings.labels.showSecretError.main;
+				}
+			}
+
+		},
+
+		// Sign In
+		signin: {
+
+			// Sign In About Info/Sidebar
+			about: {
+				placeholder: '{{content.about}}',
+				text: function () {
+					return settings.labels.signin.sidebar;
+				}
+			},
+
+			// Sign In Form
+			form: {
+				placeholder: '{{content.form}}',
+				text: function () {
+					return window.mashery.content.main;
+				}
+			},
+
+			// Heading
+			heading: {
+				placeholder: '{{content.heading}}',
+				text: function () {
+					return settings.labels.signin.heading;
 				}
 			},
 
@@ -2356,90 +3276,12 @@ var loadPortal = (function () {
 			subheading: {
 				placeholder: '{{content.subheading}}',
 				text: function () {
-					return settings.labels.contact.subheading;
+					return settings.labels.signin.subheading;
 				}
 			}
-		},
 
-		// Contact Success
-		contactSuccess: {
-
-			// Heading
-			heading: {
-				placeholder: '{{content.heading}}',
-				text: function () {
-					return settings.labels.contactSuccess.heading;
-				}
-			},
-
-			// Main Content
-			main: {
-				placeholder: '{{content.main}}',
-				text: function () {
-					return settings.labels.contactSuccess.main;
-				}
-			}
-		},
-
-		// App Registration
-		appRegister: {
-
-			// Heading
-			heading: {
-				placeholder: '{{content.heading}}',
-				text: function () {
-					return settings.labels.appRegister.heading;
-				}
-			},
-
-			// Subheading
-			subheading: {
-				placeholder: '{{content.subheading}}',
-				text: function () {
-					return settings.labels.appRegister.subheading;
-				}
-			}
-		},
-
-		// App Registration Success
-		appRegisterSuccess: {
-
-			// Heading
-			heading: {
-				placeholder: '{{content.heading}}',
-				text: function () {
-					return settings.labels.appRegisterSuccess.heading;
-				}
-			},
-
-			// Main Content
-			main: {
-				placeholder: '{{content.main}}',
-				text: function () {
-					return settings.labels.appRegisterSuccess.main;
-				}
-			}
-		},
-
-		// 404 Page
-		fourOhFour: {
-
-			// Heading
-			heading: {
-				placeholder: '{{content.heading}}',
-				text: function () {
-					return settings.labels.fourOhFour.heading;
-				}
-			},
-
-			// Main Content
-			main: {
-				placeholder: '{{content.main}}',
-				text: function () {
-					return settings.labels.fourOhFour.main;
-				}
-			}
 		}
+
 	};
 
 	/**
@@ -2448,76 +3290,11 @@ var loadPortal = (function () {
 	 */
 	var globalPlaceholders = {
 
-		// Page Title
-		title: {
-			placeholder: '{{mashery.title}}',
-			text: function () {
-				var heading = m$.get('h1');
-				return (heading ? heading.innerHTML.trim() : window.mashery.title.replace(window.mashery.area + ' - ', '').replace(window.mashery.area, ''));
-			}
-		},
-
 		// Portal/Area Name
 		area: {
 			placeholder: '{{mashery.area}}',
 			text: function () {
 				return window.mashery.area;
-			}
-		},
-
-		// Current User's Username
-		username: {
-			placeholder: '{{mashery.username}}',
-			text: function () {
-				return window.mashery.username;
-			}
-		},
-
-		// Logo
-		logo: {
-			placeholder: '{{content.logo}}',
-			text: function () {
-				return settings.logo ? settings.logo : window.mashery.area;
-			}
-		},
-
-		// User Nav Items (<li><a href="#">link</a></li> without a parent list wrapper)
-		navItemsUser: {
-			placeholder: '{{content.navItemsUser}}',
-			text: function () {
-				return getUserNavItems();
-			}
-		},
-
-		// Primary Nav Items (<li><a href="#">link</a></li> without a parent list wrapper)
-		navItemsPrimary: {
-			placeholder: '{{content.navItemsPrimary}}',
-			text: function () {
-				return getNavItems(window.mashery.content.navPrimary);
-			}
-		},
-
-		// Secondary Nav Items (<li><a href="#">link</a></li> without a parent list wrapper)
-		navItemsSecondary: {
-			placeholder: '{{content.navItemsSecondary}}',
-			text: function () {
-				return getNavItems(window.mashery.content.navSecondary);
-			}
-		},
-
-		// User Account Nav Items (<li><a> href="#"link</a></li> without a parent list wrapper)
-		navItemsAccount: {
-			placeholder: '{{content.navItemsAccount}}',
-			text: function () {
-				return getAccountNavItems();
-			}
-		},
-
-		// Mashery Account Nav Items (<li><a> href="#"link</a></li> without a parent list wrapper)
-		navItemsMasheryAccount: {
-			placeholder: '{{content.navItemsMasheryAccount}}',
-			text: function () {
-				return getMasheryAccountNavItems();
 			}
 		},
 
@@ -2537,29 +3314,58 @@ var loadPortal = (function () {
 			}
 		},
 
-		// Search Form
-		searchForm: {
-			placeholder: '{{content.searchForm}}',
+		// Logo
+		logo: {
+			placeholder: '{{content.logo}}',
 			text: function () {
-				var template =
-					'<form id="search-form" class="search-form" method="get" action="/search">' +
-						'<input class="search-input" id="search-input" type="text" value="" placeholder="' + settings.labels.search.placeholder + '" name="q">' +
-						'<button class="search-button" id="search-button" type="submit">' + settings.labels.search.button + '</button>' +
-					'</form>';
-				return template;
+				return settings.logo ? settings.logo : window.mashery.area;
 			}
 		},
 
-		// Registration Terms of Use
-		registerTerms: {
-			placeholder: '{{content.terms}}',
+		// User Account Nav Items (<li><a> href="#"link</a></li> without a parent list wrapper)
+		navItemsAccount: {
+			placeholder: '{{content.navItemsAccount}}',
 			text: function () {
-				var text =
-					'<div id="registration-terms-of-service">' +
-						'<p>By clicking the "Register" button, I certify that I have read and agree to {{content.privacyPolicy}}the <a href="http://www.mashery.com/terms/">Mashery Terms of Service</a> and <a href="http://www.mashery.com/privacy/">Privacy Policy</a>.</p>' +
-					'</div>';
-				return text;
+				return getAccountNavItems();
 			}
+		},
+
+		// Mashery Account Nav Items (<li><a> href="#"link</a></li> without a parent list wrapper)
+		navItemsMasheryAccount: {
+			placeholder: '{{content.navItemsMasheryAccount}}',
+			text: function () {
+				return getMasheryAccountNavItems();
+			}
+		},
+
+		// Primary Nav Items (<li><a href="#">link</a></li> without a parent list wrapper)
+		navItemsPrimary: {
+			placeholder: '{{content.navItemsPrimary}}',
+			text: function () {
+				return getNavItems(window.mashery.content.navPrimary);
+			}
+		},
+
+		// Secondary Nav Items (<li><a href="#">link</a></li> without a parent list wrapper)
+		navItemsSecondary: {
+			placeholder: '{{content.navItemsSecondary}}',
+			text: function () {
+				return getNavItems(window.mashery.content.navSecondary);
+			}
+		},
+
+		// User Nav Items (<li><a href="#">link</a></li> without a parent list wrapper)
+		navItemsUser: {
+			placeholder: '{{content.navItemsUser}}',
+			text: function () {
+				return getUserNavItems();
+			}
+		},
+
+		// Mashery Made Logo
+		masheryMade: {
+			placeholder: '{{content.masheryMade}}',
+			text: '<a id="mashery-made-logo" href="http://mashery.com"><img src="https://support.mashery.com/public/Mashery/images/masherymade.png"></a>'
 		},
 
 		// Privacy Policy
@@ -2570,11 +3376,48 @@ var loadPortal = (function () {
 			}
 		},
 
-		// Mashery Made Logo
-		masheryMade: {
-			placeholder: '{{content.masheryMade}}',
-			text: '<a id="mashery-made-logo" href="http://mashery.com"><img src="https://support.mashery.com/public/Mashery/images/masherymade.png"></a>'
+		// Registration Terms of Use
+		registerTerms: {
+			placeholder: '{{content.terms}}',
+			text: function () {
+				var text =
+					'<div id="registration-terms-of-service">' +
+					'<p>By clicking the "Register" button, I certify that I have read and agree to {{content.privacyPolicy}}the <a href="http://www.mashery.com/terms/">Mashery Terms of Service</a> and <a href="http://www.mashery.com/privacy/">Privacy Policy</a>.</p>' +
+					'</div>';
+				return text;
+			}
+		},
+
+		// Search Form
+		searchForm: {
+			placeholder: '{{content.searchForm}}',
+			text: function () {
+				var template =
+					'<form id="search-form" class="search-form" method="get" action="/search">' +
+					'<input class="search-input" id="search-input" type="text" value="" placeholder="' + settings.labels.search.placeholder + '" name="q">' +
+					'<button class="search-button" id="search-button" type="submit">' + settings.labels.search.button + '</button>' +
+					'</form>';
+				return template;
+			}
+		},
+
+		// Page Title
+		title: {
+			placeholder: '{{mashery.title}}',
+			text: function () {
+				var heading = m$.get('h1');
+				return (heading ? heading.innerHTML.trim() : window.mashery.title.replace(window.mashery.area + ' - ', '').replace(window.mashery.area, ''));
+			}
+		},
+
+		// Current User's Username
+		username: {
+			placeholder: '{{mashery.username}}',
+			text: function () {
+				return window.mashery.username;
+			}
 		}
+
 	};
 
 
@@ -2597,7 +3440,7 @@ var loadPortal = (function () {
 			var tempLocal = /account/.test(local) ? 'account' : local;
 			if (localPlaceholders[tempLocal]) {
 				localPlaceholders[tempLocal].forEach((function (placeholder) {
-					if(!placeholder.placeholder || !placeholder.text) return;
+					if (!placeholder.placeholder || !placeholder.text) return;
 					template = template.replace(new RegExp(placeholder.placeholder, 'g'), placeholder.text);
 				}));
 			}
@@ -2678,23 +3521,36 @@ var loadPortal = (function () {
 	};
 
 	/**
-	 * Inject HTML elements into the <head>
-	 * @param {String} type The HTML element type
-	 * @param {Object} atts The attributes and values for the element
+	 * Load IO Docs scripts if they're not already present
 	 */
-	var inject = function (type, atts) {
+	var loadIODocsScripts = function () {
+		m$.loadJS('/public/Mashery/scripts/Iodocs/prettify.js', (function () {
+			m$.loadJS('/public/Mashery/scripts/Mashery/beautify.js', (function () {
+				m$.loadJS('/public/Mashery/scripts/vendor/alpaca.min.js', (function () {
+					m$.loadJS('/public/Mashery/scripts/Iodocs/utilities.js', (function () {
+						m$.loadJS('/public/Mashery/scripts/Iodocs/iodocs.js', (function () {
+							m$.loadJS('/public/Mashery/scripts/Mashery/ace/ace.js');
+						}), true);
+					}), true);
+				}), true);
+			}), true);
+		}), true);
+	};
 
-		// Variables
-		var ref = window.document.getElementsByTagName('script')[0];
-		var elem = document.createElement(type);
-
-		// Loop through each attribute
-		atts.forEach((function (value, key) {
-			elem.setAttribute(key, value);
-		}));
-
-		// @todo replace with ref.before(elem)
-		ref.parentNode.insertBefore(elem, ref);
+	/**
+	 * Load any Mashery files that are required for a page to work
+	 * Currently, this is only required for IO Docs
+	 */
+	var loadRequiredFiles = function () {
+		// If not IO Docs, bail
+		if (window.mashery.contentType !== 'ioDocs') return;
+		if (!('jQuery' in window)) {
+			// If jQuery isn't loaded yet, load it
+			loadJS('https://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js', loadIODocsScripts);
+		} else {
+			// Otherwise, just load our scripts
+			loadIODocsScripts();
+		}
 	};
 
 	/**
@@ -2723,7 +3579,7 @@ var loadPortal = (function () {
 			var junk = m$.getAll('#header-edit, #main .section .section-meta');
 			junk.forEach((function (item) {
 				item.remove();
-			}))
+			}));
 		}
 
 		// Run the after callback
@@ -2737,7 +3593,7 @@ var loadPortal = (function () {
 	 * Verify that a user logged in.
 	 * @bugfix Sometimes mashery variable provides wrong info at page load after logout event
 	 */
-	var verifyLoggedIn = function () {
+	exports.verifyLoggedIn = function () {
 
 		// Only run on logout and member remove pages
 		if (['logout', 'memberRemoveSuccess'].indexOf(window.mashery.contentType) === -1) return;
@@ -2752,6 +3608,45 @@ var loadPortal = (function () {
 		window.mashery.isAdmin = false;
 		window.mashery.dashboard = null;
 		window.mashery.logout = null;
+
+	};
+
+	/**
+	 * Render the header elements
+	 * @param {Boolean} ajax  If true, skip rendering (since they already exist)
+	 */
+	var renderHead = function (ajax) {
+
+		// Don't run on Ajax (content is already rendered)
+		if (ajax) return;
+
+		// Force latest rendering engine in IE
+		m$.inject('meta', {
+			'http-equiv': 'X-UA-Compatible',
+			'content': 'IE=edge,chrome=1'
+		});
+
+		// Add a default viewport width
+		if (settings.responsive) {
+			m$.inject('meta', {
+				name: 'viewport',
+				content: 'width=device-width, initial-scale=1.0'
+			});
+		}
+
+		// Add a favicon
+		if (settings.favicon && settings.faviconURL) {
+			m$.inject('link', {
+				rel: 'shortcut icon',
+				href: settings.faviconURL
+			});
+
+			m$.inject('link', {
+				rel: 'icon',
+				sizes: settings.faviconSizes,
+				href: settings.faviconURL
+			});
+		}
 
 	};
 
@@ -2780,7 +3675,7 @@ var loadPortal = (function () {
 	 */
 	exports.renderLayout = function () {
 		render('#app', 'layout', settings.callbacks.beforeRenderLayout, settings.callbacks.afterRenderLayout);
-		verifyLoggedIn();
+		exports.verifyLoggedIn();
 	};
 
 	/**
@@ -2817,48 +3712,15 @@ var loadPortal = (function () {
 	exports.renderFooter = function () {
 
 		// Run the before callback
-		settings.callbacks.beforeRenderRenderFooter();
+		settings.callbacks.beforeRenderFooter();
 
 		// Render footers 1 and 2
 		render('#footer-1-wrapper', 'footer1');
 		render('#footer-2-wrapper', 'footer2');
 
 		// Run the after callback
-		settings.callbacks.afterRenderRenderFooter();
+		settings.callbacks.afterRenderFooter();
 
-	};
-
-	/**
-	 * Load IO Docs scripts if they're not already present
-	 */
-	var loadIODocsScripts = function () {
-		m$.loadJS('/public/Mashery/scripts/Iodocs/prettify.js', (function () {
-			m$.loadJS('/public/Mashery/scripts/Mashery/beautify.js', (function () {
-				m$.loadJS('/public/Mashery/scripts/vendor/alpaca.min.js', (function () {
-					m$.loadJS('/public/Mashery/scripts/Iodocs/utilities.js', (function () {
-						m$.loadJS('/public/Mashery/scripts/Iodocs/iodocs.js', (function () {
-							m$.loadJS('/public/Mashery/scripts/Mashery/ace/ace.js');
-						}), true);
-					}), true);
-				}), true);
-			}), true);
-		}), true);
-	}
-
-	/**
-	 * Load any Mashery files that are required for a page to work
-	 * Currently, this is only required for IO Docs
-	 */
-	var loadRequiredFiles = function () {
-		// If not IO Docs, bail
-		if (window.mashery.contentType !== 'ioDocs') return;
-		if (!('jQuery' in window)) {
-			// If jQuery isn't loaded yet, load it
-			loadJS('https://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js', loadIODocsScripts);
-		} else {
-			// Otherwise, just load our scripts
-			loadIODocsScripts();
-		}
 	};
 
 	/**
@@ -2867,45 +3729,6 @@ var loadPortal = (function () {
 	exports.renderMain = function () {
 		loadRequiredFiles();
 		render('#main-wrapper', window.mashery.contentType, settings.callbacks.beforeRenderMain, settings.callbacks.afterRenderMain);
-	};
-
-	/**
-	 * Render the header elements
-	 * @param {Boolean} ajax  If true, skip rendering (since they already exist)
-	 */
-	var renderHead = function (ajax) {
-
-		// Don't run on Ajax (content is already rendered)
-		if (ajax) return;
-
-		// Force latest rendering engine in IE
-		inject('meta', {
-			'http-equiv': 'X-UA-Compatible',
-			'content': 'IE=edge,chrome=1'
-		});
-
-		// Add a default viewport width
-		if (settings.responsive) {
-			inject('meta', {
-				name: 'viewport',
-				content: 'width=device-width, initial-scale=1.0'
-			});
-		}
-
-		// Add a favicon
-		if (settings.favicon && settings.faviconURL) {
-			inject('link', {
-				rel: 'shortcut icon',
-				href: settings.faviconURL
-			});
-
-			inject('link', {
-				rel: 'icon',
-				sizes: settings.faviconSizes,
-				href: settings.faviconURL
-			});
-		}
-
 	};
 
 	/**
@@ -2968,7 +3791,7 @@ var loadPortal = (function () {
 		// Reload IO Docs
 		fetchContent(window.location.href, true);
 
-	}
+	};
 
 	/**
 	 * Render the Mashery Made logo (if missing)
@@ -2985,7 +3808,7 @@ var loadPortal = (function () {
 
 		// Create our logo container and add the logo
 		var mashMade = document.createElement('div');
-		mashMade.innerHTML = '<p>x</p><div id="mashery-made"><div class="container"><p>' + globalPlaceholders.masheryMade.text + '</p></div></div>';
+		mashMade.innerHTML = '<p>x</p><div id="mashery-made"><div class="container"><p>' + globalPlaceholders['{{content.masheryMade}}'] + '</p></div></div>';
 
 		// Inject into the DOM
 		app.appendChild(mashMade.childNodes[1]);
@@ -3010,55 +3833,10 @@ var loadPortal = (function () {
 
 		// Create our terms of use
 		var div = document.createElement('div');
-		div.innerHTML = '<p>x</p>' + replacePlaceholders(globalPlaceholders.registerTerms.text, 'register');
+		div.innerHTML = '<p>x</p>' + replacePlaceholders(globalPlaceholders['{{content.terms}}'], 'register');
 
 		// Inject into the DOM
 		reg.appendChild(div.childNodes[1]);
-
-	}
-
-	/**
-	 * Render the Portal
-	 * @param {Boolean} ajax  If true, the page is being loaded via Ajax
-	 */
-	exports.renderPortal = function (ajax) {
-		settings.callbacks.beforeRender(); // Run beforeRender() callback
-		document.documentElement.classList.add('rendering'); // Add rendering class to the DOM
-		renderHead(ajax); // <head> attributes
-		exports.addStyleHooks(); // Content-specific classes
-		exports.renderLayout(); // Layout
-		exports.renderUserNav(); // User Navigation
-		exports.renderPrimaryNav(); // Primary Navigation
-		exports.renderSecondaryNav(); // Secondary Navigation
-		exports.renderMain(); // Main Content
-		exports.renderTitle(); // Page Title
-		exports.renderFooter(); // Footer
-		fixLocation(); // Jump to anchor
-		renderLogout(); // Logout Form
-		renderMemberRemove(); // Remove Member Form
-		exports.renderMasheryMade(); // Add the Mashery Made logo if missing
-		exports.renderTOS(); // Add the Mashery Terms of Service if missing from registration page
-		settings.callbacks.afterRender(); // Run afterRender() callback
-		reloadIODocs(); // Reload IO Docs
-		document.documentElement.classList.remove('loading'); // Remove loading class from the DOM
-		document.documentElement.classList.remove('rendering'); // Remove rendering class from the DOM
-	};
-
-	/**
-	 * Process logout events
-	 * @param {Event} event The click event
-	 */
-	var processLogout = function (event) {
-
-		// Bail if there's no logout form
-		var logout = m$.get('#mashery-logout-form');
-		if (!logout) return;
-
-		// Prevent the default click behavior
-		event.preventDefault();
-
-		// Submit the logout form
-		logout.submit();
 
 	};
 
@@ -3142,6 +3920,51 @@ var loadPortal = (function () {
 	};
 
 	/**
+	 * Render the Portal
+	 * @param {Boolean} ajax  If true, the page is being loaded via Ajax
+	 */
+	exports.renderPortal = function (ajax) {
+		settings.callbacks.beforeRender(); // Run beforeRender() callback
+		document.documentElement.classList.add('rendering'); // Add rendering class to the DOM
+		renderHead(ajax); // <head> attributes
+		exports.addStyleHooks(); // Content-specific classes
+		exports.renderLayout(); // Layout
+		exports.renderUserNav(); // User Navigation
+		exports.renderPrimaryNav(); // Primary Navigation
+		exports.renderSecondaryNav(); // Secondary Navigation
+		exports.renderMain(); // Main Content
+		exports.renderTitle(); // Page Title
+		exports.renderFooter(); // Footer
+		fixLocation(); // Jump to anchor
+		renderLogout(); // Logout Form
+		renderMemberRemove(); // Remove Member Form
+		exports.renderMasheryMade(); // Add the Mashery Made logo if missing
+		exports.renderTOS(); // Add the Mashery Terms of Service if missing from registration page
+		settings.callbacks.afterRender(); // Run afterRender() callback
+		reloadIODocs(); // Reload IO Docs
+		document.documentElement.classList.remove('loading'); // Remove loading class from the DOM
+		document.documentElement.classList.remove('rendering'); // Remove rendering class from the DOM
+	};
+
+	/**
+	 * Process logout events
+	 * @param {Event} event The click event
+	 */
+	var processLogout = function (event) {
+
+		// Bail if there's no logout form
+		var logout = m$.get('#mashery-logout-form');
+		if (!logout) return;
+
+		// Prevent the default click behavior
+		event.preventDefault();
+
+		// Submit the logout form
+		logout.submit();
+
+	};
+
+	/**
 	 * Process remove membership events
 	 * @param {Event} event The click event
 	 */
@@ -3220,13 +4043,13 @@ var loadPortal = (function () {
 	*/
 	exports.init = function (options) {
 
-		loadJS('https://cdn.polyfill.io/v2/polyfill.min.js?features=default', (function () {
+		m$.loadJS('https://cdn.polyfill.io/v2/polyfill.min.js?features=default', (function () {
 
 			// Merge user options with defaults
 			settings = m$.extend( defaults, options || {} );
 
 			// Run callback before initializing
-			exports.callbacks.beforeInit();
+			settings.callbacks.beforeInit();
 
 			// Render the Portal
 			exports.renderPortal();
@@ -3240,7 +4063,7 @@ var loadPortal = (function () {
 			}
 
 			// Run callback after initializing
-			exports.callbacks.afterInit();
+			settings.callbacks.afterInit();
 
 		}));
 
