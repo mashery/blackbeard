@@ -31,12 +31,24 @@ var loadPortal = (function () {
 		// Use comma separated list for multiple selectors.
 		ajaxIgnore: null,
 
+		// If true, inject a favicon
+		favicon: false,
+
+		// The favicon URL
+		faviconURL: '/files/favicon.ico',
+
+		// The favicon sizes
+		faviconSizes: '16x16 32x32',
+
 		/**
 		 * Logo
 		 * Add a custom logo.
 		 * Accepts any markup as a string (<img src>, <svg>, etc.)
 		 */
 		logo: null,
+
+		// If true, include viewport resizing meta tag
+		responsive: true,
 
 		/**
 		 * Templates
@@ -1872,7 +1884,11 @@ var loadPortal = (function () {
 	 * @param {String} local    A local placeholder to use, if any
 	 */
 	var replacePlaceholders = function (template, local) {
+
+		// Check if the template is a string or a function
 		template = Object.prototype.toString.call(template) === '[object Function]' ? template() : template;
+
+		// Replace local placeholders (if they exist)
 		if (local) {
 			var tempLocal = /account/.test(local) ? 'account' : local;
 			if (localPlaceholders[tempLocal]) {
@@ -1882,32 +1898,43 @@ var loadPortal = (function () {
 				});
 			}
 		}
+
+		// Replace paths
 		paths.forEach(function (path) {
 			if (!path.placeholder || !path.url) return;
 			template = template.replace(new RegExp(path.placeholder, 'g'), path.url);
 		});
+
+		// Replace global placeholders
 		globalPlaceholders.forEach(function (placeholder) {
 			if (!placeholder.placeholder || !placeholder.text) return;
 			template = template.replace(new RegExp(placeholder.placeholder, 'g'), placeholder.text);
 		});
+
 		return template;
+
 	};
 
 	/**
 	 * Get the user navigation items
 	 */
 	var getUserNavItems = function () {
+
 		var template;
+
 		if (mashery.loggedIn) {
+			// If the user is logged in
 			template =
 				'<li id="nav-user-myaccount"><a href="{{path.keys}}">' + settings.labels.userNav.account + '</a></li>' +
 				(mashery.isAdmin ? '<li><a href="{{path.dashboard}}">' + settings.labels.userNav.dashboard + '</a></li>' : '') +
 				'<li id="nav-user-signout"><a href="{{path.logout}}">' + settings.labels.userNav.signout + '</a></li>';
 		} else {
+			// If they're logged out
 			template =
 				'<li id="nav-user-signin"><a href="{{path.signin}}">' + settings.labels.userNav.signin + '</a></li>' +
 				'<li id="nav-user-register"><a href="{{path.register}}">' + settings.labels.userNav.register + '</a></li>';
 		}
+
 		return replacePlaceholders(template);
 	};
 
@@ -1952,11 +1979,17 @@ var loadPortal = (function () {
 	 * @param {Object} atts The attributes and values for the element
 	 */
 	var inject = function (type, atts) {
+
+		// Variables
 		var ref = window.document.getElementsByTagName('script')[0];
 		var elem = document.createElement(type);
+
+		// Loop through each attribute
 		atts.forEach(function (value, key) {
 			elem.setAttribute(key, value);
 		});
+
+		// @todo replace with ref.before(elem)
 		ref.parentNode.insertBefore(elem, ref);
 	};
 
@@ -1968,21 +2001,32 @@ var loadPortal = (function () {
 	 * @param {Function} after    The callback to run after rendering
 	 */
 	var render = function (selector, key, before, after) {
+
+		// Get the content
 		var content = m$.get(selector);
 		if (!content) return;
+
+		// Run the before callback
 		if (before) {
 			before();
 		}
+
+		// Render the content
 		content.innerHTML = settings.templates[key] ? replacePlaceholders(settings.templates[key], key) : '';
+
+		// If custom page or documentation, remove Mashery inserted junk
 		if (['page','docs'].indexOf(window.mashery.contentType !== -1)) {
 			var junk = m$.getAll('#header-edit, #main .section .section-meta');
 			junk.forEach(function (item) {
 				item.remove();
 			})
 		}
+
+		// Run the after callback
 		if (after) {
 			after();
 		}
+
 	};
 
 	/**
@@ -1990,25 +2034,41 @@ var loadPortal = (function () {
 	 * @bugfix Sometimes mashery variable provides wrong info at page load after logout event
 	 */
 	var verifyLoggedIn = function () {
+
+		// Only run on logout and member remove pages
 		if (['logout', 'memberRemoveSuccess'].indexOf(window.mashery.contentType) === -1) return;
+
+		// Check if the a logout form exists (if so, user is logged in and we can bail)
 		var loggedIn = m$.get('#mashery-logout-form', window.mashery.dom);
 		if (loggedIn) return;
+
+		// Update mashery object values
 		window.mashery.loggedIn = false;
 		window.mashery.username = null;
 		window.mashery.isAdmin = false;
 		window.mashery.dashboard = null;
 		window.mashery.logout = null;
+
 	};
 
 	/**
 	 * Add class hooks for styling to the DOM, and a global JS variable for conditional functions
 	 */
 	exports.addStyleHooks = function () {
+
+		// Get the app wrapper
 		var wrapper = m$.get('#app-wrapper');
 		if (!wrapper) return;
+
+		// Get the current pathname (or 'home' if one doesn't exist)
 		var path = ['/', '/home'].indexOf(window.location.pathname.toLowerCase()) === -1 ? window.location.pathname.slice(1) : 'home';
+
+		// Add a class hook for the content type and current page
 		wrapper.className = m$.sanitizeClass(window.mashery.contentType, 'category') + ' ' + m$.sanitizeClass(path, 'single');
+
+		// Add a JavaScript hook for the current page
 		window.mashery.contentId = m$.sanitizeClass(path);
+
 	};
 
 	/**
@@ -2048,28 +2108,32 @@ var loadPortal = (function () {
 	};
 
 	/**
-	 * Render unspecified content
-	 * @param {String} id   The selector of the container to render the content into
-	 * @param {String} key  The content type
+	 * Render the footer
 	 */
-	exports.renderContent = function (id, key) {
-		var content = m$.get(id);
-		if (!content) return;
-		settings.callbacks.beforeRenderFooter();
-		content.innerHTML = settings.templates[key] ? replacePlaceholders(settings.templates[key]) : '';
-		settings.callbacks.afterRenderFooter();
+	exports.renderFooter = function () {
+
+		// Run the before callback
+		settings.callbacks.beforeRenderRenderFooter();
+
+		// Render footers 1 and 2
+		render('#footer-1-wrapper', 'footer1');
+		render('#footer-2-wrapper', 'footer2');
+
+		// Run the after callback
+		settings.callbacks.afterRenderRenderFooter();
+
 	};
 
 	/**
 	 * Load IO Docs scripts if they're not already present
 	 */
 	var loadIODocsScripts = function () {
-		loadJS('/public/Mashery/scripts/Iodocs/prettify.js', function () {
-			loadJS('/public/Mashery/scripts/Mashery/beautify.js', function () {
-				loadJS('/public/Mashery/scripts/vendor/alpaca.min.js', function () {
-					loadJS('/public/Mashery/scripts/Iodocs/utilities.js', function () {
-						loadJS('/public/Mashery/scripts/Iodocs/iodocs.js', function () {
-							loadJS('/public/Mashery/scripts/Mashery/ace/ace.js');
+		m$.loadJS('/public/Mashery/scripts/Iodocs/prettify.js', function () {
+			m$.loadJS('/public/Mashery/scripts/Mashery/beautify.js', function () {
+				m$.loadJS('/public/Mashery/scripts/vendor/alpaca.min.js', function () {
+					m$.loadJS('/public/Mashery/scripts/Iodocs/utilities.js', function () {
+						m$.loadJS('/public/Mashery/scripts/Iodocs/iodocs.js', function () {
+							m$.loadJS('/public/Mashery/scripts/Mashery/ace/ace.js');
 						}, true);
 					}, true);
 				}, true);
@@ -2079,16 +2143,17 @@ var loadPortal = (function () {
 
 	/**
 	 * Load any Mashery files that are required for a page to work
-	 * Curretly, this is only required for IO Docs
+	 * Currently, this is only required for IO Docs
 	 */
 	var loadRequiredFiles = function () {
-		if (window.mashery.contentType === 'ioDocs') {
-			// window.prettyPrint = function () {};
-			if (!('jQuery' in window)) {
-				loadJS('https://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js', loadIODocsScripts);
-			} else {
-				loadIODocsScripts();
-			}
+		// If not IO Docs, bail
+		if (window.mashery.contentType !== 'ioDocs') return;
+		if (!('jQuery' in window)) {
+			// If jQuery isn't loaded yet, load it
+			loadJS('https://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js', loadIODocsScripts);
+		} else {
+			// Otherwise, just load our scripts
+			loadIODocsScripts();
 		}
 	};
 
@@ -2103,32 +2168,39 @@ var loadPortal = (function () {
 	/**
 	 * Render the header elements
 	 * @param {Boolean} ajax  If true, skip rendering (since they already exist)
-	 * @todo Add support for Favicons via a setting
 	 */
 	var renderHead = function (ajax) {
 
+		// Don't run on Ajax (content is already rendered)
 		if (ajax) return;
 
+		// Force latest rendering engine in IE
 		inject('meta', {
 			'http-equiv': 'X-UA-Compatible',
 			'content': 'IE=edge,chrome=1'
 		});
 
-		inject('meta', {
-			name: 'viewport',
-			content: 'width=device-width, initial-scale=1.0'
-		});
+		// Add a default viewport width
+		if (settings.responsive) {
+			inject('meta', {
+				name: 'viewport',
+				content: 'width=device-width, initial-scale=1.0'
+			});
+		}
 
-		// inject('link', {
-		// 	rel: 'shortcut icon',
-		// 	href: '/files/favicon.ico'
-		// });
+		// Add a favicon
+		if (settings.favicon && settings.faviconURL) {
+			inject('link', {
+				rel: 'shortcut icon',
+				href: settings.faviconURL
+			});
 
-		// inject('link', {
-		// 	rel: 'icon',
-		// 	sizes: '16x16 32x32',
-		// 	href: '/files/favicon.icon'
-		// });
+			inject('link', {
+				rel: 'icon',
+				sizes: settings.faviconSizes,
+				href: settings.faviconURL
+			});
+		}
 
 	};
 
@@ -2144,20 +2216,31 @@ var loadPortal = (function () {
 	 * Inject the remove member form into the DOM on remove member page
 	 */
 	var renderMemberRemove = function () {
+
+		// Only run on the member remove page
 		if (window.mashery.contentType !== 'memberRemove' || m$.get('#member-remove-form')) return;
+
+		// Get the form
 		var form = m$.get('.main form', window.mashery.dom);
 		if (!form) return;
+
+		// Give it an ID and make it hidden
 		form.id = 'member-remove-form';
 		form.setAttribute('hidden', 'hidden');
+
+		// Update the onclick popup text
 		var submit = m$.get('#process', form);
 		if (submit) {
 			submit.setAttribute('onclick', 'return confirm("' + localPlaceholders.memberRemove.popup.text() + '")');
 		}
-		document.body.insertBefore(form, document.body.lastChild);
+
+		// Inject it into the DOM
+		document.body.lastChild.before(form);
 	};
 
 	/**
 	 * Jump to anchor or adjust focus when rendering is complete
+	 * (Our JS rendering process breaks the normal browser behavior)
 	 */
 	var fixLocation = function () {
 		if (window.location.hash) {
@@ -2171,36 +2254,63 @@ var loadPortal = (function () {
 	 * Reload IO Docs to force script to reinit after DOM is available
 	 */
 	var reloadIODocs = function () {
-		if (window.mashery.contentType !== 'ioDocs' || window.mashery.isAjax || window.masheryIsReloaded) return;
+
+		// Check if IO Docs has been reloaded yet
+		if (window.mashery.contentType !== 'ioDocs' || window.masheryIsAjax || window.masheryIsReloaded) return;
+
+		// Set reloaded state to true
 		window.masheryIsReloaded = true;
+
+		// Reload IO Docs
 		fetchContent(window.location.href, true);
+
 	}
 
 	/**
 	 * Render the Mashery Made logo (if missing)
 	 */
 	exports.renderMasheryMade = function () {
+
+		// Bail if Mashery Made logo is already in the DOM
 		var masheryMade = m$.get('#mashery-made-logo');
 		if (masheryMade) return;
+
+		// Get the app container
 		var app = m$.get('#app');
 		if (!app) return;
+
+		// Create our logo container and add the logo
 		var mashMade = document.createElement('div');
 		mashMade.innerHTML = '<p>x</p><div id="mashery-made"><div class="container"><p>' + globalPlaceholders.masheryMade.text + '</p></div></div>';
+
+		// Inject into the DOM
 		app.appendChild(mashMade.childNodes[1]);
+
 	};
 
 	/**
 	 * Render the Mashery Terms of Use of registration pages (if missing)
 	 */
 	exports.renderTOS = function () {
+
+		// Only run on Registration pages
 		if (['register', 'join'].indexOf(window.mashery.contentType) === -1) return;
+
+		// Bail if a Terms of Use already exists
 		var tos = m$.get('#registration-terms-of-service');
 		if (tos) return;
+
+		// Bail if there's no registration form
 		var reg = m$.get('form[action*="/member/register"]');
 		if (!reg) return;
+
+		// Create our terms of use
 		var div = document.createElement('div');
 		div.innerHTML = '<p>x</p>' + replacePlaceholders(globalPlaceholders.registerTerms.text, 'register');
+
+		// Inject into the DOM
 		reg.appendChild(div.childNodes[1]);
+
 	}
 
 	/**
@@ -2208,7 +2318,8 @@ var loadPortal = (function () {
 	 * @param {Boolean} ajax  If true, the page is being loaded via Ajax
 	 */
 	exports.renderPortal = function (ajax) {
-		settings.callbacks.beforeRender();
+		settings.callbacks.beforeRender(); // Run beforeRender() callback
+		document.documentElement.classList.add('rendering'); // Add rendering class to the DOM
 		renderHead(ajax); // <head> attributes
 		exports.addStyleHooks(); // Content-specific classes
 		exports.renderLayout(); // Layout
@@ -2217,16 +2328,16 @@ var loadPortal = (function () {
 		exports.renderSecondaryNav(); // Secondary Navigation
 		exports.renderMain(); // Main Content
 		exports.renderTitle(); // Page Title
-		exports.renderContent('#footer-1-wrapper', 'footer1'); // Footer Content 1
-		exports.renderContent('#footer-2-wrapper', 'footer2'); // Footer Content 2
+		exports.renderFooter(); // Footer
 		fixLocation(); // Jump to anchor
 		renderLogout(); // Logout Form
 		renderMemberRemove(); // Remove Member Form
 		exports.renderMasheryMade(); // Add the Mashery Made logo if missing
 		exports.renderTOS(); // Add the Mashery Terms of Service if missing from registration page
-		settings.callbacks.afterRender();
-		document.documentElement.classList.remove('loading');
-		reloadIODocs();
+		settings.callbacks.afterRender(); // Run afterRender() callback
+		reloadIODocs(); // Reload IO Docs
+		document.documentElement.classList.remove('loading'); // Remove loading class from the DOM
+		document.documentElement.classList.remove('rendering'); // Remove rendering class from the DOM
 	};
 
 	/**
@@ -2234,10 +2345,17 @@ var loadPortal = (function () {
 	 * @param {Event} event The click event
 	 */
 	var processLogout = function (event) {
+
+		// Bail if there's no logout form
 		var logout = m$.get('#mashery-logout-form');
 		if (!logout) return;
+
+		// Prevent the default click behavior
 		event.preventDefault();
+
+		// Submit the logout form
 		logout.submit();
+
 	};
 
 	/**
@@ -2247,13 +2365,24 @@ var loadPortal = (function () {
 	 * @param {Boolean} pushState If true, update browser history
 	 */
 	var renderWithAjax = function (data, url, pushState) {
+
+		// Update Mashery data
 		setupMashery(data);
+
+		// Update Ajax state
+		window.masheryIsAjax = true;
+
+		// Scrape content from the DOM object
 		getContent(window.mashery.contentType);
+
+		// Update the browser history
 		if (pushState) {
 			window.history.pushState({ url: url }, data.title, url);
 		}
+
+		// Render the Portal content
 		exports.renderPortal(true);
-		window.mashery.isAjax = true;
+
 	};
 
 	/**
@@ -2266,12 +2395,15 @@ var loadPortal = (function () {
 			url: url,
 			responseType: 'document'
 		}).success(function (data) {
+			// Render our content on Success
 			renderWithAjax(data, url, pushState);
 		}).error(function (data, xhr) {
+			// If a 404, display 404 error
 			if (xhr.status === 404) {
 				renderWithAjax(data, url, pushState);
 				return;
 			}
+			// Otherwise, force page reload
 			window.location = url;
 		});
 	};
@@ -2282,19 +2414,25 @@ var loadPortal = (function () {
 	 */
 	var loadWithAjax = function (event) {
 
-		// Make sure link should trigger an ajax event
+		// Make sure Ajax is enabled and clicked object isn't on the ignore list
 		if (!settings.ajax || (settings.ajaxIgnore && event.target.matches(settings.ajaxIgnore)) || event.target.closest(ajaxIgnore)) return;
+
+		// Make sure clicked item was a valid, local link
 		if (event.target.tagName.toLowerCase() !== 'a' || !event.target.href || event.target.hostname !== window.location.hostname) return;
+
+		// Skip Ajax on member remove success page
 		if (window.mashery.contentType === 'memberRemoveSuccess') return;
+
+		// Don't run if link is an anchor to the current page
 		if(event.target.pathname === window.location.pathname && event.target.hash.length > 0) return;
 
 		// Don't run if right-click or command/control + click
 		if (event.button !== 0 || event.metaKey || event.ctrlKey) return;
 
-		// Prevent the default
+		// Prevent the default click event
 		event.preventDefault();
 
-		// Get the content
+		// Get the content with Ajax
 		fetchContent(event.target.href, true);
 
 	};
@@ -2304,10 +2442,17 @@ var loadPortal = (function () {
 	 * @param {Event} event The click event
 	 */
 	var processMemberRemove = function (event) {
+
+		// Get the remove member form
 		var remove = m$.get('#member-remove-form #process');
 		if (!remove || window.mashery.contentType !== 'memberRemove') return;
+
+		// Prevent the default click event
 		event.preventDefault();
+
+		// Submit the remove member form
 		m$.click(remove);
+
 	};
 
 	/**
@@ -2344,14 +2489,24 @@ var loadPortal = (function () {
 
 	/**
 	 * Handle for submit events
+	 * Currently only used for Search form, but may be expanded in the future
 	 * @param {Event} event  The form submit event
 	 */
 	var submitHandler = function (event) {
-		if (!event.target.closest('#search-form')) return;
+
+		// Bail if form isn't search or Ajax is disabled
+		if (!event.target.closest('#search-form') || !settings.ajax) return;
+
+		// Get search form input field
 		var input = m$.get('#search-input', event.target);
 		if (!input) return;
+
+		// Prevent default form event
 		event.preventDefault();
+
+		// Fetch the search results page
 		fetchContent(paths.search.url + '?q=' + encodeURIComponent(input.value), true);
+
 	};
 
 	/**
