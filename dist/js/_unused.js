@@ -1,4 +1,257 @@
+/*!
+ * blackbeard v0.2.0: Future portal layout
+ * (c) 2017 Chris Ferdinandi
+ * BSD-3-Clause License
+ * http://github.com/mashery/blackbeard
+ */
+
 var m$ = (function () {
+
+	'use strict';
+
+	var m$ = {}; // Placeholder for public methods
+
+	/**
+	 * Get the first matching element
+	 * @param  {String} selector  The selector to match against
+	 * @param  {Node}   scope     The element to search inside [optional, defaults to document]
+	 * @return {Node}             The element
+	 */
+	m$.get = function (selector, scope) {
+		scope = scope || document;
+		return scope.querySelector(selector);
+	};
+
+	/**
+	 * Get the all matching elements
+	 * @param {String} selector  The selector to match against
+	 * @param {Node}   scope     The element to search inside [optional, defaults to document]
+	 * @param {Array}            An array of matching elements
+	 */
+	m$.getAll = function (selector, scope) {
+		scope = scope || document;
+		return Array.prototype.slice.call(scope.querySelectorAll(selector));
+	};
+
+	/**
+	 * Add an event listener
+	 * @param {String}   event    The event type
+	 * @param {Node}     elem     The element to run the event on [optional, defaults to window]
+	 * @param {Function} callback The function to run on the event
+	 * @param {Boolean}  capture  If true, for bubbling on non-bubbling event
+	 */
+	m$.on = function (event, elem, callback, capture) {
+		if (typeof (elem) === 'function') {
+			capture = callback;
+			callback = elem;
+			elem = window;
+		}
+		capture = capture ? true : false;
+		elem.addEventListener(event, callback, capture);
+	};
+
+	/**
+	 * Remove an event listener (if a named function was used to set it up)
+	 * @param {String}   event    The event type
+	 * @param {Node}     elem     The element to run the event on [optional, defaults to window]
+	 * @param {Function} callback The function to run on the event
+	 * @param {Boolean}  capture  If true, for bubbling on non-bubbling event
+	 */
+	m$.off = function (event, elem, callback, capture) {
+		if (typeof (elem) === 'function') {
+			capture = callback;
+			callback = elem;
+			elem = window;
+		}
+		capture = capture ? true : false;
+		elem.removeEventListener(event, callback, capture);
+	};
+
+	/**
+	 * Simulate a click event.
+	 * @public
+	 * @param {Element} elem  the element to simulate a click on
+	 */
+	m$.click = function (elem) {
+		// Create our event (with options)
+		var evt = new MouseEvent('click', {
+			bubbles: true,
+			cancelable: true,
+			view: window
+		});
+		// If cancelled, don't dispatch our event
+		var canceled = !elem.dispatchEvent(evt);
+	};
+
+	/**
+	 * Load a JS file asynchronously.
+	 * @author @scottjehl, Filament Group, Inc.
+	 * @license MIT
+	 * @link https://github.com/filamentgroup/loadJS
+	 * @param  {String}   src       URL of script to load.
+	 * @param  {Function} callback  Callback to run on completion.
+	 * @return {String}             The script URL.
+	 */
+	m$.loadJS = function (src, callback, reload) {
+		var existing = document.querySelector('script[src*="' + src + '"]');
+		if (existing) {
+			if (!reload) {
+				if (callback && typeof (callback) === 'function') {
+					callback();
+				}
+				return;
+			}
+			existing.parentNode.removeChild(existing);
+		}
+		var ref = window.document.getElementsByTagName('script')[0];
+		var script = window.document.createElement('script');
+		script.src = src;
+		ref.parentNode.insertBefore(script, ref);
+		if (callback && typeof (callback) === 'function') {
+			script.onload = callback;
+		}
+		return script;
+	};
+
+	/**
+	 * Load a CSS file asynchronously
+	 * @copyright @scottjehl, Filament Group, Inc.
+	 * @license MIT
+	 * @param {String} href    The URL for your CSS file
+	 * @param {Node}   before  Element to use as a reference for injecting the <link> [optional]
+	 * @param {String} media   Stylesheet media type [optional, defaults to 'all']
+	 */
+	m$.loadCSS = function (href, before, media) {
+		var ss = window.document.createElement('link');
+		var ref = before || window.document.getElementsByTagName('script')[0];
+		var sheets = window.document.styleSheets;
+		ss.rel = 'stylesheet';
+		ss.href = href;
+		// temporarily, set media to something non-matching to ensure it'll fetch without blocking render
+		ss.media = 'only x';
+		// inject link
+		ref.parentNode.insertBefore(ss, ref);
+		// This function sets the link's media back to `all` so that the stylesheet applies once it loads
+		// It is designed to poll until document.styleSheets includes the new sheet.
+		function toggleMedia() {
+			var defined;
+			for (var i = 0; i < sheets.length; i++) {
+				if (sheets[i].href && sheets[i].href.indexOf(href) > -1) {
+					defined = true;
+				}
+			}
+			if (defined) {
+				ss.media = media || 'all';
+			}
+			else {
+				setTimeout(toggleMedia);
+			}
+		}
+		toggleMedia();
+		return ss;
+	};
+
+	/**
+	 * Add a query string to a URL
+	 * @param  {String} url   The URL
+	 * @param  {String} key   The query string key
+	 * @param  {String} value The query string value
+	 * @return {String}       The URL with query string
+	 */
+	m$.addQueryString = function (url, key, value) {
+		return url + (/[\?]/.test(url) ? '&' : '?') + key + '=' + value;
+	};
+
+	/**
+	 * Get the value of a query string from a URL
+	 * @param  {String} field The field to get the value of
+	 * @param  {String} url   The URL to get the value from [optional]
+	 * @return {String}       The value
+	 */
+	m$.getQueryString = function (field, url) {
+		var href = url ? url : window.location.href;
+		var reg = new RegExp('[?&]' + field + '=([^&#]*)', 'i');
+		var string = reg.exec(href);
+		return string ? string[1] : null;
+	};
+
+	/**
+	 * Sanitize a string for use as a class
+	 * @url Regex pattern: http://stackoverflow.com/a/9635698/1293256
+	 * @param {String} id      The string to convert into a class
+	 * @param {String} prefix  A prefix to use before the class [optionals]
+	 */
+	m$.sanitizeClass = function (id, prefix) {
+		if (!id) return '';
+		prefix = prefix ? prefix + '-' : '';
+		return prefix + id.replace(/^[^a-z]+|[^\w:.-]+/gi, '-').toLowerCase();
+	};
+
+	/**
+	 * Inject HTML elements into the <head>
+	 * @param {String} type The HTML element type
+	 * @param {Object} atts The attributes and values for the element
+	 */
+	m$.inject = function (type, atts) {
+
+		// Variables
+		var ref = window.document.getElementsByTagName('script')[0];
+		var elem = document.createElement(type);
+
+		// Loop through each attribute
+		atts.forEach((function (value, key) {
+			elem.setAttribute(key, value);
+		}));
+
+		// Inject into the <head>
+		ref.before(elem);
+
+	};
+
+	/**
+	 * Merge two or more objects together.
+	 * @param   {Boolean}  deep     If true, do a deep (or recursive) merge [optional]
+	 * @param   {Object}   objects  The objects to merge together
+	 * @returns {Object}            Merged values of defaults and options
+	 * @todo optimize loops
+	 */
+	m$.extend = function () {
+
+		// Variables
+		var extended = {};
+		var deep = false;
+
+		// Check if a deep merge
+		if (typeof (arguments[0]) === 'boolean') {
+			deep = arguments[0];
+			delete arguments[0];
+		}
+
+		// Merge the object into the extended object
+		var merge = function (obj) {
+			obj.forEach((function(prop, key) {
+				// If deep merge and property is an object, merge properties
+				if (deep && Object.prototype.toString.call(obj[prop]) === '[object Object]') {
+					extended[key] = extend(true, extended[key], prop);
+				} else {
+					extended[key] = prop;
+				}
+			}));
+		};
+
+		// Loop through each object and conduct a merge
+		arguments.forEach((function (obj) {
+			merge(obj);
+		}));
+
+		return extended;
+
+	};
+
+	return m$;
+
+})();
+var loadPortal = (function () {
 
 	'use strict';
 
@@ -7,7 +260,7 @@ var m$ = (function () {
 	//
 
 	// Placeholder for public methods
-	var m$ = {};
+	var exports = {};
 
 	// Ignore on Ajax page load
 	var ajaxIgnore = '.clear-results, h4 .select-all, #toggleEndpoints, #toggleMethods, [href*="/io-docs"]';
@@ -47,14 +300,8 @@ var m$ = (function () {
 		 */
 		logo: null,
 
-		// If true, activate mashtip tooltips
-		mashtips: true,
-
 		// If true, include viewport resizing meta tag
 		responsive: true,
-
-		// If true, test password strength
-		testPassword: true,
 
 		/**
 		 * Templates
@@ -71,7 +318,7 @@ var m$ = (function () {
 			accountApps: function () {
 				var template = 	'<h1>{{content.headingMyApps}}</h1><ul id="nav-account">{{content.navItemsAccount}}</ul>';
 				if (Object.keys(mashery.content.main).length > 0) {
-					mashery.content.main.forEach(function (app) {
+					mashery.content.main.forEach((function (app) {
 						template +=
 							'<h2>' + app.application + '</h2>' +
 							'<ul>' +
@@ -79,20 +326,11 @@ var m$ = (function () {
 								'<li>Key: ' + (app.key ? app.key : 'None') + '</li>' +
 								'<li>Created: ' + app.created + '</li>' +
 							'</ul>' +
-							'<p>';
-
-							if (app.edit) {
-								template += '<a class="btn btn-edit-app" id="' + m$.sanitizeClass(app.application, 'btn-edit-app') + '" href="' + app.edit + '">Edit This App</a>';
-							}
-							if (app.delete) {
-								template += '<a class="btn btn-delete-app" id="' + m$.sanitizeClass(app.application, 'btn-delete-app') + '" href="' + app.delete + '">Delete This App</a>';
-							}
-							if (app.add) {
-								template += '<a class="btn btn-add-key-app" id="' + m$.sanitizeClass(app.application, 'btn-add-key-app') + '" href="' + app.add + '">Add APIs</a>';
-							}
-
-						template += '</p>';
-					});
+							'<p>' +
+						'<a class="btn btn-edit-app" id="' + m$.sanitizeClass(app.application, 'btn-edit-app') + '" href="' + app.edit + '">Edit This App</a>' +
+						'<a class="btn btn-delete-app" id="' + m$.sanitizeClass(app.application, 'btn-delete-app') + '" href="' + app.delete + '">Delete This App</a>' +
+							'</p>';
+					}));
 				} else {
 					template += '{{content.noApps}}';
 				}
@@ -131,10 +369,10 @@ var m$ = (function () {
 			accountKeys: function () {
 				var template = '<h1>{{content.headingMyApiKeys}}</h1><ul id="nav-account">{{content.navItemsAccount}}</ul>';
 				if (Object.keys(mashery.content.main).length > 0 ) {
-					mashery.content.main.forEach(function (plan) {
+					mashery.content.main.forEach((function (plan) {
 						template += '<h2>' + plan.name + '</h2>';
 						if (plan.keys.length > 0) {
-							plan.keys.forEach(function (key) {
+							plan.keys.forEach((function (key) {
 								var secret = key.secret ? '<li>Secret: ' + key.secret + '</li>' : '';
 								template +=
 									'<p><strong>' + key.application + '</strong></p>' +
@@ -146,14 +384,14 @@ var m$ = (function () {
 									'</ul>' +
 									key.limits +
 									'<p><a class="btn btn-delete-key" id="btn-delete-key" href="' + key.delete + '">Delete This Key</a></p>';
-							});
+							}));
 						} else {
 							template += '<p>{{content.noPlanKeys}}</p>';
 							if (mashery.content.secondary) {
 								template += '<p><a class="btn btn-get-key" id="' + m$.sanitizeClass(plan.name, 'btn-get-key') + '"  href="' + mashery.content.secondary + '">Get a Key for ' + plan.name + '</a></p>';
 							}
 						}
-					});
+					}));
 				} else {
 					template += '{{content.noKeys}}';
 					if (mashery.content.secondary) {
@@ -196,68 +434,6 @@ var m$ = (function () {
 										'<ul id="nav-mashery-account">{{content.navItemsMasheryAccount}}</ul>' +
 										'{{content.passwordChanged}}' +
 									'</div>',
-
-			/**
-			 * Add App APIs
-			 * Add APIs to an application
-			 */
-			appAddAPIs: function () {
-				var template =
-							'<div class="container container-small">' +
-								'<h1>Add APIs to this Application</h1>' +
-								'<ul>' +
-									'<li><strong>Application:</strong> ' + window.mashery.content.secondary.application + '</li>' +
-									'<li><strong>Created:</strong> ' + window.mashery.content.secondary.created + '</li>' +
-									(window.mashery.content.secondary.api ? '<li><strong>API:</strong> ' + window.mashery.content.secondary.api + '</li>' : '') +
-									(window.mashery.content.secondary.key ? '<li><strong>Key:</strong> ' + window.mashery.content.secondary.key + '</li>' : '') +
-								'</ul>' +
-								'<h2>Add APIs</h2>' +
-								window.mashery.content.main +
-							'</div>';
-
-				return template;
-			},
-
-			/**
-			 * App Delete
-			 * Delete an application
-			 */
-			appDelete: function () {
-				var template =
-							'<div class="container container-small">' +
-								'<h1>Delete Your Application</h1>' +
-								'<ul>' +
-									'<li><strong>Application:</strong> ' + window.mashery.content.secondary.application + '</li>' +
-									'<li><strong>Created:</strong> ' + window.mashery.content.secondary.created + '</li>' +
-									(window.mashery.content.secondary.api ? '<li><strong>API:</strong> ' + window.mashery.content.secondary.api + '</li>' : '') +
-									(window.mashery.content.secondary.key ? '<li><strong>Key:</strong> ' + window.mashery.content.secondary.key + '</li>' : '') +
-								'</ul>' +
-								'<h2>Confirm Deletion</h2>' +
-								'<p><strong>Are you sure you want to delete this application and all of its keys?</strong></p>' +
-								window.mashery.content.main +
-							'</div>';
-
-				return template;
-			},
-
-			/**
-			 * Add App APIs: Success
-			 * New API keys added to an app
-			 */
-			appAddAPIsSuccess:	'<div class="container container-small">' +
-									'<h1>{{content.heading}}</h1>' +
-									'{{content.main}}' +
-								'</div>',
-
-			/**
-			 * Edit Application
-			 * Layout with form to edit an application
-			 */
-			appEdit:	'<div class="container container-small">' +
-							'<h1>{{content.heading}}</h1>' +
-							'{{content.main}}' +
-							'{{content.form}}' +
-						'</div>',
 
 			/**
 			 * App Registration
@@ -385,26 +561,6 @@ var m$ = (function () {
 								'<h1>{{content.heading}}</h1>' +
 								'<p>You have successfully registered as {{content.main}}. Read our <a href="/docs">API documentation</a> to get started. You can view your keys and applications under <a href="{{path.keys}}">My Account</a>.</p>' +
 							'</div>',
-
-			keyDelete: function () {
-				var template =
-					'<h1>Delete Your Key</h1>' +
-
-					'<h2>' + window.mashery.content.secondary.api + '</h2>' +
-					'<ul>' +
-						'<li><strong>Application:</strong> ' + window.mashery.content.secondary.application + '</li>' +
-						'<li><strong>Key:</strong> ' + window.mashery.content.secondary.key + '</li>' +
-						(window.mashery.content.secondary.secret ? '<li><strong>Secret:</strong> ' + window.mashery.content.secondary.secret + '</li>' : '') +
-						'<li><strong>Status:</strong> ' + window.mashery.content.secondary.status + '</li>' +
-						'<li><strong>Created:</strong> ' + window.mashery.content.secondary.created + '</li>' +
-					'</ul>' +
-
-					'<h2>Confirm Deletion</h2>' +
-					'<p><strong>Are you sure you want to delete this key?</strong></p>' +
-					window.mashery.content.main;
-
-				return '<div class="main container container-small" id="main">' + template + '</div>';
-			},
 
 			/**
 			 * Base layout
@@ -614,7 +770,7 @@ var m$ = (function () {
 				var template = '<h1>{{content.heading}}</h1>';
 				if (window.mashery.content.main) {
 					template += '<p>{{content.meta}}</p>';
-					window.mashery.content.main.forEach(function (result) {
+					window.mashery.content.main.forEach((function (result) {
 						template +=
 							'<div class="search-result">' +
 								'<h2 class="no-margin-bottom"><a href="' + result.url + '">' + result.title + '</a></h2>' +
@@ -624,7 +780,7 @@ var m$ = (function () {
 									'<a href="' + result.url + '">' + result.url + '</a>' +
 								'</p>' +
 							'</div>';
-					});
+					}));
 					template += '<div class="search-pagination">';
 					if (window.mashery.content.secondary.pagePrevious) {
 						template += '<a href="' + window.mashery.content.secondary.pagePrevious + '">{{content.pagePrevious}}</a>';
@@ -750,35 +906,6 @@ var m$ = (function () {
 			},
 
 			/**
-			 * App Add APIs: Success
-			 * API keys successfully added to an app
-			 */
-			appAddAPIsSuccess: {
-				heading: 'New API Keys Issued', // The heading
-
-				// The message
-				main: '<p>An email has been sent to you with your key and application details. You can also view them at any time from the <a href="{{path.keys}}">My Account</a> page.</p>' +
-				'<p>To get started using your API keys, dig into <a href="{{path.docs}}">our documentation</a>. We look forward to seeing what you create!</p>',
-			},
-
-			/**
-			 * Delete App
-			 * The page to delete an application
-			 */
-			appDelete: {
-				confirm: 'Are you really sure you want to delete this application?'
-			},
-
-			/**
-			 * App Edit
-			 * The edit application page
-			 */
-			appEdit: {
-				heading: 'Edit Your Application',
-				main: '<p>Edit your details using the form below.</p>'
-			},
-
-			/**
 			 * App Registration
 			 * The page to register an application
 			 */
@@ -850,14 +977,6 @@ var m$ = (function () {
 			 */
 			joinSuccess: {
 				heading: 'Registration Successful' // The heading
-			},
-
-			/**
-			 * Delete Key
-			 * The page to delete an API key
-			 */
-			keyDelete: {
-				confirm: 'Are you really sure you want to delete this key?'
 			},
 
 			/**
@@ -946,7 +1065,7 @@ var m$ = (function () {
 			 */
 			noAccess: {
 				heading: 'You don\'t have access to this content', // The heading
-				main: '<p>If you\'re not logged in yet, try <a href="{{path.signin}}">logging in</a> or <a href="{{path.register}}">registering for an account</a>.</p>' // The message
+				main: '<p>If you\'re not logged in yet, try <a href="{{paths.signin}}">logging in</a> or <a href="{{path.register}}">registering for an account</a>.</p>' // The message
 			},
 
 			/**
@@ -1137,99 +1256,127 @@ var m$ = (function () {
 	var paths = {
 
 		// My Apps
-		'{{path.apps}}': function () {
-			return '/apps/myapps';
+		accountApps: {
+			placeholder: '{{path.apps}}',
+			url: '/apps/myapps'
 		},
 
 		// My Keys
-		'{{path.keys}}': function () {
-			return '/apps/mykeys';
+		accountKeys: {
+			placeholder: '{{path.keys}}',
+			url: '/apps/mykeys'
 		},
 
 		// My Account
-		'{{path.account}}': function () {
-			return '/member/edit';
+		accountManage: {
+			placeholder: '{{path.account}}',
+			url: '/member/edit'
 		},
 
 		// Change My Email
-		'{{path.changeEmail}}': function () {
-			return '/member/email';
+		changeEmail: {
+			placeholder: '{{path.changeEmail}}',
+			url: '/member/email'
 		},
 
 		// Change My Password
-		'{{path.changePassword}}': function () {
-			return '/member/passwd';
+		changePassword: {
+			placeholder: '{{path.changePassword}}',
+			url: '/member/passwd'
 		},
 
 		// Contact
-		'{{path.contact}}': function () {
-			return '/contact';
+		contact: {
+			placeholder: '{{path.contact}}',
+			url: '/contact'
 		},
 
 		// Dashboard
-		'{{path.dashboard}}': function () {
-			return (window.mashery.dashboard ? window.mashery.dashboard : '#');
+		dashboard: {
+			placeholder: '{{path.dashboard}}',
+			url: function () {
+				// Grabbed dynamically
+				return (window.mashery.dashboard ? window.mashery.dashboard : '#');
+			}
 		},
 
 		// Documentation
-		'{{path.docs}}': function () {
-			return '/docs';
+		docs: {
+			placeholder: '{{path.docs}}',
+			url: '/docs'
 		},
 
 		// IO Docs
-		'{{path.iodocs}}': function () {
-			return '/io-docs';
+		ioDocs: {
+			placeholder: '{{path.iodocs}}',
+			url: '/io-docs'
 		},
 
 		// Logout
-		'{{path.logout}}': function () {
-			return '/logout/logout';
+		logout: {
+			placeholder: '{{path.logout}}',
+			url: '/logout/logout'
 		},
 
 		// Password Request
-		'{{path.lostPassword}}': function () {
-			return '/member/lost';
+		lostPassword: {
+			placeholder: '{{path.lostPassword}}',
+			url: '/member/lost'
 		},
 
 		// Username Request
-		'{{path.lostUsername}}': function () {
-			return '/member/lost-username';
+		lostUsername: {
+			placeholder: '{{path.lostUsername}}',
+			url: '/member/lost-username'
 		},
 
 		// Trigger Remove Member
 		// Special link that submits the remove member form
-		'{{path.removeMember}}': function () {
-			return '/member/remove?action=removeMember';
+		memberRemove: {
+			placeholder: '{{path.removeMember}}',
+			url: '/member/remove?action=removeMember'
 		},
 
 		// User Registration
-		'{{path.register}}': function () {
-			return '/member/register';
+		register: {
+			placeholder: '{{path.register}}',
+			url: '/member/register'
 		},
 
 		// User Registration Resent
-		'{{path.registerResendConfirmation}}': function () {
-			return '/member/resend-confirmation';
+		registerResendConfirmation: {
+			placeholder: '{{path.registerResendConfirmation}}',
+			url: '/member/resend-confirmation'
 		},
 
 		// Remove Membership
-		'{{path.removeMembership}}': function () {
-			return '/member/remove';
+		removeMembership: {
+			placeholder: '{{path.removeMembership}}',
+			url: '/member/remove'
 		},
 
 		// Search Results
-		'{{path.search}}': function () {
-			return '/search';
+		search: {
+			placeholder: '{{path.search}}',
+			url: '/search'
 		},
 
 		// Sign In
-		'{{path.signin}}': function () {
-			return window.mashery.login.url + window.mashery.login.redirect;
+		signin: {
+			placeholder: '{{path.signin}}',
+			url: function () {
+				// Get the URL dynamically since it varies based on configuration and includes a redirect back to the current page
+				return window.mashery.login.url + window.mashery.login.redirect;
+			},
 		},
 
 		// View My Profile
-		'{{path.viewProfile}}': function () {
-			return (window.mashery.userProfile ? window.mashery.userProfile : '/profile/profile');
+		viewProfile: {
+			placeholder: '{{path.viewProfile}}',
+			url: function () {
+				// Varies by user. Grabbed dynamically.
+				return (window.mashery.userProfile ? window.mashery.userProfile : '/profile/profile');
+			}
 		}
 
 	};
@@ -1244,117 +1391,131 @@ var m$ = (function () {
 		account: {
 
 			// My Account Nav Label
-			'{{content.account}}': function () {
-				return settings.labels.account.account;
+			account: {
+				placeholder: '{{content.account}}',
+				text: function () {
+					return settings.labels.account.account;
+				}
 			},
 
 			// My Apps Nav Label
-			'{{content.apps}}': function () {
-				return settings.labels.account.apps;
+			apps: {
+				placeholder: '{{content.apps}}',
+				text: function () {
+					return settings.labels.account.apps;
+				}
 			},
 
 			// My Account Heading
-			'{{content.headingAccount}}': function () {
-				return settings.labels.account.headingAccount;
+			headingAccount: {
+				placeholder: '{{content.headingAccount}}',
+				text: function () {
+					return settings.labels.account.headingAccount;
+				}
 			},
 
 			// My Account Info Subheading
-			'{{content.headingAccountInfo}}': function () {
-				return settings.labels.account.headingAccountInfo;
+			headingAccountInfo: {
+				placeholder: '{{content.headingAccountInfo}}',
+				text: function () {
+					return settings.labels.account.headingAccountInfo;
+				}
 			},
 
 			// Change My Email Heading
-			'{{content.headingChangeEmail}}': function () {
-				return settings.labels.account.headingChangeEmail;
+			headingChangeEmail: {
+				placeholder: '{{content.headingChangeEmail}}',
+				text: function () {
+					return settings.labels.account.headingChangeEmail;
+				}
 			},
 
 			// Change My Email Success Heading
-			'{{content.headingChangeEmailSuccess}}': function () {
-				return settings.labels.account.headingChangeEmailSuccess;
+			headingChangeEmailSuccess: {
+				placeholder: '{{content.headingChangeEmailSuccess}}',
+				text: function () {
+					return settings.labels.account.headingChangeEmailSuccess;
+				}
 			},
 
 			// Change My Password Heading
-			'{{content.headingChangePassword}}': function () {
-				return settings.labels.account.headingChangePassword;
+			headingChangePassword: {
+				placeholder: '{{content.headingChangePassword}}',
+				text: function () {
+					return settings.labels.account.headingChangePassword;
+				}
 			},
 
 			// Change My Password Success Heading
-			'{{content.headingChangePasswordSuccess}}': function () {
-				return settings.labels.account.headingChangePasswordSuccess;
+			headingChangePasswordSuccess: {
+				placeholder: '{{content.headingChangePasswordSuccess}}',
+				text: function () {
+					return settings.labels.account.headingChangePasswordSuccess;
+				}
 			},
 
 			// My Keys Heading
-			'{{content.headingMyApiKeys}}': function () {
-				return settings.labels.account.headingMyApiKeys;
+			headingMyApiKeys: {
+				placeholder: '{{content.headingMyApiKeys}}',
+				text: function () {
+					return settings.labels.account.headingMyApiKeys;
+				}
 			},
 
 			// My Apps Heading
-			'{{content.headingMyApps}}': function () {
-				return settings.labels.account.headingMyApps;
+			headingMyApps: {
+				placeholder: '{{content.headingMyApps}}',
+				text: function () {
+					return settings.labels.account.headingMyApps;
+				}
 			},
 
 			// My Keys Nav Label
-			'{{content.keys}}': function () {
-				return settings.labels.account.keys;
+			keys: {
+				placeholder: '{{content.keys}}',
+				text: function () {
+					return settings.labels.account.keys;
+				}
 			},
 
 			// No Applications Message
-			'{{content.noApps}}': function () {
-				return settings.labels.account.noApps;
+			noApps: {
+				placeholder: '{{content.noApps}}',
+				text: function () {
+					return settings.labels.account.noApps;
+				}
 			},
 
 			// No Keys Message
-			'{{content.noKeys}}': function () {
-				return settings.labels.account.noKeys;
+			noKeys: {
+				placeholder: '{{content.noKeys}}',
+				text: function () {
+					return settings.labels.account.noKeys;
+				}
 			},
 
 			// No Keys for Specific Plan Message
-			'{{content.noPlanKeys}}': function () {
-				return settings.labels.account.noPlanKeys;
+			noPlanKeys: {
+				placeholder: '{{content.noPlanKeys}}',
+				text: function () {
+					return settings.labels.account.noPlanKeys;
+				}
 			},
 
 			// Email successfully changed message
-			'{{content.emailChanged}}': function () {
-				return settings.labels.account.emailChanged;
+			emailChanged: {
+				placeholder: '{{content.emailChanged}}',
+				text: function () {
+					return settings.labels.account.emailChanged;
+				}
 			},
 
 			// Password successfully changed message
-			'{{content.passwordChanged}}': function () {
-				return settings.labels.account.passwordChanged;
-			}
-
-		},
-
-		appEdit: {
-
-			// Heading
-			'{{content.heading}}': function () {
-				return settings.labels.appEdit.heading;
-			},
-
-			// Body Text
-			'{{content.main}}': function () {
-				return settings.labels.appEdit.main;
-			},
-
-			// App Edit Form
-			'{{content.form}}': function () {
-				return window.mashery.content.main;
-			},
-
-		},
-
-		// App Add APIs Success
-		appAddAPIsSuccess: {
-
-			// Heading
-			'{{content.heading}}': function () {
-				return settings.labels.appAddAPIsSuccess.heading;
-			},
-
-			// Main Content
-			'{{content.main}}': function () {
-				return settings.labels.appAddAPIsSuccess.main;
+			passwordChanged: {
+				placeholder: '{{content.passwordChanged}}',
+				text: function () {
+					return settings.labels.account.passwordChanged;
+				}
 			}
 
 		},
@@ -1363,13 +1524,19 @@ var m$ = (function () {
 		appRegister: {
 
 			// Heading
-			'{{content.heading}}': function () {
-				return settings.labels.appRegister.heading;
+			heading: {
+				placeholder: '{{content.heading}}',
+				text: function () {
+					return settings.labels.appRegister.heading;
+				}
 			},
 
 			// Subheading
-			'{{content.subheading}}': function () {
-				return settings.labels.appRegister.subheading;
+			subheading: {
+				placeholder: '{{content.subheading}}',
+				text: function () {
+					return settings.labels.appRegister.subheading;
+				}
 			}
 
 		},
@@ -1378,13 +1545,19 @@ var m$ = (function () {
 		appRegisterSuccess: {
 
 			// Heading
-			'{{content.heading}}': function () {
-				return settings.labels.appRegisterSuccess.heading;
+			heading: {
+				placeholder: '{{content.heading}}',
+				text: function () {
+					return settings.labels.appRegisterSuccess.heading;
+				}
 			},
 
 			// Main Content
-			'{{content.main}}': function () {
-				return settings.labels.appRegisterSuccess.main;
+			main: {
+				placeholder: '{{content.main}}',
+				text: function () {
+					return settings.labels.appRegisterSuccess.main;
+				}
 			}
 
 		},
@@ -1393,13 +1566,19 @@ var m$ = (function () {
 		contact: {
 
 			// Heading
-			'{{content.heading}}': function () {
-				return settings.labels.contact.heading;
+			heading: {
+				placeholder: '{{content.heading}}',
+				text: function () {
+					return settings.labels.contact.heading;
+				}
 			},
 
 			// Subheading
-			'{{content.subheading}}': function () {
-				return settings.labels.contact.subheading;
+			subheading: {
+				placeholder: '{{content.subheading}}',
+				text: function () {
+					return settings.labels.contact.subheading;
+				}
 			}
 
 		},
@@ -1408,13 +1587,19 @@ var m$ = (function () {
 		contactSuccess: {
 
 			// Heading
-			'{{content.heading}}': function () {
-				return settings.labels.contactSuccess.heading;
+			heading: {
+				placeholder: '{{content.heading}}',
+				text: function () {
+					return settings.labels.contactSuccess.heading;
+				}
 			},
 
 			// Main Content
-			'{{content.main}}': function () {
-				return settings.labels.contactSuccess.main;
+			main: {
+				placeholder: '{{content.main}}',
+				text: function () {
+					return settings.labels.contactSuccess.main;
+				}
 			}
 
 		},
@@ -1423,13 +1608,19 @@ var m$ = (function () {
 		fourOhFour: {
 
 			// Heading
-			'{{content.heading}}': function () {
-				return settings.labels.fourOhFour.heading;
+			heading: {
+				placeholder: '{{content.heading}}',
+				text: function () {
+					return settings.labels.fourOhFour.heading;
+				}
 			},
 
 			// Main Content
-			'{{content.main}}': function () {
-				return settings.labels.fourOhFour.main;
+			main: {
+				placeholder: '{{content.main}}',
+				text: function () {
+					return settings.labels.fourOhFour.main;
+				}
 			}
 
 		},
@@ -1438,13 +1629,19 @@ var m$ = (function () {
 		ioDocs: {
 
 			// Heading
-			'{{content.heading}}': function () {
-				return settings.labels.ioDocs.heading;
+			heading: {
+				placeholder: '{{content.heading}}',
+				text: function () {
+					return settings.labels.ioDocs.heading;
+				}
 			},
 
 			// Subheading
-			'{{content.subheading}}': function () {
-				return settings.labels.ioDocs.subheading;
+			subheading: {
+				placeholder: '{{content.subheading}}',
+				text: function () {
+					return settings.labels.ioDocs.subheading;
+				}
 			}
 
 		},
@@ -1453,13 +1650,19 @@ var m$ = (function () {
 		join: {
 
 			// Heading
-			'{{content.heading}}': function () {
-				return settings.labels.join.heading;
+			heading: {
+				placeholder: '{{content.heading}}',
+				text: function () {
+					return settings.labels.join.heading;
+				}
 			},
 
 			// Subheading
-			'{{content.subheading}}': function () {
-				return settings.labels.join.subheading;
+			subheading: {
+				placeholder: '{{content.subheading}}',
+				text: function () {
+					return settings.labels.join.subheading;
+				}
 			}
 
 		},
@@ -1468,8 +1671,11 @@ var m$ = (function () {
 		joinSuccess: {
 
 			// Heading
-			'{{content.heading}}': function () {
-				return settings.labels.joinSuccess.heading;
+			heading: {
+				placeholder: '{{content.heading}}',
+				text: function () {
+					return settings.labels.joinSuccess.heading;
+				}
 			}
 
 		},
@@ -1478,33 +1684,39 @@ var m$ = (function () {
 		layout: {
 
 			// Footer 1
-			'{{layout.footer1}}': function () {
-				return '<div id="footer-1-wrapper"></div>';
+			footer1: {
+				placeholder: '{{layout.footer1}}',
+				text: '<div id="footer-1-wrapper"></div>'
 			},
 
 			// Footer 2
-			'{{layout.footer2}}': function () {
-				return '<div id="footer-2-wrapper"></div>';
+			footer2: {
+				placeholder: '{{layout.footer2}}',
+				text: '<div id="footer-2-wrapper"></div>'
 			},
 
 			// Main Content
-			'{{layout.main}}': function () {
-				return '<!-- tabindex="-1" hack for skipnav link: https://code.google.com/p/chromium/issues/detail?id=37721 --><main class="tabindex" tabindex="-1" id="main-wrapper"></main>';
+			main: {
+				placeholder: '{{layout.main}}',
+				text: '<!-- tabindex="-1" hack for skipnav link: https://code.google.com/p/chromium/issues/detail?id=37721 -->' + '<main class="tabindex" tabindex="-1" id="main-wrapper"></main>'
 			},
 
 			// Primary Nav
-			'{{layout.navPrimary}}': function () {
-				return '<nav id="nav-primary-wrapper"></nav>';
+			navPrimary: {
+				placeholder: '{{layout.navPrimary}}',
+				text: '<nav id="nav-primary-wrapper"></nav>'
 			},
 
 			// Secondary Nav
-			'{{layout.navSecondary}}': function () {
-				return '<nav id="nav-secondary-wrapper"></nav>';
+			navSecondary: {
+				placeholder: '{{layout.navSecondary}}',
+				text: '<nav id="nav-secondary-wrapper"></nav>'
 			},
 
 			// User Nav
-			'{{layout.navUser}}': function () {
-				return '<nav id="nav-user-wrapper"></nav>';
+			navUser: {
+				placeholder: '{{layout.navUser}}',
+				text: '<nav id="nav-user-wrapper"></nav>'
 			}
 
 		},
@@ -1513,13 +1725,19 @@ var m$ = (function () {
 		logout: {
 
 			// Heading
-			'{{content.heading}}': function () {
-				return settings.labels.logout.heading;
+			heading: {
+				placeholder: '{{content.heading}}',
+				text: function () {
+					return settings.labels.logout.heading;
+				}
 			},
 
 			// Main Content
-			'{{content.main}}': function () {
-				return settings.labels.logout.main;
+			main: {
+				placeholder: '{{content.main}}',
+				text: function () {
+					return settings.labels.logout.main;
+				}
 			}
 
 		},
@@ -1528,13 +1746,19 @@ var m$ = (function () {
 		logoutFail: {
 
 			// Heading
-			'{{content.heading}}': function () {
-				return settings.labels.logoutFail.heading;
+			heading: {
+				placeholder: '{{content.heading}}',
+				text: function () {
+					return settings.labels.logoutFail.heading;
+				}
 			},
 
 			// Main Content
-			'{{content.main}}': function () {
-				return settings.labels.logoutFail.main;
+			main: {
+				placeholder: '{{content.main}}',
+				text: function () {
+					return settings.labels.logoutFail.main;
+				}
 			}
 
 		},
@@ -1543,13 +1767,19 @@ var m$ = (function () {
 		lostPassword: {
 
 			// Heading
-			'{{content.heading}}': function () {
-				return settings.labels.lostPassword.heading;
+			heading: {
+				placeholder: '{{content.heading}}',
+				text: function () {
+					return settings.labels.lostPassword.heading;
+				}
 			},
 
 			// Subheading
-			'{{content.subheading}}': function () {
-				return settings.labels.lostPassword.subheading;
+			subheading: {
+				placeholder: '{{content.subheading}}',
+				text: function () {
+					return settings.labels.lostPassword.subheading;
+				}
 			}
 
 		},
@@ -1558,13 +1788,19 @@ var m$ = (function () {
 		lostPasswordReset: {
 
 			// Heading
-			'{{content.heading}}': function () {
-				return settings.labels.lostPasswordReset.heading;
+			heading: {
+				placeholder: '{{content.heading}}',
+				text: function () {
+					return settings.labels.lostPasswordReset.heading;
+				}
 			},
 
 			// Main Content
-			'{{content.main}}': function () {
-				return settings.labels.lostPasswordReset.main;
+			main: {
+				placeholder: '{{content.main}}',
+				text: function () {
+					return settings.labels.lostPasswordReset.main;
+				}
 			}
 
 		},
@@ -1573,13 +1809,19 @@ var m$ = (function () {
 		lostUsername: {
 
 			// Heading
-			'{{content.heading}}': function () {
-				return settings.labels.lostUsername.heading;
+			heading: {
+				placeholder: '{{content.heading}}',
+				text: function () {
+					return settings.labels.lostUsername.heading;
+				}
 			},
 
 			// Subheading
-			'{{content.subheading}}': function () {
-				return settings.labels.lostUsername.subheading;
+			subheading: {
+				placeholder: '{{content.subheading}}',
+				text: function () {
+					return settings.labels.lostUsername.subheading;
+				}
 			}
 
 		},
@@ -1588,13 +1830,19 @@ var m$ = (function () {
 		lostUsernameReset: {
 
 			// Heading
-			'{{content.heading}}': function () {
-				return settings.labels.lostUsernameReset.heading;
+			heading: {
+				placeholder: '{{content.heading}}',
+				text: function () {
+					return settings.labels.lostUsernameReset.heading;
+				}
 			},
 
 			// Main Content
-			'{{content.main}}': function () {
-				return settings.labels.lostUsernameReset.main;
+			main: {
+				placeholder: '{{content.main}}',
+				text: function () {
+					return settings.labels.lostUsernameReset.main;
+				}
 			}
 
 		},
@@ -1603,28 +1851,43 @@ var m$ = (function () {
 		memberRemove: {
 
 			// Cancel Button Text
-			'{{content.cancel}}': function () {
-				return settings.labels.memberRemove.cancel;
+			cancel: {
+				placeholder: '{{content.cancel}}',
+				text: function () {
+					return settings.labels.memberRemove.cancel;
+				}
 			},
 
 			// Confirm Button Text
-			'{{content.confirm}}': function () {
-				return settings.labels.memberRemove.confirm;
+			confirm: {
+				placeholder: '{{content.confirm}}',
+				text: function () {
+					return settings.labels.memberRemove.confirm;
+				}
 			},
 
 			// Heading
-			'{{content.heading}}': function () {
-				return settings.labels.memberRemove.heading;
+			heading: {
+				placeholder: '{{content.heading}}',
+				text: function () {
+					return settings.labels.memberRemove.heading;
+				}
 			},
 
 			// Main Content
-			'{{content.main}}': function () {
-				return settings.labels.memberRemove.main;
+			main: {
+				placeholder: '{{content.main}}',
+				text: function () {
+					return settings.labels.memberRemove.main;
+				}
 			},
 
 			// Pop Up Confirmation Text
-			'{{content.popup}}': function () {
-				return settings.labels.memberRemove.popup;
+			popup: {
+				placeholder: '{{content.popup}}',
+				text: function () {
+					return settings.labels.memberRemove.popup;
+				}
 			}
 
 		},
@@ -1633,13 +1896,19 @@ var m$ = (function () {
 		memberRemoveSuccess: {
 
 			// Heading
-			'{{content.heading}}': function () {
-				return settings.labels.memberRemoveSuccess.heading;
+			heading: {
+				placeholder: '{{content.heading}}',
+				text: function () {
+					return settings.labels.memberRemoveSuccess.heading;
+				}
 			},
 
 			// Main Content
-			'{{content.main}}': function () {
-				return settings.labels.memberRemoveSuccess.main;
+			main: {
+				placeholder: '{{content.main}}',
+				text: function () {
+					return settings.labels.memberRemoveSuccess.main;
+				}
 			}
 
 		},
@@ -1648,13 +1917,19 @@ var m$ = (function () {
 		noAccess: {
 
 			// Heading
-			'{{content.heading}}': function () {
-				return settings.labels.noAccess.heading;
+			heading: {
+				placeholder: '{{content.heading}}',
+				text: function () {
+					return settings.labels.noAccess.heading;
+				}
 			},
 
 			// Main Content
-			'{{content.main}}': function () {
-				return settings.labels.noAccess.main;
+			main: {
+				placeholder: '{{content.main}}',
+				text: function () {
+					return settings.labels.noAccess.main;
+				}
 			}
 
 		},
@@ -1663,33 +1938,51 @@ var m$ = (function () {
 		profile: {
 
 			// Heading
-			'{{content.heading}}': function () {
-				return settings.labels.profile.heading;
+			heading: {
+				placeholder: '{{content.heading}}',
+				text: function () {
+					return settings.labels.profile.heading;
+				}
 			},
 
 			// User Info Subheading
-			'{{content.headingUserInfo}}': function () {
-				return settings.labels.profile.headingUserInfo;
+			headingUserInfo: {
+				placeholder: '{{content.headingUserInfo}}',
+				text: function () {
+					return settings.labels.profile.headingUserInfo;
+				}
 			},
 
 			// User Activity Subheading
-			'{{content.headingActivity}}': function () {
-				return settings.labels.profile.headingActivity;
+			headingActivity: {
+				placeholder: '{{content.headingActivity}}',
+				text: function () {
+					return settings.labels.profile.headingActivity;
+				}
 			},
 
 			// User Website Label
-			'{{content.userWebsite}}': function () {
-				return settings.labels.profile.userWebsite;
+			userWebsite: {
+				placeholder: '{{content.userWebsite}}',
+				text: function () {
+					return settings.labels.profile.userWebsite;
+				}
 			},
 
 			// User Blog Label
-			'{{content.userBlog}}': function () {
-				return settings.labels.profile.userBlog;
+			userBlog: {
+				placeholder: '{{content.userBlog}}',
+				text: function () {
+					return settings.labels.profile.userBlog;
+				}
 			},
 
 			// User Registration Date Label
-			'{{content.userRegistered}}': function () {
-				return settings.labels.profile.userRegistered;
+			userRegistered: {
+				placeholder: '{{content.userRegistered}}',
+				text: function () {
+					return settings.labels.profile.userRegistered;
+				}
 			}
 
 		},
@@ -1698,23 +1991,35 @@ var m$ = (function () {
 		register: {
 
 			// About/Sidebar Content
-			'{{content.about}}': function () {
-				return settings.labels.register.sidebar;
+			about: {
+				placeholder: '{{content.about}}',
+				text: function () {
+					return settings.labels.register.sidebar;
+				}
 			},
 
 			// Form
-			'{{content.form}}': function () {
-				return window.mashery.content.main;
+			form: {
+				placeholder: '{{content.form}}',
+				text: function () {
+					return window.mashery.content.main;
+				}
 			},
 
 			// Heading
-			'{{content.heading}}': function () {
-				return settings.labels.register.heading;
+			heading: {
+				placeholder: '{{content.heading}}',
+				text: function () {
+					return settings.labels.register.heading;
+				}
 			},
 
-			// Subheading
-			'{{content.subheading}}': function () {
-				return settings.labels.register.subheading;
+			// Subheadin
+			subheading: {
+				placeholder: '{{content.subheading}}',
+				text: function () {
+					return settings.labels.register.subheading;
+				}
 			}
 
 		},
@@ -1723,8 +2028,11 @@ var m$ = (function () {
 		registerSent: {
 
 			// Heading
-			'{{content.heading}}': function () {
-				return settings.labels.registerSent.heading;
+			heading: {
+				placeholder: '{{content.heading}}',
+				text: function () {
+					return settings.labels.registerSent.heading;
+				}
 			}
 
 		},
@@ -1733,13 +2041,19 @@ var m$ = (function () {
 		registerResend: {
 
 			// Heading
-			'{{content.heading}}': function () {
-				return settings.labels.registerResend.heading;
+			heading: {
+				placeholder: '{{content.heading}}',
+				text: function () {
+					return settings.labels.registerResend.heading;
+				}
 			},
 
 			// Subheading
-			'{{content.subheading}}': function () {
-				return settings.labels.registerResend.subheading;
+			subheading: {
+				placeholder: '{{content.subheading}}',
+				text: function () {
+					return settings.labels.registerResend.subheading;
+				}
 			}
 
 		},
@@ -1748,13 +2062,19 @@ var m$ = (function () {
 		registerResendSuccess: {
 
 			// Heading
-			'{{content.heading}}': function () {
-				return settings.labels.registerResendSuccess.heading;
+			heading: {
+				placeholder: '{{content.heading}}',
+				text: function () {
+					return settings.labels.registerResendSuccess.heading;
+				}
 			},
 
 			// Main Content
-			'{{content.main}}': function () {
-				return settings.labels.registerResendSuccess.main;
+			main: {
+				placeholder: '{{content.main}}',
+				text: function () {
+					return settings.labels.registerResendSuccess.main;
+				}
 			}
 
 		},
@@ -1763,53 +2083,83 @@ var m$ = (function () {
 		search: {
 
 			// Heading
-			'{{content.heading}}': function () {
-				return settings.labels.search.heading;
+			heading: {
+				placeholder: '{{content.heading}}',
+				text: function () {
+					return settings.labels.search.heading;
+				}
 			},
 
 			// Meta Info
-			'{{content.meta}}': function () {
-				return settings.labels.search.meta;
+			meta: {
+				placeholder: '{{content.meta}}',
+				text: function () {
+					return settings.labels.search.meta;
+				}
 			},
 
 			// No Results Found Message
-			'{{content.noResults}}': function () {
-				return settings.labels.search.noResults;
+			noResults: {
+				placeholder: '{{content.noResults}}',
+				text: function () {
+					return settings.labels.search.noResults;
+				}
 			},
 
 			// The Search Query
-			'{{content.query}}': function () {
-				return window.mashery.content.secondary.query;
+			query: {
+				placeholder: '{{content.query}}',
+				text: function () {
+					return window.mashery.content.secondary.query;
+				}
 			},
 
 			// The Start of the Displayed Result Range (X of Y out of Z)
-			'{{content.first}}': function () {
-				return window.mashery.content.secondary.first;
+			first: {
+				placeholder: '{{content.first}}',
+				text: function () {
+					return window.mashery.content.secondary.first;
+				}
 			},
 
 			// The End of the Displayed Result Range (X of Y out of Z)
-			'{{content.last}}': function () {
-				return window.mashery.content.secondary.last;
+			last: {
+				placeholder: '{{content.last}}',
+				text: function () {
+					return window.mashery.content.secondary.last;
+				}
 			},
 
 			// The Total Number of Results
-			'{{content.total}}': function () {
-				return window.mashery.content.secondary.total;
+			total: {
+				placeholder: '{{content.total}}',
+				text: function () {
+					return window.mashery.content.secondary.total;
+				}
 			},
 
 			// Previous Page Link Text
-			'{{content.pagePrevious}}': function () {
-				return settings.labels.search.pagePrevious;
+			pagePrevious: {
+				placeholder: '{{content.pagePrevious}}',
+				text: function () {
+					return settings.labels.search.pagePrevious;
+				}
 			},
 
 			// Next Page Link Text
-			'{{content.pageNext}}': function () {
-				return settings.labels.search.pageNext;
+			pageNext: {
+				placeholder: '{{content.pageNext}}',
+				text: function () {
+					return settings.labels.search.pageNext;
+				}
 			},
 
 			// Divider Between Previous and Next Links
-			'{{content.pageDivider}}': function () {
-				return settings.labels.search.pageDivider;
+			pageDivider: {
+				placeholder: '{{content.pageDivider}}',
+				text: function () {
+					return settings.labels.search.pageDivider;
+				}
 			}
 
 		},
@@ -1818,13 +2168,19 @@ var m$ = (function () {
 		showSecret: {
 
 			// Heading
-			'{{content.heading}}': function () {
-				return settings.labels.showSecret.heading;
+			heading: {
+				placeholder: '{{content.heading}}',
+				text: function () {
+					return settings.labels.showSecret.heading;
+				}
 			},
 
 			// Main Content
-			'{{content.main}}': function () {
-				return settings.labels.showSecret.main;
+			main: {
+				placeholder: '{{content.main}}',
+				text: function () {
+					return settings.labels.showSecret.main;
+				}
 			}
 
 		},
@@ -1833,13 +2189,19 @@ var m$ = (function () {
 		showSecretSuccess: {
 
 			// Heading
-			'{{content.heading}}': function () {
-				return settings.labels.showSecretSuccess.heading;
+			heading: {
+				placeholder: '{{content.heading}}',
+				text: function () {
+					return settings.labels.showSecretSuccess.heading;
+				}
 			},
 
 			// Main Content
-			'{{content.main}}': function () {
-				return settings.labels.showSecretSuccess.main;
+			main: {
+				placeholder: '{{content.main}}',
+				text: function () {
+					return settings.labels.showSecretSuccess.main;
+				}
 			}
 
 		},
@@ -1848,13 +2210,19 @@ var m$ = (function () {
 		showSecretError: {
 
 			// Heading
-			'{{content.heading}}': function () {
-				return settings.labels.showSecretError.heading;
+			heading: {
+				placeholder: '{{content.heading}}',
+				text: function () {
+					return settings.labels.showSecretError.heading;
+				}
 			},
 
 			// Main Content
-			'{{content.main}}': function () {
-				return settings.labels.showSecretError.main;
+			main: {
+				placeholder: '{{content.main}}',
+				text: function () {
+					return settings.labels.showSecretError.main;
+				}
 			}
 
 		},
@@ -1863,23 +2231,35 @@ var m$ = (function () {
 		signin: {
 
 			// Sign In About Info/Sidebar
-			'{{content.about}}': function () {
-				return settings.labels.signin.sidebar;
+			about: {
+				placeholder: '{{content.about}}',
+				text: function () {
+					return settings.labels.signin.sidebar;
+				}
 			},
 
 			// Sign In Form
-			'{{content.form}}': function () {
-				return window.mashery.content.main;
+			form: {
+				placeholder: '{{content.form}}',
+				text: function () {
+					return window.mashery.content.main;
+				}
 			},
 
 			// Heading
-			'{{content.heading}}': function () {
-				return settings.labels.signin.heading;
+			heading: {
+				placeholder: '{{content.heading}}',
+				text: function () {
+					return settings.labels.signin.heading;
+				}
 			},
 
 			// Subheading
-			'{{content.subheading}}': function () {
-				return settings.labels.signin.subheading;
+			subheading: {
+				placeholder: '{{content.subheading}}',
+				text: function () {
+					return settings.labels.signin.subheading;
+				}
 			}
 
 		}
@@ -1893,88 +2273,131 @@ var m$ = (function () {
 	var globalPlaceholders = {
 
 		// Portal/Area Name
-		'{{mashery.area}}': function () {
-			return window.mashery.area;
+		area: {
+			placeholder: '{{mashery.area}}',
+			text: function () {
+				return window.mashery.area;
+			}
 		},
 
 		// Main Content (if there's not one specific to the content type)
-		'{{content.main}}': function () {
-			return window.mashery.content.main;
+		contentMain: {
+			placeholder: '{{content.main}}',
+			text: function () {
+				return window.mashery.content.main;
+			}
 		},
 
 		// Secondary Content (if there's not one specific to the content type)
-		'{{content.secondary}}': function () {
-			return window.mashery.content.secondary;
+		contentSecondary: {
+			placeholder: '{{content.secondary}}',
+			text: function () {
+				return window.mashery.content.secondary;
+			}
 		},
 
 		// Logo
-		'{{content.logo}}': function () {
-			return (settings.logo ? settings.logo : window.mashery.area);
+		logo: {
+			placeholder: '{{content.logo}}',
+			text: function () {
+				return settings.logo ? settings.logo : window.mashery.area;
+			}
 		},
 
 		// User Account Nav Items (<li><a> href="#"link</a></li> without a parent list wrapper)
-		'{{content.navItemsAccount}}': function () {
-			return getAccountNavItems();
+		navItemsAccount: {
+			placeholder: '{{content.navItemsAccount}}',
+			text: function () {
+				return getAccountNavItems();
+			}
 		},
 
 		// Mashery Account Nav Items (<li><a> href="#"link</a></li> without a parent list wrapper)
-		'{{content.navItemsMasheryAccount}}': function () {
-			return getMasheryAccountNavItems();
+		navItemsMasheryAccount: {
+			placeholder: '{{content.navItemsMasheryAccount}}',
+			text: function () {
+				return getMasheryAccountNavItems();
+			}
 		},
 
 		// Primary Nav Items (<li><a href="#">link</a></li> without a parent list wrapper)
-		'{{content.navItemsPrimary}}': function () {
-			return getNavItems(window.mashery.content.navPrimary);
+		navItemsPrimary: {
+			placeholder: '{{content.navItemsPrimary}}',
+			text: function () {
+				return getNavItems(window.mashery.content.navPrimary);
+			}
 		},
 
 		// Secondary Nav Items (<li><a href="#">link</a></li> without a parent list wrapper)
-		'{{content.navItemsSecondary}}': function () {
-			return getNavItems(window.mashery.content.navSecondary);
+		navItemsSecondary: {
+			placeholder: '{{content.navItemsSecondary}}',
+			text: function () {
+				return getNavItems(window.mashery.content.navSecondary);
+			}
 		},
 
 		// User Nav Items (<li><a href="#">link</a></li> without a parent list wrapper)
-		'{{content.navItemsUser}}': function () {
-			return getUserNavItems();
+		navItemsUser: {
+			placeholder: '{{content.navItemsUser}}',
+			text: function () {
+				return getUserNavItems();
+			}
 		},
 
 		// Mashery Made Logo
-		'{{content.masheryMade}}': function () {
-			return '<a id="mashery-made-logo" href="http://mashery.com"><img src="https://support.mashery.com/public/Mashery/images/masherymade.png"></a>';
+		masheryMade: {
+			placeholder: '{{content.masheryMade}}',
+			text: '<a id="mashery-made-logo" href="http://mashery.com"><img src="https://support.mashery.com/public/Mashery/images/masherymade.png"></a>'
 		},
 
 		// Privacy Policy
-		'{{content.privacyPolicy}}': function () {
-			return settings.labels.register.privacyPolicy;
+		privacyPolicy: {
+			placeholder: '{{content.privacyPolicy}}',
+			text: function () {
+				return settings.labels.register.privacyPolicy;
+			}
 		},
 
 		// Registration Terms of Use
-		'{{content.terms}}': function () {
-			var text =
-				'<div id="registration-terms-of-service">' +
-				'<p>By clicking the "Register" button, I certify that I have read and agree to {{content.privacyPolicy}}the <a href="http://www.mashery.com/terms/">Mashery Terms of Service</a> and <a href="http://www.mashery.com/privacy/">Privacy Policy</a>.</p>' +
-				'</div>';
-			return text;
+		registerTerms: {
+			placeholder: '{{content.terms}}',
+			text: function () {
+				var text =
+					'<div id="registration-terms-of-service">' +
+					'<p>By clicking the "Register" button, I certify that I have read and agree to {{content.privacyPolicy}}the <a href="http://www.mashery.com/terms/">Mashery Terms of Service</a> and <a href="http://www.mashery.com/privacy/">Privacy Policy</a>.</p>' +
+					'</div>';
+				return text;
+			}
 		},
 
 		// Search Form
-		'{{content.searchForm}}': function () {
-			var template =
-				'<form id="search-form" class="search-form" method="get" action="/search">' +
-				'<input class="search-input" id="search-input" type="text" value="" placeholder="' + settings.labels.search.placeholder + '" name="q">' +
-				'<button class="search-button" id="search-button" type="submit">' + settings.labels.search.button + '</button>' +
-				'</form>';
-			return template;
+		searchForm: {
+			placeholder: '{{content.searchForm}}',
+			text: function () {
+				var template =
+					'<form id="search-form" class="search-form" method="get" action="/search">' +
+					'<input class="search-input" id="search-input" type="text" value="" placeholder="' + settings.labels.search.placeholder + '" name="q">' +
+					'<button class="search-button" id="search-button" type="submit">' + settings.labels.search.button + '</button>' +
+					'</form>';
+				return template;
+			}
 		},
 
 		// Page Title
-		'{{mashery.title}}': function () {
-			var heading = document.querySelector('h1');
-			return (heading ? heading.innerHTML.trim() : window.mashery.title.replace(window.mashery.area + ' - ', '').replace(window.mashery.area, ''));
+		title: {
+			placeholder: '{{mashery.title}}',
+			text: function () {
+				var heading = m$.get('h1');
+				return (heading ? heading.innerHTML.trim() : window.mashery.title.replace(window.mashery.area + ' - ', '').replace(window.mashery.area, ''));
+			}
 		},
 
 		// Current User's Username
-		'{{mashery.username}}': function () {
-			return window.mashery.username;
+		username: {
+			placeholder: '{{mashery.username}}',
+			text: function () {
+				return window.mashery.username;
+			}
 		}
 
 	};
@@ -1985,199 +2408,37 @@ var m$ = (function () {
 	//
 
 	/**
-	 * Load a JS file asynchronously.
-	 * @public
-	 * @author @scottjehl, Filament Group, Inc.
-	 * @license MIT
-	 * @link https://github.com/filamentgroup/loadJS
-	 * @param  {String}   src       URL of script to load.
-	 * @param  {Function} callback  Callback to run on completion.
-	 * @return {String}             The script URL.
-	 */
-	m$.loadJS = function (src, callback, reload) {
-		var existing = document.querySelector('script[src*="' + src + '"]');
-		if (existing) {
-			if (!reload) {
-				if (callback && typeof (callback) === 'function') {
-					callback();
-				}
-				return;
-			}
-			existing.parentNode.removeChild(existing);
-		}
-		var ref = window.document.getElementsByTagName('script')[0];
-		var script = window.document.createElement('script');
-		script.src = src;
-		ref.parentNode.insertBefore(script, ref);
-		if (callback && typeof (callback) === 'function') {
-			script.onload = callback;
-		}
-		return script;
-	};
-
-	/**
-	 * Load a CSS file asynchronously
-	 * @public
-	 * @copyright @scottjehl, Filament Group, Inc.
-	 * @license MIT
-	 * @param {String} href    The URL for your CSS file
-	 * @param {Node}   before  Element to use as a reference for injecting the <link> [optional]
-	 * @param {String} media   Stylesheet media type [optional, defaults to 'all']
-	 */
-	m$.loadCSS = function (href, before, media) {
-		// Bail if CSS file already exists
-		if (document.querySelector('link[href*="' + href + '"]')) return;
-		var ss = window.document.createElement('link');
-		var ref = before || window.document.getElementsByTagName('script')[0];
-		var sheets = window.document.styleSheets;
-		ss.rel = 'stylesheet';
-		ss.href = href;
-		// temporarily, set media to something non-matching to ensure it'll fetch without blocking render
-		ss.media = 'only x';
-		// inject link
-		ref.parentNode.insertBefore(ss, ref);
-		// This function sets the link's media back to `all` so that the stylesheet applies once it loads
-		// It is designed to poll until document.styleSheets includes the new sheet.
-		function toggleMedia() {
-			var defined;
-			for (var i = 0; i < sheets.length; i++) {
-				if (sheets[i].href && sheets[i].href.indexOf(href) > -1) {
-					defined = true;
-				}
-			}
-			if (defined) {
-				ss.media = media || 'all';
-			}
-			else {
-				setTimeout(toggleMedia);
-			}
-		}
-		toggleMedia();
-		return ss;
-	};
-
-	/**
-	 * Sanitize a string for use as a class
-	 * Regex pattern: http://stackoverflow.com/a/9635698/1293256
-	 * @public
-	 * @param {String} id      The string to convert into a class
-	 * @param {String} prefix  A prefix to use before the class [optionals]
-	 */
-	m$.sanitizeClass = function (id, prefix) {
-		if (!id) return '';
-		prefix = prefix ? prefix + '-' : '';
-		return prefix + id.replace(/^[^a-z]+|[^\w:.-]+/gi, '-').toLowerCase();
-	};
-
-	/**
-	 * Inject HTML elements into the <head>
-	 * @public
-	 * @param {String} type The HTML element type
-	 * @param {Object} atts The attributes and values for the element
-	 */
-	m$.inject = function (type, atts) {
-
-		// Variables
-		var ref = window.document.getElementsByTagName('script')[0];
-		var elem = document.createElement(type);
-
-		// Loop through each attribute
-		atts.forEach(function (value, key) {
-			elem.setAttribute(key, value);
-		});
-
-		// Inject into the <head>
-		ref.before(elem);
-
-	};
-
-	/**
-	 * Merge two or more objects together.
-	 * @private
-	 * @param   {Boolean}  deep     If true, do a deep (or recursive) merge [optional]
-	 * @param   {Object}   objects  The objects to merge together
-	 * @returns {Object}            Merged values of defaults and options
-	 * @todo optimize loops
-	 */
-	var extend = function () {
-
-		// Variables
-		var extended = {};
-		var deep = false;
-
-		// Check if a deep merge
-		if (typeof (arguments[0]) === 'boolean') {
-			deep = arguments[0];
-			delete arguments[0];
-		}
-
-		// Merge the object into the extended object
-		var merge = function (obj) {
-			obj.forEach(function(prop, key) {
-				// If deep merge and property is an object, merge properties
-				if (deep && Object.prototype.toString.call(obj[prop]) === '[object Object]') {
-					extended[key] = extend(true, extended[key], prop);
-				} else {
-					extended[key] = prop;
-				}
-			});
-		};
-
-		// Loop through each object and conduct a merge
-		arguments.forEach(function (obj) {
-			merge(obj);
-		});
-
-		return extended;
-
-	};
-
-	/**
-	 * Simulate a click event.
-	 * @public
-	 * @param {Element} elem  the element to simulate a click on
-	 */
-	var click = function (elem) {
-		// Create our event (with options)
-		var evt = new MouseEvent('click', {
-			bubbles: true,
-			cancelable: true,
-			view: window
-		});
-		// If cancelled, don't dispatch our event
-		var canceled = !elem.dispatchEvent(evt);
-	};
-
-	/**
 	 * Replaces placeholders with real content
-	 * @private
 	 * @param {String} template The template string
 	 * @param {String} local    A local placeholder to use, if any
 	 */
 	var replacePlaceholders = function (template, local) {
 
 		// Check if the template is a string or a function
-		template = typeof (template) === 'function' ? template() : template;
+		template = Object.prototype.toString.call(template) === '[object Function]' ? template() : template;
 
 		// Replace local placeholders (if they exist)
 		if (local) {
 			var tempLocal = /account/.test(local) ? 'account' : local;
 			if (localPlaceholders[tempLocal]) {
-				localPlaceholders[tempLocal].forEach(function (content, placeholder) {
-					template = template.replace(new RegExp(placeholder, 'g'), content);
-				});
+				localPlaceholders[tempLocal].forEach((function (placeholder) {
+					if (!placeholder.placeholder || !placeholder.text) return;
+					template = template.replace(new RegExp(placeholder.placeholder, 'g'), placeholder.text);
+				}));
 			}
 		}
 
 		// Replace paths
-		paths.forEach(function (path, placeholder) {
-			template = template.replace(new RegExp(placeholder, 'g'), path);
-		});
+		paths.forEach((function (path) {
+			if (!path.placeholder || !path.url) return;
+			template = template.replace(new RegExp(path.placeholder, 'g'), path.url);
+		}));
 
 		// Replace global placeholders
-		globalPlaceholders.forEach(function (content, placeholder) {
-			template = template.replace(new RegExp(placeholder, 'g'), content);
-		});
+		globalPlaceholders.forEach((function (placeholder) {
+			if (!placeholder.placeholder || !placeholder.text) return;
+			template = template.replace(new RegExp(placeholder.placeholder, 'g'), placeholder.text);
+		}));
 
 		return template;
 
@@ -2185,7 +2446,6 @@ var m$ = (function () {
 
 	/**
 	 * Get the user navigation items
-	 * @private
 	 */
 	var getUserNavItems = function () {
 
@@ -2209,7 +2469,6 @@ var m$ = (function () {
 
 	/**
 	 * Get the account navigation items
-	 * @private
 	 */
 	var getAccountNavItems = function () {
 		var template =
@@ -2221,7 +2480,6 @@ var m$ = (function () {
 
 	/**
 	 * Get the Mashery account navigation items
-	 * @private
 	 */
 	var getMasheryAccountNavItems = function () {
 		var template =
@@ -2234,20 +2492,51 @@ var m$ = (function () {
 
 	/**
 	 * Convert an array of navigation items into a string
-	 * @private
 	 * @param {Array} items The navigation items
 	 */
 	var getNavItems = function (items) {
 		var template = '';
-		items.forEach(function (item) {
+		items.forEach((function (item) {
 			template += '<li><a href="' + decodeURIComponent(item.url) + '">' + item.label + '</a></li>';
-		});
+		}));
 		return template;
 	};
 
 	/**
+	 * Load IO Docs scripts if they're not already present
+	 */
+	var loadIODocsScripts = function () {
+		m$.loadJS('/public/Mashery/scripts/Iodocs/prettify.js', (function () {
+			m$.loadJS('/public/Mashery/scripts/Mashery/beautify.js', (function () {
+				m$.loadJS('/public/Mashery/scripts/vendor/alpaca.min.js', (function () {
+					m$.loadJS('/public/Mashery/scripts/Iodocs/utilities.js', (function () {
+						m$.loadJS('/public/Mashery/scripts/Iodocs/iodocs.js', (function () {
+							m$.loadJS('/public/Mashery/scripts/Mashery/ace/ace.js');
+						}), true);
+					}), true);
+				}), true);
+			}), true);
+		}), true);
+	};
+
+	/**
+	 * Load any Mashery files that are required for a page to work
+	 * Currently, this is only required for IO Docs
+	 */
+	var loadRequiredFiles = function () {
+		// If not IO Docs, bail
+		if (window.mashery.contentType !== 'ioDocs') return;
+		if (!('jQuery' in window)) {
+			// If jQuery isn't loaded yet, load it
+			loadJS('https://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js', loadIODocsScripts);
+		} else {
+			// Otherwise, just load our scripts
+			loadIODocsScripts();
+		}
+	};
+
+	/**
 	 * Render content in the Portal
-	 * @private
 	 * @param {String}   selector The selector for the element to render the content into
 	 * @param {String}   key      The content type
 	 * @param {Function} before   The callback to run before rendering
@@ -2256,7 +2545,7 @@ var m$ = (function () {
 	var render = function (selector, key, before, after) {
 
 		// Get the content
-		var content = document.querySelector(selector);
+		var content = m$.get(selector);
 		if (!content) return;
 
 		// Run the before callback
@@ -2269,10 +2558,10 @@ var m$ = (function () {
 
 		// If custom page or documentation, remove Mashery inserted junk
 		if (['page','docs'].indexOf(window.mashery.contentType !== -1)) {
-			var junk = document.querySelectorAll('#header-edit, #main .section .section-meta');
-			junk.forEach(function (item) {
+			var junk = m$.getAll('#header-edit, #main .section .section-meta');
+			junk.forEach((function (item) {
 				item.remove();
-			});
+			}));
 		}
 
 		// Run the after callback
@@ -2284,16 +2573,15 @@ var m$ = (function () {
 
 	/**
 	 * Verify that a user logged in.
-	 * @public
 	 * @bugfix Sometimes mashery variable provides wrong info at page load after logout event
 	 */
-	m$.verifyLoggedIn = function () {
+	exports.verifyLoggedIn = function () {
 
 		// Only run on logout and member remove pages
 		if (['logout', 'memberRemoveSuccess'].indexOf(window.mashery.contentType) === -1) return;
 
 		// Check if the a logout form exists (if so, user is logged in and we can bail)
-		var loggedIn = window.mashery.dom.querySelector('#mashery-logout-form');
+		var loggedIn = m$.get('#mashery-logout-form', window.mashery.dom);
 		if (loggedIn) return;
 
 		// Update mashery object values
@@ -2307,7 +2595,6 @@ var m$ = (function () {
 
 	/**
 	 * Render the header elements
-	 * @private
 	 * @param {Boolean} ajax  If true, skip rendering (since they already exist)
 	 */
 	var renderHead = function (ajax) {
@@ -2347,12 +2634,11 @@ var m$ = (function () {
 
 	/**
 	 * Add class hooks for styling to the DOM, and a global JS variable for conditional functions
-	 * @public
 	 */
-	m$.addStyleHooks = function () {
+	exports.addStyleHooks = function () {
 
 		// Get the app wrapper
-		var wrapper = document.querySelector('#app-wrapper');
+		var wrapper = m$.get('#app-wrapper');
 		if (!wrapper) return;
 
 		// Get the current pathname (or 'home' if one doesn't exist)
@@ -2367,257 +2653,45 @@ var m$ = (function () {
 	};
 
 	/**
-	 * Load IO Docs scripts if they're not already present
-	 * @private
-	 */
-	var loadIODocsScripts = function () {
-		m$.loadJS('/public/Mashery/scripts/Iodocs/prettify.js', function () {
-			m$.loadJS('/public/Mashery/scripts/Mashery/beautify.js', function () {
-				m$.loadJS('/public/Mashery/scripts/vendor/alpaca.min.js', function () {
-					m$.loadJS('/public/Mashery/scripts/Iodocs/utilities.js', function () {
-						m$.loadJS('/public/Mashery/scripts/Iodocs/iodocs.js', function () {
-							m$.loadJS('/public/Mashery/scripts/Mashery/ace/ace.js');
-						}, true);
-					}, true);
-				}, true);
-			}, true);
-		}, true);
-	};
-
-	/**
-	 * Load required files for IODocs
-	 * @private
-	 */
-	var loadRequiredFilesIODocs = function () {
-		// If not IO Docs, bail
-		if (window.mashery.contentType !== 'ioDocs') return;
-		if (!('jQuery' in window)) {
-			// If jQuery isn't loaded yet, load it
-			m$.loadJS('https://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js', loadIODocsScripts);
-		} else {
-			// Otherwise, just load our scripts
-			loadIODocsScripts();
-		}
-	};
-
-	/**
-	 * Load required files for IODocs
-	 * @private
-	 */
-	var loadRequiredFilesPasswords = function () {
-
-		// Only run on pages with password requirement lists
-		if (!document.querySelector('#passwd_requirements')) {
-			masheryTestPassword.destroy();
-			return;
-		};
-
-		// Only run if testPassword is enabled
-		if (!settings.testPassword) return;
-
-		// Initialize tests
-		masheryTestPassword.init();
-
-	};
-
-	/**
-	 * Load Mashtips functions
-	 * @private
-	 */
-	var loadRequiredFilesMashtips = function () {
-
-		// Only run on pages with Mashtips
-		if (!document.querySelector('.mashtip')) {
-			masheryMashtips.destroy();
-			return;
-		};
-
-		// Only run if testPassword is enabled
-		if (!settings.mashtips) return;
-
-		// Initialize tests
-		masheryMashtips.init();
-
-	};
-
-	/**
-	 * Load any Mashery files that are required for a page to work
-	 * @private
-	 */
-	var loadRequiredFiles = function () {
-		loadRequiredFilesIODocs(); // Load required files for IO Docs
-		loadRequiredFilesPasswords(); // Load required files for registration and password pages
-		loadRequiredFilesMashtips(); // Load Mashtip functions for tooltips
-	};
-
-	/**
-	 * Inject the logout form into the DOM
-	 * @private
-	 */
-	var renderLogout = function () {
-		if (!window.mashery.logout || document.querySelector('#mashery-logout-form')) return;
-		document.body.insertBefore(window.mashery.logout, document.body.lastChild);
-	};
-
-	/**
-	 * Inject the remove member form into the DOM on remove member page
-	 * @private
-	 */
-	var renderMemberRemove = function () {
-
-		// Only run on the member remove page
-		if (window.mashery.contentType !== 'memberRemove' || document.querySelector('#member-remove-form')) return;
-
-		// Get the form
-		var form = window.mashery.dom.querySelector('.main form');
-		if (!form) return;
-
-		// Give it an ID and make it hidden
-		form.id = 'member-remove-form';
-		form.setAttribute('hidden', 'hidden');
-
-		// Update the onclick popup text
-		var submit = form.querySelector('#process');
-		if (submit) {
-			submit.setAttribute('onclick', 'return confirm("' + localPlaceholders.memberRemove.popup.text() + '")');
-		}
-
-		// Inject it into the DOM
-		document.body.lastChild.before(form);
-	};
-
-	/**
-	 * Render the Mashery Made logo (if missing)
-	 * @private
-	 */
-	var renderMasheryMade = function () {
-
-		// Bail if Mashery Made logo is already in the DOM
-		var masheryMade = document.querySelector('#mashery-made-logo');
-		if (masheryMade) return;
-
-		// Get the app container
-		var app = document.querySelector('#app');
-		if (!app) return;
-
-		// Create our logo container and add the logo
-		var mashMade = document.createElement('div');
-		mashMade.innerHTML = '<p>x</p><div id="mashery-made"><div class="container"><p>' + globalPlaceholders['{{content.masheryMade}}']() + '</p></div></div>';
-
-		// Inject into the DOM
-		app.appendChild(mashMade.childNodes[1]);
-
-	};
-
-	/**
-	 * Render the Mashery Terms of Use of registration pages (if missing)
-	 * @private
-	 */
-	var renderTOS = function () {
-
-		// Only run on Registration pages
-		if (['register', 'join'].indexOf(window.mashery.contentType) === -1) return;
-
-		// Bail if a Terms of Use already exists
-		var tos = document.querySelector('#registration-terms-of-service');
-		if (tos) return;
-
-		// Bail if there's no registration form
-		var reg = document.querySelector('form[action*="/member/register"]');
-		if (!reg) return;
-
-		// Create our terms of use
-		var div = document.createElement('div');
-		div.innerHTML = '<p>x</p>' + replacePlaceholders(globalPlaceholders['{{content.terms}}'](), 'register');
-
-		// Inject into the DOM
-		reg.appendChild(div.childNodes[1]);
-
-	};
-
-	/**
-	 * Reload IO Docs to force script to reinit after DOM is available
-	 * @private
-	 */
-	var reloadIODocs = function () {
-
-		// Check if IO Docs has been reloaded yet
-		if (window.mashery.contentType !== 'ioDocs' || window.masheryIsAjax || window.masheryIsReloaded) return;
-
-		// Set reloaded state to true
-		window.masheryIsReloaded = true;
-
-		// Reload IO Docs
-		fetchContent(window.location.href, true);
-
-	};
-
-	/**
-	 * Update the delete app confirmation modal text with user settings
-	 */
-	var updateDeleteAppConfirmModal = function () {
-		if (window.mashery.contentType !== 'appDelete') return;
-		var process = document.querySelector('form #process');
-		if (!process) return;
-		process.setAttribute('onClick', 'return confirm(\'' + settings.labels.appDelete.confirm + '\')');
-	};
-
-	/**
-	 * Update the delete key confirmation modal text with user settings
-	 */
-	var updateDeleteKeyConfirmModal = function () {
-		if (window.mashery.contentType !== 'keyDelete') return;
-		var process = document.querySelector('form #process');
-		if (!process) return;
-		process.setAttribute('onClick', 'return confirm(\'' + settings.labels.keyDelete.confirm + '\')');
-	};
-
-	/**
 	 * Render the layout
-	 * @public
 	 */
-	m$.renderLayout = function () {
+	exports.renderLayout = function () {
 		render('#app', 'layout', settings.callbacks.beforeRenderLayout, settings.callbacks.afterRenderLayout);
-		m$.verifyLoggedIn();
+		exports.verifyLoggedIn();
 	};
 
 	/**
 	 * Render the title attribute
-	 * @public
 	 */
-	m$.renderTitle = function () {
+	exports.renderTitle = function () {
 		document.title = replacePlaceholders(settings.labels.title, window.mashery.contentType);
 	};
 
 	/**
 	 * Render the user navigation
-	 * @public
 	 */
-	m$.renderUserNav = function () {
+	exports.renderUserNav = function () {
 		render('#nav-user-wrapper', 'userNav', settings.callbacks.beforeRenderUserNav, settings.callbacks.afterRenderUserNav);
 	};
 
 	/**
 	 * Render the primary navigation
-	 * @public
 	 */
-	m$.renderPrimaryNav = function () {
+	exports.renderPrimaryNav = function () {
 		render('#nav-primary-wrapper', 'primaryNav', settings.callbacks.beforeRenderPrimaryNav, settings.callbacks.afterRenderPrimaryNav);
 	};
 
 	/**
 	 * Render the secondary navigation
-	 * @public
 	 */
-	m$.renderSecondaryNav = function () {
+	exports.renderSecondaryNav = function () {
 		render('#nav-secondary-wrapper', 'secondaryNav', settings.callbacks.beforeRenderSecondaryNav, settings.callbacks.afterRenderSecondaryNav);
 	};
 
 	/**
 	 * Render the footer
-	 * @public
 	 */
-	m$.renderFooter = function () {
+	exports.renderFooter = function () {
 
 		// Run the before callback
 		settings.callbacks.beforeRenderFooter();
@@ -2633,49 +2707,123 @@ var m$ = (function () {
 
 	/**
 	 * Render the main content
-	 * @public
 	 */
-	m$.renderMain = function () {
+	exports.renderMain = function () {
+		loadRequiredFiles();
 		render('#main-wrapper', window.mashery.contentType, settings.callbacks.beforeRenderMain, settings.callbacks.afterRenderMain);
+	};
+
+	/**
+	 * Inject the logout form into the DOM
+	 */
+	var renderLogout = function () {
+		if (!window.mashery.logout || m$.get('#mashery-logout-form')) return;
+		document.body.insertBefore(window.mashery.logout, document.body.lastChild);
+	};
+
+	/**
+	 * Inject the remove member form into the DOM on remove member page
+	 */
+	var renderMemberRemove = function () {
+
+		// Only run on the member remove page
+		if (window.mashery.contentType !== 'memberRemove' || m$.get('#member-remove-form')) return;
+
+		// Get the form
+		var form = m$.get('.main form', window.mashery.dom);
+		if (!form) return;
+
+		// Give it an ID and make it hidden
+		form.id = 'member-remove-form';
+		form.setAttribute('hidden', 'hidden');
+
+		// Update the onclick popup text
+		var submit = m$.get('#process', form);
+		if (submit) {
+			submit.setAttribute('onclick', 'return confirm("' + localPlaceholders.memberRemove.popup.text() + '")');
+		}
+
+		// Inject it into the DOM
+		document.body.lastChild.before(form);
 	};
 
 	/**
 	 * Jump to anchor or adjust focus when rendering is complete
 	 * (Our JS rendering process breaks the normal browser behavior)
-	 * @public
 	 */
-	m$.fixLocation = function () {
+	var fixLocation = function () {
 		if (window.location.hash) {
 			window.location.hash = window.location.hash;
 		} else {
-			document.querySelector('#app').focus();
+			m$.get('#app').focus();
 		}
 	};
 
 	/**
-	 * Add required content and make required DOM updates
+	 * Reload IO Docs to force script to reinit after DOM is available
 	 */
-	m$.renderCleanup = function () {
+	var reloadIODocs = function () {
 
-		// Render hidden forms and required content
-		loadRequiredFiles(); // Load required CSS/JS files into the DOM
-		renderLogout(); // Logout Form
-		renderMemberRemove(); // Remove Member Form
-		renderMasheryMade(); // Add the Mashery Made logo if missing
-		renderTOS(); // Add the Mashery Terms of Service if missing from registration page
+		// Check if IO Docs has been reloaded yet
+		if (window.mashery.contentType !== 'ioDocs' || window.masheryIsAjax || window.masheryIsReloaded) return;
 
-		// Make updates to DOM content
-		updateDeleteAppConfirmModal(); // Update the delete app confirmation modal
-		updateDeleteKeyConfirmModal();  // Update the delete key confirmation modal
+		// Set reloaded state to true
+		window.masheryIsReloaded = true;
 
-		// Forced reloads
-		reloadIODocs(); // Reload IO Docs
+		// Reload IO Docs
+		fetchContent(window.location.href, true);
+
+	};
+
+	/**
+	 * Render the Mashery Made logo (if missing)
+	 */
+	exports.renderMasheryMade = function () {
+
+		// Bail if Mashery Made logo is already in the DOM
+		var masheryMade = m$.get('#mashery-made-logo');
+		if (masheryMade) return;
+
+		// Get the app container
+		var app = m$.get('#app');
+		if (!app) return;
+
+		// Create our logo container and add the logo
+		var mashMade = document.createElement('div');
+		mashMade.innerHTML = '<p>x</p><div id="mashery-made"><div class="container"><p>' + globalPlaceholders['{{content.masheryMade}}'] + '</p></div></div>';
+
+		// Inject into the DOM
+		app.appendChild(mashMade.childNodes[1]);
+
+	};
+
+	/**
+	 * Render the Mashery Terms of Use of registration pages (if missing)
+	 */
+	exports.renderTOS = function () {
+
+		// Only run on Registration pages
+		if (['register', 'join'].indexOf(window.mashery.contentType) === -1) return;
+
+		// Bail if a Terms of Use already exists
+		var tos = m$.get('#registration-terms-of-service');
+		if (tos) return;
+
+		// Bail if there's no registration form
+		var reg = m$.get('form[action*="/member/register"]');
+		if (!reg) return;
+
+		// Create our terms of use
+		var div = document.createElement('div');
+		div.innerHTML = '<p>x</p>' + replacePlaceholders(globalPlaceholders['{{content.terms}}'], 'register');
+
+		// Inject into the DOM
+		reg.appendChild(div.childNodes[1]);
 
 	};
 
 	/**
 	 * Render the Portal via Ajax
-	 * @private
 	 * @param {Object}  data      The page data
 	 * @param {String}  url       The page URL
 	 * @param {Boolean} pushState If true, update browser history
@@ -2697,13 +2845,12 @@ var m$ = (function () {
 		}
 
 		// Render the Portal content
-		m$.renderPortal(true);
+		exports.renderPortal(true);
 
 	};
 
 	/**
 	 * Fetch page content with Ajax
-	 * @private
 	 * @param {String}  url        The page URL
 	 * @param {Boolean} pushState  If true, update browser history
 	 */
@@ -2711,10 +2858,10 @@ var m$ = (function () {
 		atomic.ajax({
 			url: url,
 			responseType: 'document'
-		}).success(function (data) {
+		}).success((function (data) {
 			// Render our content on Success
 			renderWithAjax(data, url, pushState);
-		}).error(function (data, xhr) {
+		})).error((function (data, xhr) {
 			// If a 404, display 404 error
 			if (xhr.status === 404) {
 				renderWithAjax(data, url, pushState);
@@ -2722,12 +2869,11 @@ var m$ = (function () {
 			}
 			// Otherwise, force page reload
 			window.location = url;
-		});
+		}));
 	};
 
 	/**
 	 * Process link clicks and prepare for Ajax call
-	 * @private
 	 * @param {Event} event The click event
 	 */
 	var loadWithAjax = function (event) {
@@ -2756,14 +2902,40 @@ var m$ = (function () {
 	};
 
 	/**
+	 * Render the Portal
+	 * @param {Boolean} ajax  If true, the page is being loaded via Ajax
+	 */
+	exports.renderPortal = function (ajax) {
+		settings.callbacks.beforeRender(); // Run beforeRender() callback
+		document.documentElement.classList.add('rendering'); // Add rendering class to the DOM
+		renderHead(ajax); // <head> attributes
+		exports.addStyleHooks(); // Content-specific classes
+		exports.renderLayout(); // Layout
+		exports.renderUserNav(); // User Navigation
+		exports.renderPrimaryNav(); // Primary Navigation
+		exports.renderSecondaryNav(); // Secondary Navigation
+		exports.renderMain(); // Main Content
+		exports.renderTitle(); // Page Title
+		exports.renderFooter(); // Footer
+		fixLocation(); // Jump to anchor
+		renderLogout(); // Logout Form
+		renderMemberRemove(); // Remove Member Form
+		exports.renderMasheryMade(); // Add the Mashery Made logo if missing
+		exports.renderTOS(); // Add the Mashery Terms of Service if missing from registration page
+		settings.callbacks.afterRender(); // Run afterRender() callback
+		reloadIODocs(); // Reload IO Docs
+		document.documentElement.classList.remove('loading'); // Remove loading class from the DOM
+		document.documentElement.classList.remove('rendering'); // Remove rendering class from the DOM
+	};
+
+	/**
 	 * Process logout events
-	 * @private
 	 * @param {Event} event The click event
 	 */
 	var processLogout = function (event) {
 
 		// Bail if there's no logout form
-		var logout = document.querySelector('#mashery-logout-form');
+		var logout = m$.get('#mashery-logout-form');
 		if (!logout) return;
 
 		// Prevent the default click behavior
@@ -2776,38 +2948,36 @@ var m$ = (function () {
 
 	/**
 	 * Process remove membership events
-	 * @private
 	 * @param {Event} event The click event
 	 */
 	var processMemberRemove = function (event) {
 
 		// Get the remove member form
-		var remove = document.querySelector('#member-remove-form #process');
+		var remove = m$.get('#member-remove-form #process');
 		if (!remove || window.mashery.contentType !== 'memberRemove') return;
 
 		// Prevent the default click event
 		event.preventDefault();
 
 		// Submit the remove member form
-		click(remove);
+		m$.click(remove);
 
 	};
 
 	/**
 	 * Handle all page click events
-	 * @private
 	 * @param {Event} event The click event
 	 */
 	var clickHandler = function (event) {
 
 		// Logout events
-		if (event.target.closest('a[href*="' + paths['{{path.logout}}']() + '"]')) {
+		if (event.target.closest('a[href*="' + paths.logout.url + '"]')) {
 			processLogout(event);
 			return;
 		}
 
 		// Member remove events
-		if (event.target.closest('a[href*="' + paths['{{path.removeMember}}']() + '"]')) {
+		if (event.target.closest('a[href*="' + paths.memberRemove.url + '"]')) {
 			processMemberRemove(event);
 			return;
 		}
@@ -2819,7 +2989,6 @@ var m$ = (function () {
 
 	/**
 	 * Handle popstate events and update page content
-	 * @private
 	 * @param {Event} event  The popstate event
 	 */
 	var popstateHandler = function (event) {
@@ -2830,7 +2999,6 @@ var m$ = (function () {
 	/**
 	 * Handle for submit events
 	 * Currently only used for Search form, but may be expanded in the future
-	 * @private
 	 * @param {Event} event  The form submit event
 	 */
 	var submitHandler = function (event) {
@@ -2839,39 +3007,15 @@ var m$ = (function () {
 		if (!event.target.closest('#search-form') || !settings.ajax) return;
 
 		// Get search form input field
-		var input = event.target.querySelector('#search-input');
+		var input = m$.get('#search-input', event.target);
 		if (!input) return;
 
 		// Prevent default form event
 		event.preventDefault();
 
 		// Fetch the search results page
-		fetchContent(paths['{{path.search}}']() + '?q=' + encodeURIComponent(input.value), true);
+		fetchContent(paths.search.url + '?q=' + encodeURIComponent(input.value), true);
 
-	};
-
-	/**
-	 * Render the Portal
-	 * @public
-	 * @param {Boolean} ajax  If true, the page is being loaded via Ajax
-	 */
-	m$.renderPortal = function (ajax) {
-		settings.callbacks.beforeRender(); // Run beforeRender() callback
-		document.documentElement.classList.add('rendering'); // Add rendering class to the DOM
-		renderHead(ajax); // <head> attributes
-		m$.addStyleHooks(); // Content-specific classes
-		m$.renderLayout(); // Layout
-		m$.renderUserNav(); // User Navigation
-		m$.renderPrimaryNav(); // Primary Navigation
-		m$.renderSecondaryNav(); // Secondary Navigation
-		m$.renderMain(); // Main Content
-		m$.renderTitle(); // Page Title
-		m$.renderFooter(); // Footer
-		m$.renderCleanup(); // Cleanup DOM
-		m$.fixLocation(); // Jump to anchor
-		settings.callbacks.afterRender(); // Run afterRender() callback
-		document.documentElement.classList.remove('loading'); // Remove loading class from the DOM
-		document.documentElement.classList.remove('rendering'); // Remove rendering class from the DOM
 	};
 
 	/**
@@ -2879,31 +3023,31 @@ var m$ = (function () {
 	* @public
 	* @param {object} options User options and overrides
 	*/
-	m$.init = function (options) {
+	exports.init = function (options) {
 
-		m$.loadJS('https://cdn.polyfill.io/v2/polyfill.min.js?features=default', function () {
+		m$.loadJS('https://cdn.polyfill.io/v2/polyfill.min.js?features=default', (function () {
 
 			// Merge user options with defaults
-			settings = extend( defaults, options || {} );
+			settings = m$.extend( defaults, options || {} );
 
 			// Run callback before initializing
 			settings.callbacks.beforeInit();
 
 			// Render the Portal
-			m$.renderPortal();
+			exports.renderPortal();
 
 			// Listen for click events
-			document.addEventListener('click', clickHandler, false);
+			m$.on('click', clickHandler);
 
 			if (settings.ajax) {
-				window.addEventListener('popstate', popstateHandler, false);
-				window.addEventListener('submit', submitHandler, false);
+				m$.on('popstate', popstateHandler);
+				m$.on('submit', submitHandler);
 			}
 
 			// Run callback after initializing
 			settings.callbacks.afterInit();
 
-		});
+		}));
 
 	};
 
@@ -2912,6 +3056,6 @@ var m$ = (function () {
 	// Public APIs
 	//
 
-	return m$;
+	return exports;
 
 })();

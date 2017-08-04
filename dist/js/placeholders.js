@@ -136,3 +136,4 @@ var clearDOM = function () {
 	window.requestAnimationFrame(clearDOM);
 };
 window.requestAnimationFrame(clearDOM);
+var mash = {};

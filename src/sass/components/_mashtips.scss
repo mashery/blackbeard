@@ -3,9 +3,15 @@
  * Styling for .mashtip elements
  */
 
+
+/**
+ * Mashtip icon
+ */
 .mashtip {
 	@extend .text-small;
 	@extend .text-muted;
+	cursor: pointer;
+	position: relative;
 
 	&:before {
 		content: "(";
@@ -13,5 +19,28 @@
 
 	&:after {
 		content: ")";
+	}
+}
+
+/**
+ * Mashtip details
+ */
+.mashtip-info {
+	display: none;
+	visibility: hidden;
+
+	&.active {
+		background: $color-black;
+		background: rgba(0, 0, 0, .8);
+		border-radius: 5px;
+		bottom: 26px;
+		color: $color-white;
+		display: inline-block;
+		left: 20%;
+		padding: 5px 15px;
+		position: absolute;
+		visibility: visible;
+		width: 220px;
+				z-index: 98;
 	}
 }

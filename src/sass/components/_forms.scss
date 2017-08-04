@@ -180,6 +180,15 @@ button:-moz-focusring,
 
 
 /**
+ * Submit inputs
+ */
+[type="submit"] {
+	@extend .input-inline;
+	@extend .btn;
+}
+
+
+/**
  * Search
  */
 

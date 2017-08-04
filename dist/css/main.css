@@ -750,7 +750,7 @@ pre code {
  * Primary buttons
  */
 /* line 10, src/sass/components/_buttons.scss */
-.btn, #search-button {
+.btn, [type="submit"], #search-button {
   background-color: #0088cc;
   border: 1px solid #0088cc;
   border-radius: 1px;
@@ -765,13 +765,16 @@ pre code {
 }
 
 /* line 23, src/sass/components/_buttons.scss */
-.btn:hover, #search-button:hover,
+.btn:hover, [type="submit"]:hover, #search-button:hover,
 a .btn:hover, .link-block-styled .btn:hover,
-a #search-button:hover, .link-block-styled #search-button:hover, .btn:focus, #search-button:focus,
+a [type="submit"]:hover, .link-block-styled [type="submit"]:hover,
+a #search-button:hover, .link-block-styled #search-button:hover, .btn:focus, [type="submit"]:focus, #search-button:focus,
 a .btn:focus, .link-block-styled .btn:focus,
-a #search-button:focus, .link-block-styled #search-button:focus, .btn:active, #search-button:active,
+a [type="submit"]:focus, .link-block-styled [type="submit"]:focus,
+a #search-button:focus, .link-block-styled #search-button:focus, .btn:active, [type="submit"]:active, #search-button:active,
 a .btn:active, .link-block-styled .btn:active,
-a #search-button:active, .link-block-styled #search-button:active, .btn.active, .active#search-button {
+a [type="submit"]:active, .link-block-styled [type="submit"]:active,
+a #search-button:active, .link-block-styled #search-button:active, .btn.active, .active[type="submit"], .active#search-button {
   background-color: #005580;
   border-color: #005580;
   color: #ffffff;
@@ -800,8 +803,9 @@ a .btn-secondary:active, .link-block-styled .btn-secondary:active, .btn-secondar
  * Active state
  */
 /* line 61, src/sass/components/_buttons.scss */
-.btn:active, #search-button:active,
+.btn:active, [type="submit"]:active, #search-button:active,
 .btn.active,
+.active[type="submit"],
 .active#search-button {
   box-shadow: inset 0 0.15625em 0.25em rgba(0, 0, 0, 0.15), 0 1px 0.15625em rgba(0, 0, 0, 0.05);
   outline: 0;
@@ -811,8 +815,9 @@ a .btn-secondary:active, .link-block-styled .btn-secondary:active, .btn-secondar
  * Disabled state
  */
 /* line 71, src/sass/components/_buttons.scss */
-.btn.disabled, .disabled#search-button,
+.btn.disabled, .disabled[type="submit"], .disabled#search-button,
 .btn[disabled],
+[disabled][type="submit"],
 [disabled]#search-button {
   box-shadow: none;
   cursor: not-allowed;
@@ -849,7 +854,7 @@ input[type="button"].btn-block {
  * General styles
  */
 /* line 108, src/sass/components/_buttons.scss */
-.btn, #search-button,
+.btn, [type="submit"], #search-button,
 button,
 html input[type="button"],
 input[type="reset"],
@@ -868,8 +873,9 @@ input[type="submit"] {
  * Remove right margin on last element and inputs
  */
 /* line 129, src/sass/components/_buttons.scss */
-.btn:last-child, #search-button:last-child,
+.btn:last-child, [type="submit"]:last-child, #search-button:last-child,
 input.btn,
+input[type="submit"],
 input#search-button {
   margin-right: 0;
 }
@@ -1062,7 +1068,7 @@ button:-moz-focusring,
  * Inline inputs
  */
 /* line 166, src/sass/components/_forms.scss */
-.input-inline {
+.input-inline, [type="submit"] {
   display: inline-block;
   vertical-align: middle;
   width: auto;
@@ -1078,13 +1084,16 @@ button:-moz-focusring,
 }
 
 /**
+ * Submit inputs
+ */
+/**
  * Search
  */
 /**
   * 1. Correct the odd appearance in Chrome and Safari.
   * 2. Correct the outline style in Safari.
   */
-/* line 191, src/sass/components/_forms.scss */
+/* line 200, src/sass/components/_forms.scss */
 [type="search"] {
   -webkit-appearance: textfield;
   /* 1 */
@@ -1097,7 +1106,7 @@ button:-moz-focusring,
  * Safari (but not Chrome) clips the cancel button when the search input has
  * padding (and `textfield` appearance).
  */
-/* line 201, src/sass/components/_forms.scss */
+/* line 210, src/sass/components/_forms.scss */
 [type="search"]::-webkit-search-cancel-button,
 [type="search"]::-webkit-search-decoration {
   -webkit-appearance: none;
@@ -1106,7 +1115,7 @@ button:-moz-focusring,
 /**
  * Create rounded search bar
  */
-/* line 216, src/sass/components/_forms.scss */
+/* line 225, src/sass/components/_forms.scss */
 .input-search,
 #search-input {
   border-radius: 1.3125em;
@@ -1119,7 +1128,7 @@ button:-moz-focusring,
 /**
  * Special styling for search icon as button
  */
-/* line 240, src/sass/components/_forms.scss */
+/* line 249, src/sass/components/_forms.scss */
 .btn-search,
 #search-button {
   display: inline;
@@ -1130,13 +1139,13 @@ button:-moz-focusring,
   margin-bottom: 0;
 }
 
-/* line 249, src/sass/components/_forms.scss */
+/* line 258, src/sass/components/_forms.scss */
 .btn-search svg,
 #search-button svg {
   fill: #808080;
 }
 
-/* line 253, src/sass/components/_forms.scss */
+/* line 262, src/sass/components/_forms.scss */
 .btn-search:active, .btn-search:focus, .btn-search:hover,
 #search-button:active,
 #search-button:focus,
@@ -1146,12 +1155,40 @@ button:-moz-focusring,
   color: #5a5a5a;
 }
 
-/* line 260, src/sass/components/_forms.scss */
+/* line 269, src/sass/components/_forms.scss */
 .btn-search:active svg, .btn-search:focus svg, .btn-search:hover svg,
 #search-button:active svg,
 #search-button:focus svg,
 #search-button:hover svg {
   fill: #5a5a5a;
+}
+
+/**
+ * @section Passwords
+ * Styling for password validation.
+ */
+/**
+ * Add checkmark on success completion
+ */
+/* line 10, src/sass/components/_passwords.scss */
+#passwd_requirements .valid {
+  color: green;
+}
+
+/* line 13, src/sass/components/_passwords.scss */
+#passwd_requirements .valid:after {
+  content: " \2713";
+}
+
+/**
+ * Style password input form
+ */
+/* line 21, src/sass/components/_passwords.scss */
+.passwd_new.valid,
+.passwd_again.valid {
+  background-color: #cdffcd;
+  border-color: green;
+  color: green;
 }
 
 /**
@@ -1787,189 +1824,193 @@ div.error {
   padding-right: 0.25em;
 }
 
-/**
- * GET Methods
- */
-/* line 237, src/sass/components/_iodocs.scss */
-.get {
+/* line 233, src/sass/components/_iodocs.scss */
+.category-iodocs {
+  /**
+	 * GET Methods
+	 */
+  /**
+	 * POST Methods
+	 */
+  /**
+	 * PUT Methods
+	 */
+  /**
+	 * DELETE Methods
+	 */
+  /**
+	 * PATCH Methods
+	 */
+  /**
+	 * OPTIONS Methods
+	 */
+  /**
+	 * HEAD Methods
+	 */
+}
+
+/* line 238, src/sass/components/_iodocs.scss */
+.category-iodocs .get {
   background-color: #e6f3fa;
   border: 1px solid #bfe1f2;
 }
 
-/* line 241, src/sass/components/_iodocs.scss */
-.get .http-method {
+/* line 242, src/sass/components/_iodocs.scss */
+.category-iodocs .get .http-method {
   background-color: #0088cc;
 }
 
-/* line 245, src/sass/components/_iodocs.scss */
-.get th,
-.get td {
+/* line 246, src/sass/components/_iodocs.scss */
+.category-iodocs .get th,
+.category-iodocs .get td {
   border-color: #bfe1f2;
 }
 
-/* line 250, src/sass/components/_iodocs.scss */
-.get .fieldset-expanded {
+/* line 251, src/sass/components/_iodocs.scss */
+.category-iodocs .get .fieldset-expanded {
   border-color: #bfe1f2;
 }
 
-/**
- * POST Methods
- */
-/* line 258, src/sass/components/_iodocs.scss */
-.post {
+/* line 259, src/sass/components/_iodocs.scss */
+.category-iodocs .post {
   background-color: #ebf2ea;
   border: 1px solid #cddfcc;
 }
 
-/* line 262, src/sass/components/_iodocs.scss */
-.post .http-method {
+/* line 263, src/sass/components/_iodocs.scss */
+.category-iodocs .post .http-method {
   background-color: #377f31;
 }
 
-/* line 266, src/sass/components/_iodocs.scss */
-.post th,
-.post td {
+/* line 267, src/sass/components/_iodocs.scss */
+.category-iodocs .post th,
+.category-iodocs .post td {
   border-color: #cddfcc;
 }
 
-/* line 271, src/sass/components/_iodocs.scss */
-.post .fieldset-expanded {
+/* line 272, src/sass/components/_iodocs.scss */
+.category-iodocs .post .fieldset-expanded {
   border-color: #cddfcc;
 }
 
-/**
- * PUT Methods
- */
-/* line 279, src/sass/components/_iodocs.scss */
-.put {
+/* line 280, src/sass/components/_iodocs.scss */
+.category-iodocs .put {
   background-color: #fbf6e6;
   border: 1px solid #f6eac2;
 }
 
-/* line 283, src/sass/components/_iodocs.scss */
-.put .http-method {
+/* line 284, src/sass/components/_iodocs.scss */
+.category-iodocs .put .http-method {
   background-color: #dba909;
 }
 
-/* line 287, src/sass/components/_iodocs.scss */
-.put th,
-.put td {
+/* line 288, src/sass/components/_iodocs.scss */
+.category-iodocs .put th,
+.category-iodocs .put td {
   border-color: #f6eac2;
 }
 
-/* line 292, src/sass/components/_iodocs.scss */
-.put .fieldset-expanded {
+/* line 293, src/sass/components/_iodocs.scss */
+.category-iodocs .put .fieldset-expanded {
   border-color: #f6eac2;
 }
 
-/**
- * DELETE Methods
- */
-/* line 300, src/sass/components/_iodocs.scss */
-.delete {
+/* line 301, src/sass/components/_iodocs.scss */
+.category-iodocs .delete {
   background-color: #f3e7e8;
   border: 1px solid #e1c3c4;
 }
 
-/* line 304, src/sass/components/_iodocs.scss */
-.delete .http-method {
+/* line 305, src/sass/components/_iodocs.scss */
+.category-iodocs .delete .http-method {
   background-color: #880e14;
 }
 
-/* line 308, src/sass/components/_iodocs.scss */
-.delete th,
-.delete td {
+/* line 309, src/sass/components/_iodocs.scss */
+.category-iodocs .delete th,
+.category-iodocs .delete td {
   border-color: #e1c3c4;
 }
 
-/* line 313, src/sass/components/_iodocs.scss */
-.delete .fieldset-expanded {
+/* line 314, src/sass/components/_iodocs.scss */
+.category-iodocs .delete .fieldset-expanded {
   border-color: #e1c3c4;
 }
 
-/**
- * PATCH Methods
- */
-/* line 321, src/sass/components/_iodocs.scss */
-.patch {
+/* line 322, src/sass/components/_iodocs.scss */
+.category-iodocs .patch {
   background-color: #f3e7f4;
   border: 1px solid #e1c3e3;
 }
 
-/* line 325, src/sass/components/_iodocs.scss */
-.patch .http-method {
+/* line 326, src/sass/components/_iodocs.scss */
+.category-iodocs .patch .http-method {
   background-color: #860d8e;
 }
 
-/* line 329, src/sass/components/_iodocs.scss */
-.patch th,
-.patch td {
+/* line 330, src/sass/components/_iodocs.scss */
+.category-iodocs .patch th,
+.category-iodocs .patch td {
   border-color: #e1c3e3;
 }
 
-/* line 334, src/sass/components/_iodocs.scss */
-.patch .fieldset-expanded {
+/* line 335, src/sass/components/_iodocs.scss */
+.category-iodocs .patch .fieldset-expanded {
   border-color: #e1c3e3;
 }
 
-/**
- * OPTIONS Methods
- */
-/* line 342, src/sass/components/_iodocs.scss */
-.method.options {
+/* line 343, src/sass/components/_iodocs.scss */
+.category-iodocs .method.options {
   background-color: #faf1e6;
   border: 1px solid #f2dcbf;
 }
 
-/* line 346, src/sass/components/_iodocs.scss */
-.method.options .http-method {
+/* line 347, src/sass/components/_iodocs.scss */
+.category-iodocs .method.options .http-method {
   background-color: #cc7100;
 }
 
-/* line 350, src/sass/components/_iodocs.scss */
-.method.options th,
-.method.options td {
+/* line 351, src/sass/components/_iodocs.scss */
+.category-iodocs .method.options th,
+.category-iodocs .method.options td {
   border-color: #f2dcbf;
 }
 
-/* line 355, src/sass/components/_iodocs.scss */
-.method.options .fieldset-expanded {
+/* line 356, src/sass/components/_iodocs.scss */
+.category-iodocs .method.options .fieldset-expanded {
   border-color: #f2dcbf;
 }
 
-/**
- * HEAD Methods
- */
-/* line 363, src/sass/components/_iodocs.scss */
-.head {
+/* line 364, src/sass/components/_iodocs.scss */
+.category-iodocs .head {
   background-color: #e6eef2;
   border: 1px solid #bfd5df;
 }
 
-/* line 367, src/sass/components/_iodocs.scss */
-.head .http-method {
+/* line 368, src/sass/components/_iodocs.scss */
+.category-iodocs .head .http-method {
   background-color: #00557f;
 }
 
-/* line 371, src/sass/components/_iodocs.scss */
-.head th,
-.head td {
+/* line 372, src/sass/components/_iodocs.scss */
+.category-iodocs .head th,
+.category-iodocs .head td {
   border-color: #bfd5df;
 }
 
-/* line 376, src/sass/components/_iodocs.scss */
-.head .fieldset-expanded {
+/* line 377, src/sass/components/_iodocs.scss */
+.category-iodocs .head .fieldset-expanded {
   border-color: #bfd5df;
 }
 
-/* line 384, src/sass/components/_iodocs.scss */
+/* line 387, src/sass/components/_iodocs.scss */
 .category-iodocs {
   /**
 	 * Limit the max height of the response
 	 */
 }
 
-/* line 386, src/sass/components/_iodocs.scss */
+/* line 389, src/sass/components/_iodocs.scss */
 .category-iodocs #main {
   /**
 		 * Prevent select content from clipping
@@ -1979,23 +2020,23 @@ div.error {
 		 */
 }
 
-/* line 391, src/sass/components/_iodocs.scss */
+/* line 394, src/sass/components/_iodocs.scss */
 .category-iodocs #main select {
   width: auto;
 }
 
-/* line 399, src/sass/components/_iodocs.scss */
+/* line 402, src/sass/components/_iodocs.scss */
 .category-iodocs #main ul {
   margin: 0;
 }
 
-/* line 403, src/sass/components/_iodocs.scss */
+/* line 406, src/sass/components/_iodocs.scss */
 .category-iodocs #main li {
   list-style: none;
   margin-left: 0;
 }
 
-/* line 413, src/sass/components/_iodocs.scss */
+/* line 416, src/sass/components/_iodocs.scss */
 .category-iodocs pre.response {
   max-height: 32em;
   overflow-y: auto;
@@ -2005,14 +2046,48 @@ div.error {
  * @section Mashtips
  * Styling for .mashtip elements
  */
+/**
+ * Mashtip icon
+ */
 /* line 10, src/sass/components/_mashtips.scss */
+.mashtip {
+  cursor: pointer;
+  position: relative;
+}
+
+/* line 16, src/sass/components/_mashtips.scss */
 .mashtip:before {
   content: "(";
 }
 
-/* line 14, src/sass/components/_mashtips.scss */
+/* line 20, src/sass/components/_mashtips.scss */
 .mashtip:after {
   content: ")";
+}
+
+/**
+ * Mashtip details
+ */
+/* line 28, src/sass/components/_mashtips.scss */
+.mashtip-info {
+  display: none;
+  visibility: hidden;
+}
+
+/* line 32, src/sass/components/_mashtips.scss */
+.mashtip-info.active {
+  background: #272727;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 5px;
+  bottom: 26px;
+  color: #ffffff;
+  display: inline-block;
+  left: 20%;
+  padding: 5px 15px;
+  position: absolute;
+  visibility: visible;
+  width: 220px;
+  z-index: 98;
 }
 
 /**

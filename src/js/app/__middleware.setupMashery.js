@@ -5,20 +5,20 @@
 var setupMashery = function (doc) {
 
 	// Get the default page
-	var page = m$.get('#page', doc);
+	var page = doc.querySelector('#page');
 
 	// Convert DOM content to a node
 	var dom = document.createElement('div');
 	dom.innerHTML = page.innerHTML;
 
 	// Get special links
-	var dashboard = m$.get('#user-nav .dashboard a', dom);
-	var logout = m$.get('#mashery-logout-form', dom);
-	var login = m$.get('#user-nav .sign-in a', dom);
+	var dashboard = dom.querySelector('#user-nav .dashboard a');
+	var logout = dom.querySelector('#mashery-logout-form');
+	var login = dom.querySelector('#user-nav .sign-in a');
 
 	// Set mashery properties
 	window.mashery = {
-		area: m$.get('#branding-logo', dom).innerHTML.trim(),
+		area: dom.querySelector('#branding-logo').innerHTML.trim(),
 		content: {
 			main: null,
 			secondary: null
@@ -27,8 +27,9 @@ var setupMashery = function (doc) {
 		contentType: getContentType(doc.body),
 		dashboard: dashboard ? dashboard.getAttribute('href') : null,
 		dom: dom,
-		isAdmin: m$.get('#user-nav .dashboard.toggle', dom) ? true : false,
-		loggedIn: m$.get('#mashery-logout-form', dom) ? true : false,
+		globals: {},
+		isAdmin: dom.querySelector('#user-nav .dashboard.toggle') ? true : false,
+		loggedIn: dom.querySelector('#mashery-logout-form') ? true : false,
 		login: {
 			url: login ? login.pathname : null,
 			redirect: login ? login.search : null
@@ -38,6 +39,9 @@ var setupMashery = function (doc) {
 		username: typeof mashery_info !== 'undefined' && mashery_info && mashery_info.username ? mashery_info.username : null,
 		userProfile: sessionStorage.getItem('masheryUserProfile')
 	};
+
+	// Get Mashery global variables
+	getMashGlobals(doc.documentElement.innerHTML);
 
 	// Remove page from the DOM
 	page.remove();

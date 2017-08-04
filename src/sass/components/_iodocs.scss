@@ -230,152 +230,155 @@ div.error {
     padding-right: calc-em(4px);
 }
 
+.category-iodocs {
 
-/**
- * GET Methods
- */
-.get {
-    background-color: mix( white, $color-get, 90% );
-    border: calc-em(1px) solid mix( white, $color-get, 75% );
+	/**
+	 * GET Methods
+	 */
+	.get {
+		background-color: mix( white, $color-get, 90% );
+		border: calc-em(1px) solid mix( white, $color-get, 75% );
 
-    .http-method {
-        background-color: $color-get;
-    }
+		.http-method {
+			background-color: $color-get;
+		}
 
-    th,
-    td {
-        border-color: mix( white, $color-get, 75% );
-    }
+		th,
+		td {
+			border-color: mix( white, $color-get, 75% );
+		}
 
-    .fieldset-expanded {
-        border-color: mix( white, $color-get, 75% );
-    }
-}
+		.fieldset-expanded {
+			border-color: mix( white, $color-get, 75% );
+		}
+	}
 
-/**
- * POST Methods
- */
-.post {
-    background-color: mix( white, $color-post, 90% );
-    border: calc-em(1px) solid mix( white, $color-post, 75% );
+	/**
+	 * POST Methods
+	 */
+	.post {
+		background-color: mix( white, $color-post, 90% );
+		border: calc-em(1px) solid mix( white, $color-post, 75% );
 
-    .http-method {
-        background-color: $color-post;
-    }
+		.http-method {
+			background-color: $color-post;
+		}
 
-    th,
-    td {
-        border-color: mix( white, $color-post, 75% );
-    }
+		th,
+		td {
+			border-color: mix( white, $color-post, 75% );
+		}
 
-    .fieldset-expanded {
-        border-color: mix( white, $color-post, 75% );
-    }
-}
+		.fieldset-expanded {
+			border-color: mix( white, $color-post, 75% );
+		}
+	}
 
-/**
- * PUT Methods
- */
-.put {
-    background-color: mix( white, $color-put, 90% );
-    border: calc-em(1px) solid mix( white, $color-put, 75% );
+	/**
+	 * PUT Methods
+	 */
+	.put {
+		background-color: mix( white, $color-put, 90% );
+		border: calc-em(1px) solid mix( white, $color-put, 75% );
 
-    .http-method {
-        background-color: $color-put;
-    }
+		.http-method {
+			background-color: $color-put;
+		}
 
-    th,
-    td {
-        border-color: mix( white, $color-put, 75% );
-    }
+		th,
+		td {
+			border-color: mix( white, $color-put, 75% );
+		}
 
-    .fieldset-expanded {
-        border-color: mix( white, $color-put, 75% );
-    }
-}
+		.fieldset-expanded {
+			border-color: mix( white, $color-put, 75% );
+		}
+	}
 
-/**
- * DELETE Methods
- */
-.delete {
-    background-color: mix( white, $color-delete, 90% );
-    border: calc-em(1px) solid mix( white, $color-delete, 75% );
+	/**
+	 * DELETE Methods
+	 */
+	.delete {
+		background-color: mix( white, $color-delete, 90% );
+		border: calc-em(1px) solid mix( white, $color-delete, 75% );
 
-    .http-method {
-        background-color: $color-delete;
-    }
+		.http-method {
+			background-color: $color-delete;
+		}
 
-    th,
-    td {
-        border-color: mix( white, $color-delete, 75% );
-    }
+		th,
+		td {
+			border-color: mix( white, $color-delete, 75% );
+		}
 
-    .fieldset-expanded {
-        border-color: mix( white, $color-delete, 75% );
-    }
-}
+		.fieldset-expanded {
+			border-color: mix( white, $color-delete, 75% );
+		}
+	}
 
-/**
- * PATCH Methods
- */
-.patch {
-    background-color: mix( white, $color-patch, 90% );
-    border: calc-em(1px) solid mix( white, $color-patch, 75% );
+	/**
+	 * PATCH Methods
+	 */
+	.patch {
+		background-color: mix( white, $color-patch, 90% );
+		border: calc-em(1px) solid mix( white, $color-patch, 75% );
 
-    .http-method {
-        background-color: $color-patch;
-    }
+		.http-method {
+			background-color: $color-patch;
+		}
 
-    th,
-    td {
-        border-color: mix( white, $color-patch, 75% );
-    }
+		th,
+		td {
+			border-color: mix( white, $color-patch, 75% );
+		}
 
-    .fieldset-expanded {
-        border-color: mix( white, $color-patch, 75% );
-    }
-}
+		.fieldset-expanded {
+			border-color: mix( white, $color-patch, 75% );
+		}
+	}
 
-/**
- * OPTIONS Methods
- */
-.method.options {
-    background-color: mix( white, $color-options, 90% );
-    border: calc-em(1px) solid mix( white, $color-options, 75% );
+	/**
+	 * OPTIONS Methods
+	 */
+	.method.options {
+		background-color: mix( white, $color-options, 90% );
+		border: calc-em(1px) solid mix( white, $color-options, 75% );
 
-    .http-method {
-        background-color: $color-options;
-    }
+		.http-method {
+			background-color: $color-options;
+		}
 
-    th,
-    td {
-        border-color: mix( white, $color-options, 75% );
-    }
+		th,
+		td {
+			border-color: mix( white, $color-options, 75% );
+		}
 
-    .fieldset-expanded {
-        border-color: mix( white, $color-options, 75% );
-    }
-}
+		.fieldset-expanded {
+			border-color: mix( white, $color-options, 75% );
+		}
+	}
 
-/**
- * HEAD Methods
- */
-.head {
-    background-color: mix( white, $color-head, 90% );
-    border: calc-em(1px) solid mix( white, $color-head, 75% );
+	/**
+	 * HEAD Methods
+	 */
+	.head {
+		background-color: mix( white, $color-head, 90% );
+		border: calc-em(1px) solid mix( white, $color-head, 75% );
 
-    .http-method {
-        background-color: $color-head;
-    }
+		.http-method {
+			background-color: $color-head;
+		}
 
-    th,
-    td {
-        border-color: mix( white, $color-head, 75% );
-    }
+		th,
+		td {
+			border-color: mix( white, $color-head, 75% );
+		}
 
-    .fieldset-expanded {
-        border-color: mix( white, $color-head, 75% );
-    }
+		.fieldset-expanded {
+			border-color: mix( white, $color-head, 75% );
+		}
+	}
+
 }
 
 

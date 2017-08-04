@@ -2,41 +2,7 @@ var m$ = (function () {
 
 	'use strict';
 
-	//
-	// Variables
-	//
-
 	var m$ = {}; // Placeholder for public methods
-
-
-	//
-	// Polyfills
-	//
-
-	// Object.prototype.forEach()
-	if (!Object.prototype.forEach) {
-		Object.defineProperties(Object.prototype, {
-			'forEach': {
-				value: function (callback) {
-					if (this === null) {
-						throw new TypeError('Not an object');
-					}
-					var obj = this;
-					for (var key in obj) {
-						if (obj.hasOwnProperty(key)) {
-							callback.call(obj, obj[key], key, obj);
-						}
-					}
-				},
-				writable: true
-			}
-		});
-	}
-
-
-	//
-	// Methods
-	//
 
 	/**
 	 * Get the first matching element
@@ -58,22 +24,6 @@ var m$ = (function () {
 	m$.getAll = function (selector, scope) {
 		scope = scope || document;
 		return Array.prototype.slice.call(scope.querySelectorAll(selector));
-	};
-
-	/**
-	 * Simulate a click event.
-	 * @public
-	 * @param {Element} elem  the element to simulate a click on
-	 */
-	m$.click = function (elem) {
-		// Create our event (with options)
-		var evt = new MouseEvent('click', {
-			bubbles: true,
-			cancelable: true,
-			view: window
-		});
-		// If cancelled, don't dispatch our event
-		var canceled = !elem.dispatchEvent(evt);
 	};
 
 	/**
@@ -108,6 +58,22 @@ var m$ = (function () {
 		}
 		capture = capture ? true : false;
 		elem.removeEventListener(event, callback, capture);
+	};
+
+	/**
+	 * Simulate a click event.
+	 * @public
+	 * @param {Element} elem  the element to simulate a click on
+	 */
+	m$.click = function (elem) {
+		// Create our event (with options)
+		var evt = new MouseEvent('click', {
+			bubbles: true,
+			cancelable: true,
+			view: window
+		});
+		// If cancelled, don't dispatch our event
+		var canceled = !elem.dispatchEvent(evt);
 	};
 
 	/**
@@ -149,13 +115,6 @@ var m$ = (function () {
 	 * @param {String} media   Stylesheet media type [optional, defaults to 'all']
 	 */
 	m$.loadCSS = function (href, before, media) {
-		// Arguments explained:
-		// `href` is the URL for your CSS file.
-		// `before` optionally defines the element we'll use as a reference for injecting our <link>
-		// By default, `before` uses the first <script> element in the page.
-		// However, since the order in which stylesheets are referenced matters, you might need a more specific location in your document.
-		// If so, pass a different reference element to the `before` argument and it'll insert before that instead
-		// note: `insertBefore` is used instead of `appendChild`, for safety re: http://www.paulirish.com/2011/surefire-dom-element-insertion/
 		var ss = window.document.createElement('link');
 		var ref = before || window.document.getElementsByTagName('script')[0];
 		var sheets = window.document.styleSheets;
@@ -281,11 +240,6 @@ var m$ = (function () {
 		return extended;
 
 	};
-
-
-	//
-	// Public APIs
-	//
 
 	return m$;
 

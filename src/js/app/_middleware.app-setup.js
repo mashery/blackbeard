@@ -2,7 +2,7 @@
 setupMashery(document);
 
 // Make sure placeholder loaded
-if (!m$.get('#app')) {
+if (!document.querySelector('#app')) {
 	loadPlaceholder();
 }
 

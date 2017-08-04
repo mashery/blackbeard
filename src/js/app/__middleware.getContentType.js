@@ -10,7 +10,7 @@ var getContentType = function (elem) {
 	// Variables
 	//
 
-	var h1 = m$.get('#main h1.first', elem);
+	var h1 = elem.querySelector('#main h1.first');
 	h1 = h1 ? h1.innerHTML : '';
 	var type;
 
@@ -105,7 +105,7 @@ var getContentType = function (elem) {
 		else if (elem.classList.contains('register')) {
 
 			// Edit an App
-			if (m$.get('#application-edit', elem)) {
+			if (elem.querySelector('#application-edit')) {
 				type = 'appRegister';
 			}
 
@@ -116,6 +116,40 @@ var getContentType = function (elem) {
 
 		}
 
+		// Edit App
+		else if (elem.classList.contains('edit')) {
+			type = 'appEdit';
+		}
+
+		// Add APIs
+		else if (elem.classList.contains('select')) {
+
+			// APIs successfully added
+			if (h1 === 'New Keys Issued') {
+				type = 'appAddAPIsSuccess';
+			}
+
+			// Add APIs Form
+			else {
+				type = 'appAddAPIs';
+			}
+
+		}
+
+		// Delete App
+		else if (elem.classList.contains('delete')) {
+			type = 'appDelete';
+		}
+
+		else if (elem.classList.contains('error')) {
+			type = 'appAddAPIsError';
+		}
+
+	}
+
+	// Delete Key
+	else if (elem.classList.contains('page-key') && elem.classList.contains('delete-key')) {
+		type = 'keyDelete';
 	}
 
 	// Account Pages
@@ -125,7 +159,7 @@ var getContentType = function (elem) {
 		if (elem.classList.contains('email')) {
 
 			// Change Email Success
-			if (m$.get('#myaccount .success', elem)) {
+			if (elem.querySelector('#myaccount .success')) {
 				type = 'accountEmailSuccess';
 			}
 
@@ -140,7 +174,7 @@ var getContentType = function (elem) {
 		else if (elem.classList.contains('passwd')) {
 
 			// Change Password Success
-			if (m$.get('#myaccount .success', elem)) {
+			if (elem.querySelector('#myaccount .success')) {
 				type = 'accountPasswordSuccess';
 			}
 
@@ -169,7 +203,7 @@ var getContentType = function (elem) {
 		else if (elem.classList.contains('resend-confirmation')) {
 
 			// Email Sent
-			if (m$.get('ul.success', elem)) {
+			if (elem.querySelector('ul.success')) {
 				type = 'registerResendSuccess';
 			}
 
@@ -184,7 +218,7 @@ var getContentType = function (elem) {
 		else if (elem.classList.contains('remove')) {
 
 			// Removed Successfully
-			if (/You have been removed!/.test(m$.get('.main .section-body', elem).innerHTML)) {
+			if (/You have been removed!/.test(elem.querySelector('.main .section-body').innerHTML)) {
 				type = 'memberRemoveSuccess';
 			}
 
@@ -199,7 +233,7 @@ var getContentType = function (elem) {
 		else if (elem.classList.contains('lost')) {
 
 			// Reset Email Sent
-			if (/E-mail Sent/.test(m$.get('h2', elem).innerHTML)) {
+			if (/E-mail Sent/.test(elem.querySelector('h2').innerHTML)) {
 				type = 'lostPasswordReset';
 			}
 
@@ -214,7 +248,7 @@ var getContentType = function (elem) {
 		else if (elem.classList.contains('lost-username')) {
 
 			// Reset Email Sent
-			if (/E-mail Sent/.test(m$.get('h2', elem).innerHTML)) {
+			if (/E-mail Sent/.test(elem.querySelector('h2').innerHTML)) {
 				type = 'lostUsernameReset';
 			}
 
@@ -279,7 +313,7 @@ var getContentType = function (elem) {
 	else if (elem.classList.contains('page-logout')) {
 
 		// Logout Failed
-		if (m$.get('#user-nav .account', elem)) {
+		if (elem.querySelector('#user-nav .account')) {
 			type = 'logoutFail';
 		}
 
@@ -294,7 +328,7 @@ var getContentType = function (elem) {
 	else if (elem.classList.contains('page-contact')) {
 
 		// Contact Form
-		if (m$.get('#main form', elem)) {
+		if (elem.querySelector('#main form')) {
 			type = 'contact';
 		}
 

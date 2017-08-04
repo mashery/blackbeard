@@ -8,7 +8,7 @@ var removeCSS = function (filename) {
 	'use strict';
 
 	// Get all matching stylesheets
-	var links = m$.getAll('link[href*="' + filename + '"]');
+	var links = document.querySelectorAll('link[href*="' + filename + '"]');
 
 	// Remove all matching stylesheets
 	links.forEach(function (link) {

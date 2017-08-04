@@ -6,8 +6,8 @@ var getNav = function (selector) {
 
 	// Variables
 	var nav = [];
-	var items = m$.getAll(selector, mashery.dom);
-	var form;
+	var items = mashery.dom.querySelectorAll(selector);
+	var form, data, secret, created;
 
 	// Generate items object
 	for (var i = 0; i < items.length; i++) {
@@ -36,7 +36,7 @@ var fetchUserProfile = function () {
 	}).success(function (data) {
 
 		// Get the user profile link
-		var userProfile = m$.get('.actions .public-profile.action', data);
+		var userProfile = data.querySelector('.actions .public-profile.action');
 		if (!userProfile) return;
 
 		// Get the href
@@ -47,7 +47,7 @@ var fetchUserProfile = function () {
 		sessionStorage.setItem('masheryUserProfile', userProfile);
 
 		// Update the link in the DOM
-		var profileLink = m$.get('a[href*="/profile/profile/"]');
+		var profileLink = data.querySelector('a[href*="/profile/profile/"]');
 		if (!profileLink) return;
 		profileLink.href = userProfile;
 
@@ -63,6 +63,9 @@ var getContent = function (type) {
 	// Cache mashery objects
 	var dom = window.mashery.dom;
 	var content = window.mashery.content;
+
+	// Variable placeholders
+	var appDataBasic, appDataDetails;
 
 
 	//
@@ -82,50 +85,50 @@ var getContent = function (type) {
 
 	// Custom Pages
 	if (type === 'page') {
-		content.main = m$.get('#main', dom).innerHTML;
+		content.main = dom.querySelector('#main').innerHTML;
 	}
 
 	// Documentation
 	else if (type === 'docs') {
-		content.main = m$.get('#main', dom).innerHTML;
-		content.secondary = m$.get('#sub ul', dom).innerHTML;
+		content.main = dom.querySelector('#main').innerHTML;
+		content.secondary = dom.querySelector('#sub ul').innerHTML;
 	}
 
 	// Sign In Page
 	else if (type === 'signin') {
-		var signinForm = m$.get('#signin form', dom);
+		var signinForm = dom.querySelector('#signin form');
 		content.main = '<form action="' + signinForm.action + '" method="post" enctype="multipart/form-data">' + signinForm.innerHTML + '</form>';
 	}
 
 	// Registration
 	else if (type === 'register') {
-		var regForm = m$.get('#member-register', dom);
+		var regForm = dom.querySelector('#member-register');
 		content.main = '<form action="' + regForm.action + '" method="post" enctype="multipart/form-data">' + regForm.innerHTML + '</form>';
 	}
 
 	// Registration Confirmation
 	else if (type === 'registerSent') {
-		var email = m$.get('#main p', dom);
+		var email = dom.querySelector('#main p');
 		content.main = email ? email.innerHTML.replace('We have sent a confirmation e-mail to you at this address: ', '') : null;
 	}
 
 	// Resend Confirmation Email
 	else if (type === 'registerResend') {
-		form = m$.get('#resend-confirmation', dom);
+		form = dom.querySelector('#resend-confirmation');
 		content.main = '<form action="' + form.getAttribute('action') + '" method="post" enctype="multipart/form-data" id="resend-confirmation">' + form.innerHTML + '</form>';
 		content.main = content.main.replace('<legend>Resend your account confirmation email.</legend>', '');
 	}
 
 	// Join for Existing Mashery Members
 	else if (type === 'join') {
-		form = m$.get('#member-edit', dom);
+		form = dom.querySelector('#member-edit');
 		content.main = '<form action="' + form.getAttribute('action') + '" method="post" enctype="multipart/form-data" id="member-edit">' + form.innerHTML + '</form>';
 		content.main = content.main.replace('<legend>Additional Information</legend>', '');
 	}
 
 	// Join Successful
 	else if (type === 'joinSuccess') {
-		var username = m$.get('#main .section-body p', dom);
+		var username = dom.querySelector('#main .section-body p');
 		content.main = username ? username.innerHTML.replace('You have successfully registered as <strong>', '').replace('</strong>.', '').trim() : null;
 	}
 
@@ -133,8 +136,8 @@ var getContent = function (type) {
 	else if (type === 'accountKeys') {
 
 		// Get elements
-		var keys = m$.getAll('.main .section-body h2, .main .section-body div.key', dom);
-		var getKeys = m$.get('.action.new-key', dom); // @todo check if user can register at all based on this link
+		var keys = dom.querySelectorAll('.main .section-body h2, .main .section-body div.key');
+		var getKeys = dom.querySelector('.action.new-key'); // @todo check if user can register at all based on this link
 
 		// Push each key to an object
 		if (keys.length > 0) {
@@ -150,18 +153,18 @@ var getContent = function (type) {
 						keys: []
 					};
 				} else {
-					var data = m$.getAll('dd', key);
-					var secret = data.length === 5 ? true : false;
-					var created = secret ? m$.get('abbr', data[4]) : m$.get('abbr', data[3]);
+					data = key.querySelectorAll('dd');
+					secret = data.length === 5 ? true : false;
+					created = secret ? data[4].querySelector('abbr') : data[3].querySelector('abbr');
 					content.main[currentPlan].keys.push({
 						application: data[0].innerHTML.trim(),
 						key: data[1].innerHTML.trim(),
 						secret: secret ? data[2].innerHTML.trim() : null,
 						status: secret ? data[3].innerHTML.trim() : data[2].innerHTML.trim(),
 						created: created ? created.getAttribute('title') : '',
-						limits: '<table>' + m$.get('table.key', key).innerHTML + '<table>',
-						report: m$.get('.key-actions.actions .view-report.action', key).getAttribute('href'),
-						delete: m$.get('.key-actions.actions .delete.action', key).getAttribute('href')
+						limits: '<table>' + key.querySelector('table.key').innerHTML + '<table>',
+						report: key.querySelector('.key-actions.actions .view-report.action').getAttribute('href'),
+						delete: key.querySelector('.key-actions.actions .delete.action').getAttribute('href')
 					});
 				}
 			});
@@ -169,43 +172,124 @@ var getContent = function (type) {
 
 	}
 
+	// Delete Key
+	else if (type === 'keyDelete') {
+
+		// Variables
+		form = dom.querySelector('#main .section-body form');
+		data = dom.querySelectorAll('.key dd');
+		secret = data.length === 5 ? true : false;
+		created = secret ? data[4].querySelector('abbr') : data[3].querySelector('abbr');
+
+		// Get the form
+		content.main = '<form action="' + form.getAttribute('action') + '" method="post" enctype="multipart/form-data">' + form.innerHTML + '</form>';
+
+		// Get the app data
+		content.secondary = {
+			api: dom.querySelector('#main .section-body h2').innerHTML,
+			application: data[0].innerHTML.trim(),
+			key: data[1].innerHTML.trim(),
+			secret: secret ? data[2].innerHTML.trim() : null,
+			status: secret ? data[3].innerHTML.trim() : data[2].innerHTML.trim(),
+			created: created ? created.getAttribute('title') : ''
+		};
+
+	}
+
 	// My Apps
 	else if (type === 'accountApps') {
 
 		// Get elements
-		var apps = m$.getAll('.main .application', dom);
-		var createApps = m$.getAll('.main .actions .add-app.action', dom);
+		var apps = dom.querySelectorAll('.main .application');
+		var createApps = dom.querySelector('.main .actions .add-app.action');
 
 		// Set values
 		content.main = [];
 		content.secondary = createApps ? createApps.getAttribute('href') : null;
 		apps.forEach(function(app) {
-			var dataBasic = m$.getAll('dd', app);
-			var dataDetails = m$.getAll('tbody td', app);
+
+			// Variables
+			var dataBasic = app.querySelectorAll('dd');
+			var dataDetails = app.querySelectorAll('tbody td');
+			var edit = app.querySelector('.application-actions.actions .edit.action');
+			var del = app.querySelector('.application-actions.actions .delete-app.action');
+			var add = app.querySelector('.application-actions.actions .add-key.action');
+
+			// Get main content
 			content.main.push({
-				application: m$.get('h3', app).innerHTML.trim(),
-				created: m$.get('abbr', dataBasic[1]).getAttribute('title'),
+				application: app.querySelector('h3').innerHTML.trim(),
+				created: dataBasic[1].querySelector('abbr').getAttribute('title'),
 				api: dataDetails[0] ? dataDetails[0].innerHTML.trim() : null,
 				key: dataDetails[1] ? dataDetails[1].innerHTML.trim() : null,
-				edit: m$.get('.application-actions.actions .edit.action', app).getAttribute('href'),
-				delete: m$.get('.application-actions.actions .delete-app.action', app).getAttribute('href')
+				edit: edit ? edit.getAttribute('href') : null,
+				delete: del ? del.getAttribute('href') : null,
+				add: add ? add.getAttribute('href') : null
 			});
+
 		});
 
 	}
 
 	// Register Application
 	else if (type === 'appRegister') {
-		form = m$.get('#application-edit', dom);
-		var table = m$.get('#main .section-body table', dom);
+		form = dom.querySelector('#application-edit');
+		var table = dom.querySelector('#main .section-body table');
 		content.main = '<form action="' + form.getAttribute('action') + '" method="post" enctype="multipart/form-data" id="application-edit">' + form.innerHTML + '</form>';
 		content.secondary = table ? '<table>' + table.innerHTML + '</table>' : null;
 	}
 
+
+	// Edit App
+	else if (type === 'appEdit') {
+		form = dom.querySelector('#application-edit');
+		content.main = '<form action="' + form.getAttribute('action') + '" method="post" enctype="multipart/form-data" id="application-edit">' + form.innerHTML + '</form>';
+		content.main = content.main.replace('<legend>Edit Your Application</legend>', '');
+	}
+
+	// Add APIs
+	else if (type === 'appAddAPIs') {
+
+		// Variables
+		form = dom.querySelector('#main .section-body form');
+		appDataBasic = dom.querySelectorAll('.application dd');
+		appDataDetails = dom.querySelectorAll('.application tbody td');
+
+		// Get the form
+		content.main = '<form action="' + form.getAttribute('action') + '" method="post" enctype="multipart/form-data">' + form.innerHTML + '</form>';
+
+		// Get the app data
+		content.secondary = {
+			application: dom.querySelector('.application h3').innerHTML.trim(),
+			created: appDataBasic[1].querySelector('abbr').getAttribute('title'),
+			api: appDataDetails[0] ? appDataDetails[0].innerHTML.trim() : null,
+			key: appDataDetails[1] ? appDataDetails[1].innerHTML.trim() : null
+		};
+	}
+
+	// Delete App
+	else if (type === 'appDelete') {
+
+		// Variables
+		form = dom.querySelector('#main .section-body form');
+		appDataBasic = dom.querySelectorAll('.application dd');
+		appDataDetails = dom.querySelectorAll('.application tbody td');
+
+		// Get the form
+		content.main = '<form action="' + form.getAttribute('action') + '" method="post" enctype="multipart/form-data">' + form.innerHTML + '</form>';
+
+		// Get the app data
+		content.secondary = {
+			application: dom.querySelector('.application h3').innerHTML.trim(),
+			created: appDataBasic[1].querySelector('abbr').getAttribute('title'),
+			api: appDataDetails[0] ? appDataDetails[0].innerHTML.trim() : null,
+			key: appDataDetails[1] ? appDataDetails[1].innerHTML.trim() : null
+		};
+	}
+
 	// Manage Account
 	else if (type === 'accountManage') {
-		var accountForm = m$.get('#member-edit', dom);
-		var userProfile = m$.get('.actions .public-profile.action', dom);
+		var accountForm = dom.querySelector('#member-edit');
+		var userProfile = dom.querySelector('.actions .public-profile.action');
 		content.main = '<form action="' + accountForm.getAttribute('action') + '" method="post" enctype="multipart/form-data" id="member-edit">' + accountForm.innerHTML + '</form>';
 		content.main = content.main.replace('<legend>Account Information</legend>', '');
 		if (userProfile) {
@@ -217,7 +301,7 @@ var getContent = function (type) {
 
 	// Change Email
 	else if (type === 'accountEmail') {
-		var emailForm = m$.get('.main form', dom);
+		var emailForm = dom.querySelector('.main form');
 		if (!emailForm) return;
 		content.main = '<form action="' + emailForm.getAttribute('action') + '" method="post" enctype="multipart/form-data">' + emailForm.innerHTML + '</form>';
 		fetchUserProfile();
@@ -225,32 +309,32 @@ var getContent = function (type) {
 
 	// Change Password
 	else if (type === 'accountPassword') {
-		var passwordForm = m$.get('.main form', dom);
+		var passwordForm = dom.querySelector('.main form');
 		if (!passwordForm) return;
 		content.main = '<form action="' + passwordForm.getAttribute('action') + '" method="post" enctype="multipart/form-data">' + passwordForm.innerHTML + '</form>';
-		content.secondary = m$.get('#passwd_requirements', dom).innerHTML;
+		content.secondary = dom.querySelector('#passwd_requirements').innerHTML;
 		fetchUserProfile();
 	}
 
 	// User Profiles
 	else if (type === 'profile') {
-		var data = m$.getAll('.user-information dd', dom);
-		var activity = m$.get('table.recent-activity', dom);
-		var admin = m$.get('a[href*="/r/member/"]', dom);
+		data = dom.querySelectorAll('.user-information dd');
+		var activity = dom.querySelector('table.recent-activity');
+		var admin = dom.querySelector('a[href*="/r/member/"]');
 		content.main = {
-			name: m$.get('h1.first', dom).innerHTML.replace('View Member ', '').trim(),
+			name: dom.querySelector('h1.first').innerHTML.replace('View Member ', '').trim(),
 			admin: admin ? admin.getAttribute('href') : null,
-			blog: data[0] ? m$.get('a', data[0]).getAttribute('href') : '',
-			website: data[1] ? m$.get('a', data[1]).getAttribute('href') : '',
-			registered: data[2] ? m$.get('abbr', data[2]).getAttribute('title') : '',
+			blog: data[0] ? data[0].querySelector('a').getAttribute('href') : '',
+			website: data[1] ? data[1].querySelector('a').getAttribute('href') : '',
+			registered: data[2] ? data[2].querySelector('abbr').getAttribute('title') : '',
 			activity: activity ? '<table>' + activity.innerHTML + '</table>' : null
 		};
 	}
 
 	// IO Docs
 	else if (type === 'ioDocs') {
-		var junk = m$.getAll('#main h1, #main .introText, #main .endpoint ul.actions, #apiTitle', dom);
-		var apiID = m$.get('#apiId', dom);
+		var junk = dom.querySelectorAll('#main h1, #main .introText, #main .endpoint ul.actions, #apiTitle');
+		var apiID = dom.querySelector('#apiId');
 		junk.forEach(function (item) {
 			item.remove();
 		});
@@ -260,19 +344,19 @@ var getContent = function (type) {
 			apiID.parentNode.parentNode.insertBefore(apiID.cloneNode(true), apiID.parentNode);
 			apiID.parentNode.remove();
 		}
-		content.main = m$.get('#main', dom).innerHTML;
+		content.main = dom.querySelector('#main').innerHTML;
 	}
 
 	// Reset Password
 	else if (type === 'lostPassword') {
-		form = m$.get('#lost form', dom);
+		form = dom.querySelector('#lost form');
 		content.main = '<form action="' + form.getAttribute('action') + '" method="post" enctype="multipart/form-data">' + form.innerHTML + '</form>';
 		content.main = content.main.replace('<legend>Lost Password</legend>', '');
 	}
 
 	// Reset Username
 	else if (type === 'lostUsername') {
-		form = m$.get('#lost form', dom);
+		form = dom.querySelector('#lost form');
 		content.main = '<form action="' + form.getAttribute('action') + '" method="post" enctype="multipart/form-data">' + form.innerHTML + '</form>';
 		content.main = content.main.replace('<legend>E-mail yourself your username</legend>', '');
 	}
@@ -281,29 +365,29 @@ var getContent = function (type) {
 	else if (type === 'search') {
 
 		// If there are no results
-		if (m$.get('.no-result', dom)) {
+		if (dom.querySelector('.no-result')) {
 			content.main = null;
 			content.secondary = {
 				first: 0,
 				last: 0,
 				total: 0,
-				query: m$.get('.no-result b', dom).innerHTML.trim()
+				query: dom.querySelector('.no-result b').innerHTML.trim()
 			};
 		}
 
 		// If there are results
 		else {
-			var results = m$.getAll('.section-body .result', dom);
-			var meta = m$.getAll('.result-info b', dom);
-			var paging = m$.getAll('.result-paging a', dom);
+			var results = dom.querySelectorAll('.section-body .result');
+			var meta = dom.querySelectorAll('.result-info b');
+			var paging = dom.querySelectorAll('.result-paging a');
 			content.main = [];
 
 			results.forEach(function (result) {
-				var link = m$.get('a', result);
+				var link = result.querySelector('a');
 				content.main.push({
 					url: link.getAttribute('href'),
 					title: link.innerHTML.trim(),
-					summary: m$.get('.result-summary', result).innerHTML.replace('<strong>', '<span class="search-term">').replace('</strong>', '</span>').trim()
+					summary: result.querySelector('.result-summary').innerHTML.replace('<strong>', '<span class="search-term">').replace('</strong>', '</span>').trim()
 				});
 			});
 
@@ -329,7 +413,7 @@ var getContent = function (type) {
 
 	// Contact Us
 	else if (type === 'contact') {
-		form = m$.get('#main form', dom);
+		form = dom.querySelector('#main form');
 		content.main = '<form action="' + form.getAttribute('action') + '" method="post" enctype="multipart/form-data">' + form.innerHTML + '</form>';
 	}
 
