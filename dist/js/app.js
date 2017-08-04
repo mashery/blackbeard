@@ -291,6 +291,9 @@ var masheryMashtips = (function () {
 		var info = mashtip.querySelector('.mashtip-info');
 		if (!info) return;
 		info.classList.toggle('active');
+		if (info.classList.contains('active')) {
+			info.focus();
+		}
 	};
 
 	var hideMashtips = function () {
@@ -311,7 +314,7 @@ var masheryMashtips = (function () {
 	var convertMashtips = function () {
 		mashtips = document.querySelectorAll('.mashtip');
 		mashtips.forEach((function (mashtip) {
-			mashtip.innerHTML += '<span class="mashtip-info">' + mashtip.getAttribute('title') + '</span>';
+			mashtip.innerHTML += '<span class="mashtip-info tabindex" tabindex="-1">' + mashtip.getAttribute('title') + '</span>';
 			mashtip.setAttribute('role', 'button');
 		}));
 	};
