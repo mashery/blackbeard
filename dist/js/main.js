@@ -1,7 +1,7 @@
 /*!
  * blackbeard v0.2.0: Future portal layout
  * (c) 2017 Chris Ferdinandi
- * BSD-3-Clause License
+ * LicenseRef-All Rights Reserved License
  * http://github.com/mashery/blackbeard
  */
 

@@ -110,8 +110,8 @@ var masheryTestPassword = (function () {
 	};
 
 	exports.destroy = function () {
-		var valid = document.querySelectorAll('#passwd_requirements .' + valid + ', ' + pwNew + ', ' + pwConfirm);
-		valid.forEach(function (field) {
+		var fields = document.querySelectorAll('#passwd_requirements .' + valid + ', ' + pwNew + ', ' + pwConfirm);
+		fields.forEach(function (field) {
 			field.classList.remove(valid);
 		});
 		document.removeEventListener('input', startTests, false);

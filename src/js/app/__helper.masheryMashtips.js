@@ -38,6 +38,7 @@ var masheryMashtips = (function () {
 		mashtips.forEach(function (mashtip) {
 			mashtip.innerHTML += '<span class="mashtip-info tabindex" tabindex="-1">' + mashtip.getAttribute('title') + '</span>';
 			mashtip.setAttribute('role', 'button');
+			mashtip.setAttribute('tabindex', '-1');
 		});
 	};
 
@@ -45,6 +46,11 @@ var masheryMashtips = (function () {
 		var mashtipInfo = document.querySelectorAll('.mashtip-info');
 		mashtipInfo.forEach(function (info) {
 			info.remove();
+		});
+		if (!mashtips) return;
+		mashtips.forEach(function (mashtip) {
+			mashtip.removeAttribute('role');
+			mashtip.removeAttribute('tabindex');
 		});
 	};
 

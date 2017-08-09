@@ -9,8 +9,11 @@ var m$ = (function () {
 	// Placeholder for public methods
 	var m$ = {};
 
+	// If true, use the new vanilla JS IO Docs script
+	var vanillaIODocs = true;
+
 	// Ignore on Ajax page load
-	var ajaxIgnore = '.clear-results, h4 .select-all, #toggleEndpoints, #toggleMethods, [href*="/io-docs"]';
+	var ajaxIgnore = vanillaIODocs ? '.clear-results, h4 .select-all, #toggleEndpoints, #toggleMethods' : '.clear-results, h4 .select-all, #toggleEndpoints, #toggleMethods, [href*="/io-docs"]';
 
 	// Setup internally global variables
 	var settings, main, data;
@@ -52,6 +55,9 @@ var m$ = (function () {
 
 		// If true, include viewport resizing meta tag
 		responsive: true,
+
+		// Polyfills placeholder
+		polyfills: '',
 
 		// If true, test password strength
 		testPassword: true,
@@ -118,11 +124,11 @@ var m$ = (function () {
 			 * The layout for the page confirming email change was successful
 			 */
 			accountEmailSuccess:	'<div class="main container container-small" id="main">' +
-									'<h1>{{content.headingChangeEmailSuccess}}</h1>' +
-									'<ul id="nav-account">{{content.navItemsAccount}}</ul>' +
-									'<ul id="nav-mashery-account">{{content.navItemsMasheryAccount}}</ul>' +
-									'{{content.emailChanged}}' +
-								'</div>',
+										'<h1>{{content.headingChangeEmailSuccess}}</h1>' +
+										'<ul id="nav-account">{{content.navItemsAccount}}</ul>' +
+										'<ul id="nav-mashery-account">{{content.navItemsMasheryAccount}}</ul>' +
+										'{{content.emailChanged}}' +
+									'</div>',
 
 			/**
 			 * My Keys
@@ -203,16 +209,16 @@ var m$ = (function () {
 			 */
 			appAddAPIs: function () {
 				var template =
-							'<div class="container container-small">' +
-								'<h1>Add APIs to this Application</h1>' +
+							'<div class="main container container-small" id="main">' +
+								'<h1>{{content.heading}}</h1>' +
 								'<ul>' +
-									'<li><strong>Application:</strong> ' + window.mashery.content.secondary.application + '</li>' +
-									'<li><strong>Created:</strong> ' + window.mashery.content.secondary.created + '</li>' +
-									(window.mashery.content.secondary.api ? '<li><strong>API:</strong> ' + window.mashery.content.secondary.api + '</li>' : '') +
-									(window.mashery.content.secondary.key ? '<li><strong>Key:</strong> ' + window.mashery.content.secondary.key + '</li>' : '') +
+									'<li><strong>{{content.applicationLabel}}</strong> ' + window.mashery.content.secondary.application + '</li>' +
+									'<li><strong>{{content.createdLabel}}</strong> ' + window.mashery.content.secondary.created + '</li>' +
+									(window.mashery.content.secondary.api ? '<li><strong>{{content.apiLabel}}</strong> ' + window.mashery.content.secondary.api + '</li>' : '') +
+									(window.mashery.content.secondary.key ? '<li><strong>{{content.keyLabel}}</strong> ' + window.mashery.content.secondary.key + '</li>' : '') +
 								'</ul>' +
-								'<h2>Add APIs</h2>' +
-								window.mashery.content.main +
+								'<h2>{{content.subheading}}</h2>' +
+								'{{content.main}}' +
 							'</div>';
 
 				return template;
@@ -224,17 +230,17 @@ var m$ = (function () {
 			 */
 			appDelete: function () {
 				var template =
-							'<div class="container container-small">' +
-								'<h1>Delete Your Application</h1>' +
+							'<div class="main container container-small" id="main">' +
+								'<h1>{{content.heading}}</h1>' +
 								'<ul>' +
-									'<li><strong>Application:</strong> ' + window.mashery.content.secondary.application + '</li>' +
-									'<li><strong>Created:</strong> ' + window.mashery.content.secondary.created + '</li>' +
-									(window.mashery.content.secondary.api ? '<li><strong>API:</strong> ' + window.mashery.content.secondary.api + '</li>' : '') +
-									(window.mashery.content.secondary.key ? '<li><strong>Key:</strong> ' + window.mashery.content.secondary.key + '</li>' : '') +
+									'<li><strong>{{content.applicationLabel}}</strong> ' + window.mashery.content.secondary.application + '</li>' +
+									'<li><strong>{{content.createdLabel}}</strong> ' + window.mashery.content.secondary.created + '</li>' +
+									(window.mashery.content.secondary.api ? '<li><strong>{{content.apiLabel}}</strong> ' + window.mashery.content.secondary.api + '</li>' : '') +
+									(window.mashery.content.secondary.key ? '<li><strong>{{content.keyLabel}}</strong> ' + window.mashery.content.secondary.key + '</li>' : '') +
 								'</ul>' +
-								'<h2>Confirm Deletion</h2>' +
-								'<p><strong>Are you sure you want to delete this application and all of its keys?</strong></p>' +
-								window.mashery.content.main +
+								'<h2>{{content.subheading}}</h2>' +
+								'{{content.main}}' +
+								'{{content.form}}' +
 							'</div>';
 
 				return template;
@@ -265,8 +271,8 @@ var m$ = (function () {
 			 */
 			appRegister:	'<div class="main container container-small" id="main">' +
 									'<h1>{{content.heading}}</h1>' +
-									'<p>{{content.subheading}}</p>' +
 									'{{content.main}}' +
+									'{{content.form}}' +
 								'</div>',
 
 			/**
@@ -298,8 +304,8 @@ var m$ = (function () {
 			 */
 			contact:	'<div class="main container container-small" id="main">' +
 							'<h1>{{content.heading}}</h1>' +
-							'<p>{{content.subheading}}</p>' +
 							'{{content.main}}' +
+							'{{content.form}}' +
 						'</div>',
 
 			/**
@@ -319,7 +325,10 @@ var m$ = (function () {
 			docs:	'<div class="main container" id="main">' +
 						'<div class="row">' +
 							'<div class="grid-two-thirds">{{content.main}}</div>' +
-							'<div class="grid-third"><h2>In the Docs</h2><ul>{{content.secondary}}</ul></div>' +
+							'<div class="grid-third">' +
+								'<h2>{{content.subheading}}</h2>' +
+								'<ul>{{content.secondary}}</ul>' +
+							'</div>' +
 						'</div>' +
 					'</div>',
 
@@ -360,8 +369,8 @@ var m$ = (function () {
 			 */
 			ioDocs:	'<div class="main container container-small" id="main">' +
 						'<h1>{{content.heading}}</h1>' +
-						'<p>{{content.subheading}}</p>' +
 						'{{content.main}}' +
+						'{{content.form}}' +
 					'</div>',
 
 			/**
@@ -371,8 +380,8 @@ var m$ = (function () {
 			 */
 			join:	'<div class="main container container-small" id="main">' +
 						'<h1>{{content.heading}}</h1>' +
-						'<p>{{content.subheading}}</p>' +
 						'{{content.main}}' +
+						'{{content.form}}' +
 						'{{content.terms}}' +
 					'</div>',
 
@@ -383,25 +392,25 @@ var m$ = (function () {
 			 */
 			joinSuccess:	'<div class="main container container-small" id="main">' +
 								'<h1>{{content.heading}}</h1>' +
-								'<p>You have successfully registered as {{content.main}}. Read our <a href="/docs">API documentation</a> to get started. You can view your keys and applications under <a href="{{path.keys}}">My Account</a>.</p>' +
+								'{{content.main}}' +
 							'</div>',
 
 			keyDelete: function () {
 				var template =
-					'<h1>Delete Your Key</h1>' +
+					'<h1>{{content.heading}}</h1>' +
 
-					'<h2>' + window.mashery.content.secondary.api + '</h2>' +
+					'<h2>{{content.subheadingAPI}}</h2>' +
 					'<ul>' +
-						'<li><strong>Application:</strong> ' + window.mashery.content.secondary.application + '</li>' +
-						'<li><strong>Key:</strong> ' + window.mashery.content.secondary.key + '</li>' +
-						(window.mashery.content.secondary.secret ? '<li><strong>Secret:</strong> ' + window.mashery.content.secondary.secret + '</li>' : '') +
-						'<li><strong>Status:</strong> ' + window.mashery.content.secondary.status + '</li>' +
-						'<li><strong>Created:</strong> ' + window.mashery.content.secondary.created + '</li>' +
+						'<li><strong>{{content.applicationLabel}}</strong> ' + window.mashery.content.secondary.application + '</li>' +
+						'<li><strong>{content.keyLabel}}</strong> ' + window.mashery.content.secondary.key + '</li>' +
+						(window.mashery.content.secondary.secret ? '<li><strong>{content.secretLabel}}</strong> ' + window.mashery.content.secondary.secret + '</li>' : '') +
+						'<li><strong>{{content.statusLabel}}</strong> ' + window.mashery.content.secondary.status + '</li>' +
+						'<li><strong>{{content.createdLabel}}</strong> ' + window.mashery.content.secondary.created + '</li>' +
 					'</ul>' +
 
-					'<h2>Confirm Deletion</h2>' +
-					'<p><strong>Are you sure you want to delete this key?</strong></p>' +
-					window.mashery.content.main;
+					'<h2>{{content.subheadingConfirm}}</h2>' +
+					'{{content.main}}' +
+					'{{content.form}}';
 
 				return '<div class="main container container-small" id="main">' + template + '</div>';
 			},
@@ -444,8 +453,8 @@ var m$ = (function () {
 			 */
 			lostPassword:	'<div class="main container container-small" id="main">' +
 								'<h1>{{content.heading}}</h1>' +
-								'<p>{{content.subheading}}</p>' +
 								'{{content.main}}' +
+								'{{content.form}}' +
 							'</div>',
 
 			/**
@@ -463,8 +472,8 @@ var m$ = (function () {
 			 */
 			lostUsername:	'<div class="main container container-small" id="main">' +
 								'<h1>{{content.heading}}</h1>' +
-								'<p>{{content.subheading}}</p>' +
 								'{{content.main}}' +
+								'{{content.form}}' +
 							'</div>',
 
 			/**
@@ -546,14 +555,16 @@ var m$ = (function () {
 			 * Primary Navigation
 			 * The primary navigation content for the Portal.
 			 */
-			primaryNav:	'<div class="nav-primary nav-wrap nav-collapse container padding-top-small padding-bottom-small" id="nav-primary">' +
-							'<a id="logo" class="logo" href="/">{{content.logo}}</a>' +
-							'<a role="button" class="nav-toggle" id="nav-primary-toggle" data-nav-toggle="#nav-primary-menu" href="#">Menu</a>' +
-							'<div class="nav-menu" id="nav-primary-menu">' +
-								'<ul class="nav" id="nav-primary-list">' +
-									'{{content.navItemsPrimary}}' +
-									'<li>{{content.searchForm}}</li>' +
-								'</ul>' +
+			primaryNav:	'<div class="nav-primary nav-wrap nav-collapse" id="nav-primary">' +
+							'<div class="container padding-top-small padding-bottom-small">' +
+								'<a id="logo" class="logo" href="/">{{content.logo}}</a>' +
+								'<a role="button" class="nav-toggle" id="nav-primary-toggle" data-nav-toggle="#nav-primary-menu" href="#">{{content.menuToggle}}</a>' +
+								'<div class="nav-menu" id="nav-primary-menu">' +
+									'<ul class="nav" id="nav-primary-list">' +
+										'{{content.navItemsPrimary}}' +
+										'<li>{{content.searchForm}}</li>' +
+									'</ul>' +
+								'</div>' +
 							'</div>' +
 						'</div>',
 
@@ -566,7 +577,7 @@ var m$ = (function () {
 							'<div class="row">' +
 								'<div class="grid-two-thirds">' +
 									'<h1>{{content.heading}}</h1>' +
-									'{{content.subheading}}' +
+									'{{content.main}}' +
 									'{{content.form}}' +
 									'{{content.terms}}' +
 								'</div>' +
@@ -593,8 +604,8 @@ var m$ = (function () {
 			 */
 			registerResend:	'<div class="main container container-small" id="main">' +
 								'<h1>{{content.heading}}</h1>' +
-								'<p>{{content.subheading}}</p>' +
 								'{{content.main}}' +
+								'{{content.form}}' +
 							'</div>',
 
 			/**
@@ -688,7 +699,7 @@ var m$ = (function () {
 						'<div class="row">' +
 							'<div class="grid-half">' +
 								'<h1>{{content.heading}}</h1>' +
-								'{{content.subheading}}' +
+								'{{content.main}}' +
 								'{{content.form}}' +
 							'</div>' +
 							'<div class="grid-half">' +
@@ -750,6 +761,19 @@ var m$ = (function () {
 			},
 
 			/**
+			 * Add App APIs
+			 * Add APIs to an application
+			 */
+			appAddAPIs: {
+				heading: 'Add APIs to this Application',
+				application: 'Application:',
+				created: 'Created:',
+				api: 'API:',
+				key: 'Key:',
+				subheading: 'Add APIs'
+			},
+
+			/**
 			 * App Add APIs: Success
 			 * API keys successfully added to an app
 			 */
@@ -766,6 +790,13 @@ var m$ = (function () {
 			 * The page to delete an application
 			 */
 			appDelete: {
+				heading: 'Delete Your Application',
+				application: 'Application:',
+				created: 'Created:',
+				api: 'API:',
+				key: 'Key:',
+				subheading: 'Confirm Deletion',
+				main: '<p><strong>Are you sure you want to delete this application and all of its keys?</strong></p>',
 				confirm: 'Are you really sure you want to delete this application?'
 			},
 
@@ -784,7 +815,7 @@ var m$ = (function () {
 			 */
 			appRegister: {
 				heading: 'Register an Application', // The heading
-				subheading: 'Get a key and register your application using the form below to start working with our APIs.' // The message shown above the form
+				main: '<p>Get a key and register your application using the form below to start working with our APIs.</p>' // The message shown above the form
 			},
 
 			/**
@@ -805,7 +836,7 @@ var m$ = (function () {
 			 */
 			contact: {
 				heading: 'Contact Us', // The heading
-				subheading: 'Contact us using the form below.' // The message shown above the form
+				main: '<p>Contact us using the form below.</p>' // The message shown above the form
 			},
 
 			/**
@@ -815,6 +846,14 @@ var m$ = (function () {
 			contactSuccess: {
 				heading: 'Thanks for your submission!', // The heading
 				main: 'Your message will be forwarded to the appropriate group.' // The message
+			},
+
+			/**
+			 * Documentation
+			 * The layout for API documentation.
+			 */
+			docs: {
+				subheading: 'In the Docs'
 			},
 
 			/**
@@ -832,7 +871,7 @@ var m$ = (function () {
 			 */
 			ioDocs: {
 				heading: 'Interactive API', // The heading
-				subheading: 'Test our API services with IO-Docs, our interactive API documentation.' // The message displayed before the content
+				main: '<p>Test our API services with IO-Docs, our interactive API documentation.</p>' // The message displayed before the content
 			},
 
 			/**
@@ -841,7 +880,7 @@ var m$ = (function () {
 			 */
 			join: {
 				heading: 'Join {{mashery.area}}', // The heading
-				subheading: 'Since you already have a Mashery account you don\'t have to register again, but we would like to know a little more about you. Please fill out the additional information below.' // The message shown above the form
+				main: '<p>Since you already have a Mashery account you don\'t have to register again, but we would like to know a little more about you. Please fill out the additional information below.</p>' // The message shown above the form
 			},
 
 			/**
@@ -849,7 +888,8 @@ var m$ = (function () {
 			 * The page shown after an existing Mashery user successfully joins a new area.
 			 */
 			joinSuccess: {
-				heading: 'Registration Successful' // The heading
+				heading: 'Registration Successful', // The heading
+				main: '<p>You have successfully registered as {{content.main}}. Read our <a href="/docs">API documentation</a> to get started. You can view your keys and applications under <a href="{{path.keys}}">My Account</a>.</p>' // The success message
 			},
 
 			/**
@@ -857,6 +897,15 @@ var m$ = (function () {
 			 * The page to delete an API key
 			 */
 			keyDelete: {
+				heading: 'Delete Your Key',
+				api: '{{content.api}}',
+				application: 'Application:',
+				key: 'Key:',
+				secret: 'Secret:',
+				status: 'Status:',
+				created: 'Created:',
+				subheading: 'Confirm Deletion',
+				main: '<p><strong>Are you sure you want to delete this key?</strong></p>',
 				confirm: 'Are you really sure you want to delete this key?'
 			},
 
@@ -884,7 +933,7 @@ var m$ = (function () {
 			 */
 			lostPassword: {
 				heading: 'Recover Your Password', // The heading
-				subheading: 'Enter the email address and username that you registered with and we will send you a link to reset your password.' // The message shown above the form
+				main: '<p>Enter the email address and username that you registered with and we will send you a link to reset your password.</p>' // The message shown above the form
 			},
 
 			/**
@@ -902,7 +951,7 @@ var m$ = (function () {
 			 */
 			lostUsername: {
 				heading: 'Recover Your Username', // The heading
-				subheading: 'Enter the email address you used to register and we will send you an email with your username.' // The message shown above the form
+				main: '<p>Enter the email address you used to register and we will send you an email with your username.</p>' // The message shown above the form
 			},
 
 			/**
@@ -950,6 +999,13 @@ var m$ = (function () {
 			},
 
 			/**
+			 * Primary Navigation Menu
+			 */
+			primaryNav: {
+				toggle: 'Menu'
+			},
+
+			/**
 			 * User Profile
 			 * The user profile page
 			 */
@@ -975,7 +1031,7 @@ var m$ = (function () {
 
 				// Primary Content
 				heading: 'Register for an Account', // The heading
-				subheading: '<p>Register a new Mashery ID to access {{mashery.area}}.</p>', // The message above the form
+				main: '<p>Register a new Mashery ID to access {{mashery.area}}.</p>', // The message above the form
 				privacyPolicy: '', // A custom privacy policy link or message [optional]
 
 				// The sidebar content
@@ -1000,7 +1056,7 @@ var m$ = (function () {
 			 */
 			registerResend: {
 				heading: 'Resend Your Confirmation Email', // The heading
-				subheading: 'Enter your username and email address to have your registration confirmation email resent to you.' // The message above the form
+				main: '<p>Enter your username and email address to have your registration confirmation email resent to you.</p>' // The message above the form
 			},
 
 			/**
@@ -1063,7 +1119,7 @@ var m$ = (function () {
 
 				// Content
 				heading: 'Sign In', // The heading
-				subheading: '<p>Sign in to {{mashery.area}} using your Mashery ID.</p>', // The message above the sign in form
+				main: '<p>Sign in to {{mashery.area}} using your Mashery ID.</p>', // The message above the sign in form
 
 				// The sidebar content
 				sidebar:	'<h2>Register</h2>' +
@@ -1325,23 +1381,38 @@ var m$ = (function () {
 
 		},
 
-		appEdit: {
+		// Add App API pages
+		appAddAPIs: {
 
 			// Heading
 			'{{content.heading}}': function () {
-				return settings.labels.appEdit.heading;
+				return settings.labels.appAddAPIs.heading;
 			},
 
-			// Body Text
-			'{{content.main}}': function () {
-				return settings.labels.appEdit.main;
+			// Application label
+			'{{content.applicationLabel}}': function () {
+				return settings.labels.appAddAPIs.application;
 			},
 
-			// App Edit Form
-			'{{content.form}}': function () {
-				return window.mashery.content.main;
+			// Created on label
+			'{{content.createdLabel}}': function () {
+				return settings.labels.appAddAPIs.created;
 			},
 
+			// API label
+			'{{content.apiLabel}}': function () {
+				return settings.labels.appAddAPIs.api;
+			},
+
+			// Key label
+			'{{content.keyLabel}}': function () {
+				return settings.labels.appAddAPIs.key;
+			},
+
+			// Subheading
+			'{{content.subheading}}': function () {
+				return settings.labels.appAddAPIs.subheading;
+			}
 		},
 
 		// App Add APIs Success
@@ -1359,6 +1430,61 @@ var m$ = (function () {
 
 		},
 
+		// Delete application pages
+		appDelete: {
+
+			// Heading
+			'{{content.heading}}': function () {
+				return settings.labels.appDelete.heading;
+			},
+
+			// Application Label
+			'{{content.applicationLabel}}': function () {
+				return settings.labels.appDelete.application;
+			},
+
+			// Created On Label
+			'{{content.createdLabel}}': function () {
+				return settings.labels.appDelete.created;
+			},
+
+			// API Label
+			'{{content.apiLabel}}': function () {
+				return settings.labels.appDelete.api;
+			},
+
+			// Key Label
+			'{{content.keyLabel}}': function () {
+				return settings.labels.appDelete.key;
+			},
+
+			// Subheading
+			'{{content.subheading}}': function () {
+				return settings.labels.appDelete.subheading;
+			},
+
+			// Main Content
+			'{{content.main}}': function () {
+				return settings.labels.appDelete.main;
+			}
+
+		},
+
+		// Edit App Pages
+		appEdit: {
+
+			// Heading
+			'{{content.heading}}': function () {
+				return settings.labels.appEdit.heading;
+			},
+
+			// Body Text
+			'{{content.main}}': function () {
+				return settings.labels.appEdit.main;
+			}
+
+		},
+
 		// App Registration
 		appRegister: {
 
@@ -1367,9 +1493,9 @@ var m$ = (function () {
 				return settings.labels.appRegister.heading;
 			},
 
-			// Subheading
-			'{{content.subheading}}': function () {
-				return settings.labels.appRegister.subheading;
+			// Body content
+			'{{content.main}}': function () {
+				return settings.labels.appRegister.main;
 			}
 
 		},
@@ -1398,8 +1524,8 @@ var m$ = (function () {
 			},
 
 			// Subheading
-			'{{content.subheading}}': function () {
-				return settings.labels.contact.subheading;
+			'{{content.main}}': function () {
+				return settings.labels.contact.maing;
 			}
 
 		},
@@ -1415,6 +1541,16 @@ var m$ = (function () {
 			// Main Content
 			'{{content.main}}': function () {
 				return settings.labels.contactSuccess.main;
+			}
+
+		},
+
+		// Docs
+		docs: {
+
+			// Subnav heading
+			'{{content.subheading}}': function () {
+				return settings.labels.docs.subheading;
 			}
 
 		},
@@ -1443,8 +1579,8 @@ var m$ = (function () {
 			},
 
 			// Subheading
-			'{{content.subheading}}': function () {
-				return settings.labels.ioDocs.subheading;
+			'{{content.main}}': function () {
+				return settings.labels.ioDocs.main;
 			}
 
 		},
@@ -1458,8 +1594,8 @@ var m$ = (function () {
 			},
 
 			// Subheading
-			'{{content.subheading}}': function () {
-				return settings.labels.join.subheading;
+			'{{content.main}}': function () {
+				return settings.labels.join.main;
 			}
 
 		},
@@ -1470,6 +1606,66 @@ var m$ = (function () {
 			// Heading
 			'{{content.heading}}': function () {
 				return settings.labels.joinSuccess.heading;
+			},
+
+			// Main Content
+			'{{content.main}}': function () {
+				return settings.labels.joinSuccess.main;
+			}
+
+		},
+
+		// Delete Key Page
+		keyDelete: {
+
+			// Heading
+			'{{content.heading}}': function () {
+				return settings.labels.keyDelete.heading;
+			},
+
+			// API Subheading
+			'{{content.subheadingAPI}}': function () {
+				return settings.labels.keyDelete.api;
+			},
+
+			// API
+			'{{content.api}}': function () {
+				return window.mashery.content.secondary.api;
+			},
+
+			// App Label
+			'{{content.applicationLabel}}': function () {
+				return settings.labels.keyDelete.application;
+			},
+
+			// Key Label
+			'{{content.keyLabel}}': function () {
+				return settings.labels.keyDelete.key;
+			},
+
+			// Secret Label
+			'{{content.secretLabel}}': function () {
+				return settings.labels.keyDelete.secret;
+			},
+
+			// Status Label
+			'{{content.statusLabel}}': function () {
+				return settings.labels.keyDelete.status;
+			},
+
+			// Created Label
+			'{{content.createdLabel}}': function () {
+				return settings.labels.keyDelete.created;
+			},
+
+			// Confirm Subheading
+			'{{content.subheadingConfirm}}': function () {
+				return settings.labels.keyDelete.confirm;
+			},
+
+			// Main Content
+			'{{content.main}}': function () {
+				return settings.labels.keyDelete.main;
 			}
 
 		},
@@ -1548,8 +1744,8 @@ var m$ = (function () {
 			},
 
 			// Subheading
-			'{{content.subheading}}': function () {
-				return settings.labels.lostPassword.subheading;
+			'{{content.main}}': function () {
+				return settings.labels.lostPassword.main;
 			}
 
 		},
@@ -1577,9 +1773,9 @@ var m$ = (function () {
 				return settings.labels.lostUsername.heading;
 			},
 
-			// Subheading
-			'{{content.subheading}}': function () {
-				return settings.labels.lostUsername.subheading;
+			// Main Content
+			'{{content.main}}': function () {
+				return settings.labels.lostUsername.main;
 			}
 
 		},
@@ -1659,6 +1855,16 @@ var m$ = (function () {
 
 		},
 
+		// Primary Navigation Menu
+		primaryNav: {
+
+			// Menu toggle for smaller screens
+			'{{content.menuToggle}}': function () {
+				return settings.labels.primaryNav.toggle;
+			}
+
+		},
+
 		// User Profiles
 		profile: {
 
@@ -1702,19 +1908,14 @@ var m$ = (function () {
 				return settings.labels.register.sidebar;
 			},
 
-			// Form
-			'{{content.form}}': function () {
-				return window.mashery.content.main;
-			},
-
 			// Heading
 			'{{content.heading}}': function () {
 				return settings.labels.register.heading;
 			},
 
-			// Subheading
-			'{{content.subheading}}': function () {
-				return settings.labels.register.subheading;
+			// Main Content
+			'{{content.main}}': function () {
+				return settings.labels.register.main;
 			}
 
 		},
@@ -1737,9 +1938,9 @@ var m$ = (function () {
 				return settings.labels.registerResend.heading;
 			},
 
-			// Subheading
-			'{{content.subheading}}': function () {
-				return settings.labels.registerResend.subheading;
+			// Main Content
+			'{{content.main}}': function () {
+				return settings.labels.registerResend.main;
 			}
 
 		},
@@ -1867,19 +2068,14 @@ var m$ = (function () {
 				return settings.labels.signin.sidebar;
 			},
 
-			// Sign In Form
-			'{{content.form}}': function () {
-				return window.mashery.content.main;
-			},
-
 			// Heading
 			'{{content.heading}}': function () {
 				return settings.labels.signin.heading;
 			},
 
-			// Subheading
-			'{{content.subheading}}': function () {
-				return settings.labels.signin.subheading;
+			// Main Content
+			'{{content.main}}': function () {
+				return settings.labels.signin.main;
 			}
 
 		}
@@ -1899,6 +2095,11 @@ var m$ = (function () {
 
 		// Main Content (if there's not one specific to the content type)
 		'{{content.main}}': function () {
+			return window.mashery.content.main;
+		},
+
+		// Main Form (if there's not one specific to the content type)
+		'{{content.form}}': function () {
 			return window.mashery.content.main;
 		},
 
@@ -2371,6 +2572,10 @@ var m$ = (function () {
 	 * @private
 	 */
 	var loadIODocsScripts = function () {
+		// @todo rewrite IO Docs in vanilla JS with an init
+		// m$.loadJS('/files/iodocs-vanilla.js', function () {
+		// 	ioDocs.init();
+		// });
 		m$.loadJS('/public/Mashery/scripts/Iodocs/prettify.js', function () {
 			m$.loadJS('/public/Mashery/scripts/Mashery/beautify.js', function () {
 				m$.loadJS('/public/Mashery/scripts/vendor/alpaca.min.js', function () {
@@ -2391,12 +2596,21 @@ var m$ = (function () {
 	var loadRequiredFilesIODocs = function () {
 		// If not IO Docs, bail
 		if (window.mashery.contentType !== 'ioDocs') return;
-		if (!('jQuery' in window)) {
-			// If jQuery isn't loaded yet, load it
-			m$.loadJS('https://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js', loadIODocsScripts);
+
+		if (vanillaIODocs) {
+			window.iodocs = null;
+			// window.Alpaca = null;
+			m$.loadJS('/files/iodocs-vanilla.js', function () {
+				ioDocs.init();
+			});
 		} else {
-			// Otherwise, just load our scripts
-			loadIODocsScripts();
+			if (!('jQuery' in window)) {
+				// If jQuery isn't loaded yet, load it
+				m$.loadJS('https://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js', loadIODocsScripts);
+			} else {
+				// Otherwise, just load our scripts
+				loadIODocsScripts();
+			}
 		}
 	};
 
@@ -2410,7 +2624,7 @@ var m$ = (function () {
 		if (!document.querySelector('#passwd_requirements')) {
 			masheryTestPassword.destroy();
 			return;
-		};
+		}
 
 		// Only run if testPassword is enabled
 		if (!settings.testPassword) return;
@@ -2430,7 +2644,7 @@ var m$ = (function () {
 		if (!document.querySelector('.mashtip')) {
 			masheryMashtips.destroy();
 			return;
-		};
+		}
 
 		// Only run if testPassword is enabled
 		if (!settings.mashtips) return;
@@ -2479,7 +2693,7 @@ var m$ = (function () {
 		// Update the onclick popup text
 		var submit = form.querySelector('#process');
 		if (submit) {
-			submit.setAttribute('onclick', 'return confirm("' + localPlaceholders.memberRemove.popup.text() + '")');
+			submit.setAttribute('onclick', 'return confirm("' + localPlaceholders.memberRemove['{{content.popup}}']() + '")');
 		}
 
 		// Inject it into the DOM
@@ -2540,6 +2754,9 @@ var m$ = (function () {
 	 * @private
 	 */
 	var reloadIODocs = function () {
+
+		// Don't run if using vanilla JS IO Docs script
+		if (vanillaIODocs) return;
 
 		// Check if IO Docs has been reloaded yet
 		if (window.mashery.contentType !== 'ioDocs' || window.masheryIsAjax || window.masheryIsReloaded) return;
@@ -2881,10 +3098,10 @@ var m$ = (function () {
 	*/
 	m$.init = function (options) {
 
-		m$.loadJS('https://cdn.polyfill.io/v2/polyfill.min.js?features=default', function () {
+		// Merge user options with defaults
+		settings = extend(defaults, options || {});
 
-			// Merge user options with defaults
-			settings = extend( defaults, options || {} );
+		m$.loadJS('https://cdn.polyfill.io/v2/polyfill.min.js?features=default,' + settings.polyfills, function () {
 
 			// Run callback before initializing
 			settings.callbacks.beforeInit();

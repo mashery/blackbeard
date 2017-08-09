@@ -65,7 +65,7 @@ var getContent = function (type) {
 	var content = window.mashery.content;
 
 	// Variable placeholders
-	var appDataBasic, appDataDetails;
+	var h1, appDataBasic, appDataDetails;
 
 
 	//
@@ -318,11 +318,12 @@ var getContent = function (type) {
 
 	// User Profiles
 	else if (type === 'profile') {
+		h1 = dom.querySelector('h1.first');
 		data = dom.querySelectorAll('.user-information dd');
 		var activity = dom.querySelector('table.recent-activity');
 		var admin = dom.querySelector('a[href*="/r/member/"]');
 		content.main = {
-			name: dom.querySelector('h1.first').innerHTML.replace('View Member ', '').trim(),
+			name: h1 ? h1.innerHTML.replace('View Member ', '').trim() : '',
 			admin: admin ? admin.getAttribute('href') : null,
 			blog: data[0] ? data[0].querySelector('a').getAttribute('href') : '',
 			website: data[1] ? data[1].querySelector('a').getAttribute('href') : '',
@@ -344,7 +345,21 @@ var getContent = function (type) {
 			apiID.parentNode.parentNode.insertBefore(apiID.cloneNode(true), apiID.parentNode);
 			apiID.parentNode.remove();
 		}
+
+		// Strip inline styles from content
+		var styles = dom.querySelectorAll('[style]');
+		styles.forEach(function (style) {
+			style.style = '';
+		});
 		content.main = dom.querySelector('#main').innerHTML;
+
+		// Schemas
+		content.schemas = {};
+		var schemas = dom.querySelectorAll('.endpointList > script');
+		schemas.forEach(function (schema) {
+			var strObj = schema.innerHTML.replace('(function() {', '').replace('var apiRootElement = $("#' + schema.parentNode.id + '").get(0);', '').replace("$.data(apiRootElement, 'apiSchemas', ", '').replace(');', '').replace('})();', '').trim();
+			content.schemas[schema.parentNode.id] = JSON.parse(strObj);
+		});
 	}
 
 	// Reset Password
@@ -384,10 +399,11 @@ var getContent = function (type) {
 
 			results.forEach(function (result) {
 				var link = result.querySelector('a');
+				var summary = result.querySelector('.result-summary');
 				content.main.push({
 					url: link.getAttribute('href'),
 					title: link.innerHTML.trim(),
-					summary: result.querySelector('.result-summary').innerHTML.replace('<strong>', '<span class="search-term">').replace('</strong>', '</span>').trim()
+					summary: summary ? summary.innerHTML.replace('<strong>', '<span class="search-term">').replace('</strong>', '</span>').trim() : ''
 				});
 			});
 
