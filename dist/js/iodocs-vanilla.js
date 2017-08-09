@@ -20,7 +20,7 @@ var ioDocs = (function () {
 	// Public API placeholder
 	var exports = {};
 	var hideClass = 'io-docs-hide';
-	var credentials, credentialsForm, descriptions, controls, endpointLists, apiSelect, methods, endpoints, enableHSSM, enableAce;
+	var credentials, credentialsForm, descriptions, controls, endpointLists, apiSelect, methods, endpoints, enableHSSM, enableAce, authTimer, syncTokenValue;
 
 
 
@@ -69,6 +69,245 @@ var ioDocs = (function () {
 			if (credential.matches('.credentials_start')) return;
 			hide(credential);
 		}));
+	};
+
+	var setOAuth2AuthorizeCode = function (code) {
+
+		var codeField = document.querySelector('#apiOAuth2AuthorizeCode');
+		var api = document.querySelector('#api' + apiSelect.value);
+
+		if (codeField) {
+			codeField.value = code;
+		}
+
+		show(document.querySelector('#apiOAuth2AuthorizeCodeContainer'));
+
+		if (!api || api.getAttribute('data-auto-exchange-auth-code') !== '1') return;
+		hide(document.querySelector('#apiOAuth2AuthExchangeButton'));
+
+		// @todo
+		exchangeAuthCodeforAccessToken();
+
+	};
+
+	var setSyncTokenValue = function () {
+		var token = credentialsForm.querySelector('input[name=ajax_synchronization_token]');
+		syncTokenValue = token ? token.value : '';
+	};
+
+	var getAuthorizationCode = function (client_id, client_secret) {
+
+		// open empty window before async call (async code triggers popup blocker on window.open)
+		var oAuth2AuthWindow = window.open(null, 'masheryOAuth2AuthWindow', 'width=300,height=400');
+
+		window.clearInterval(authTimer); // clear the timer
+		authTimer = window.setInterval((function () {
+			if (oAuth2AuthWindow.closed !== false) { // when the window is closed
+				window.clearInterval(authTimer); // clear the timer
+				setOAuth2AuthorizeCode(window.auth_code); // set the auth code from the popup window
+				delete window.auth_code; // clear the auth code just in case
+			}
+		}), 200);
+
+		atomic.ajax({
+			url: '/io-docs/getoauth2authuri',
+			type: 'POST',
+			headers: {
+				'X-Ajax-Synchronization-Token': syncTokenValue
+			},
+			data: {
+				apiId: apiSelect.value,
+				client_id: client_id,
+				client_secret: client_secret,
+				auth_flow: 'auth_code'
+			},
+			responseType: 'json',
+		}).success((function (data){
+			if (data.success) {
+				oAuth2AuthWindow.location.href = data.authorize_uri;
+				oAuth2AuthWindow.focus();
+				// } else {  @todo Should this return an error on failure?
+				// self.resetOAuth2AccessToken();
+				// alert(jqXHR.responseText);
+				// alert("ERROR: 324  --  Sorry there was an error getting an access token. Try again later.");
+			} else {
+				oAuth2AuthWindow.close();
+			}
+		})).error((function (data) {
+			alert(data);
+		}));
+
+	};
+
+	var sendImplicitAccessToken = function (token, errorCallback, successCallback) {
+
+		atomic.ajax({
+			url: '/io-docs/catchOauth2ImplicitToken',
+			type: 'POST',
+			headers: {
+				'X-Ajax-Synchronization-Token': syncTokenValue
+			},
+			data: {
+				apiId: apiSelect.value,
+				access_token: token.access_token,
+				expires_in: token.expires_in,
+				token_type: token.token_type
+			},
+			responseType: 'json',
+		}).success((function (data) {
+			if (data.success) {
+				// @todo
+				setOAuth2AccessToken(token.access_token);
+			} else {
+				alert('Sorry, but there was an error during the account authorization process. Either the credentials were not entered correctly, or permission was denied by the account holder. Please try again.');
+			}
+		})).error((function (data) {
+			alert('Sorry, there was an error processing the response from the OAuth2 server. Try again later.');
+		}));
+
+	};
+
+	var getImplicitAccessToken = function (client_id) {
+
+		// open empty window before async call (async code triggers popup blocker on window.open)
+		var oAuth2AuthWindow = window.open(null, 'masheryOAuth2AuthWindow', 'width=300,height=400');
+
+		window.clearInterval(authTimer); // clear the timer
+		authTimer = window.setInterval((function () {
+			if (oAuth2AuthWindow.closed !== false) { // when the window is closed
+				window.clearInterval(authTimer); // clear the timer
+				sendImplicitAccessToken(window.access_token); // set the auth code from the popup window
+				delete window.access_token; // clear the auth code just in case
+			}
+		}), 200);
+
+		atomic.ajax({
+			url: '/io-docs/getoauth2authuri',
+			type: 'POST',
+			headers: {
+				'X-Ajax-Synchronization-Token': syncTokenValue
+			},
+			data: {
+				apiId: apiSelect.value,
+				client_id: client_id,
+				auth_flow: 'implicit'
+			},
+			responseType: 'json',
+		}).success((function (data) {
+			if (data.success) {
+				oAuth2AuthWindow.location.href = data.authorize_uri;
+				oAuth2AuthWindow.focus();
+			} else {
+				oAuth2AuthWindow.close();
+				resetOAuth2AccessToken();
+				// @todo Should this display an error on failure?
+				// alert(jqXHR.responseText);
+			}
+		})).error((function (data) {
+			alert(data);
+		}));
+
+	};
+
+	var resetOAuth2AccessToken = function () {
+		var token = document.querySelector('#apiOAuth2AccessToken');
+		if (token) {
+			token.value = '';
+		}
+		hide(document.querySelector('#apiOAuth2AccessTokenContainer'));
+	};
+
+	var setOAuth2AccessToken = function (newToken) {
+		var token = document.querySelector('#apiOAuth2AccessToken');
+		if (token) {
+			token.value = newToken;
+		}
+		hide(document.querySelector('#apiOAuth2AccessTokenContainer'));
+	};
+
+	var getAccessTokenFromPasswordCred = function (client_id, client_secret, username, password) {
+
+		atomic.ajax({
+			url: '/io-docs/getoauth2accesstoken',
+			type: 'GET',
+			headers: {
+				'X-Ajax-Synchronization-Token': syncTokenValue
+			},
+			data: {
+				apiId: apiSelect.value,
+				auth_flow: 'password_cred',
+				client_id: client_id,
+				client_secret: client_secret,
+				username: username,
+				password: password
+			},
+			responseType: 'json',
+		}).success((function (data) {
+			if (data.success) {
+				setOAuth2AccessToken(data.result.access_token);
+			} else {
+				resetOAuth2AccessToken();
+				alert(data);
+			}
+		})).error((function (data) {
+			alert(data);
+		}));
+
+	};
+
+	var getAccessTokenFromClientCred = function (client_id, client_secret) {
+
+		atomic.ajax({
+			url: '/io-docs/getoauth2accesstoken',
+			type: 'GET',
+			headers: {
+				'X-Ajax-Synchronization-Token': syncTokenValue
+			},
+			data: {
+				apiId: apiSelect.value,
+				auth_flow: 'client_cred',
+				client_id: client_id,
+				client_secret: client_secret
+			},
+			responseType: 'json',
+		}).success((function (data) {
+			if (data.success) {
+				setOAuth2AccessToken(data.result.access_token);
+			} else {
+				resetOAuth2AccessToken();
+				alert(data);
+			}
+		})).error((function (data) {
+			alert(data);
+		}));
+
+	};
+
+	var exchangeAuthCodeforAccessToken = function () {
+		var authCode = document.querySelector('#apiOAuth2AuthorizeCode');
+		atomic.ajax({
+			url: '/io-docs/getoauth2accesstoken',
+			type: 'GET',
+			headers: {
+				'X-Ajax-Synchronization-Token': syncTokenValue
+			},
+			data: {
+				apiId: apiSelect.value,
+				auth_flow: 'auth_code',
+				authorization_code: authCode ? authCode.value : null
+			},
+			responseType: 'json',
+		}).success((function (data) {
+			if (data.success) {
+				setOAuth2AccessToken(data.result.access_token);
+			} else {
+				resetOAuth2AccessToken();
+				alert(data);
+			}
+		})).error((function (data) {
+			alert(data);
+		}));
+
 	};
 
 	var hideDescriptions = function () {
@@ -679,6 +918,7 @@ var ioDocs = (function () {
 		// Methods
 		hideAllMethods();
 		renderSchemas();
+		setSyncTokenValue();
 
 		if (endpointLists.length === 1) {
 			apiSelect.value = apiSelect.options[1].value;

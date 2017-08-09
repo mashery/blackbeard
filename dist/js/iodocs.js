@@ -79,7 +79,7 @@ $(document).ready((function () {
 		};
 
 		// Get Selected API Id
-		// @done Not porting over
+		// @done
 		self.getSelectedApiId = function () {
 			return self.getSelectedApiEndpointListBox().attr('data-api-id');
 		};
@@ -586,7 +586,7 @@ $(document).ready((function () {
 			$('.credentials.oauth2').not('.credentials_start').slideUp();
 		};
 
-		// @todo
+		// @done
 		self.setOAuth2AuthorizeCode = function (code) {
 			$('#apiOAuth2AuthorizeCode').val(code);
 			$('#apiOAuth2AuthorizeCodeContainer').slideDown();
@@ -597,7 +597,7 @@ $(document).ready((function () {
 			}
 		};
 
-		// @todo
+		// @done
 		self.getAuthorizationCode = function (client_id, client_secret) {
 			// open empty window before async call (async code triggers popup blocker on window.open)
 			var oAuth2AuthWindow = window.open(null, "masheryOAuth2AuthWindow", "width=300,height=400");
@@ -645,7 +645,7 @@ $(document).ready((function () {
 			});
 		};
 
-		// @todo
+		// @done
 		self.sendImplicitAccessToken = function (token, errorCallback, successCallback) {
 			$.ajax({
 				async: true,
@@ -676,7 +676,7 @@ $(document).ready((function () {
 			});
 		};
 
-		// @todo
+		// @done
 		self.getImplicitAccessToken = function (client_id) {
 			// open empty window before async call (async code triggers popup blocker on window.open)
 			var oAuth2AuthWindow = window.open(null, "masheryOAuth2AuthWindow", "width=300,height=400");
@@ -722,19 +722,19 @@ $(document).ready((function () {
 			});
 		};
 
-		// @todo
+		// @done
 		self.resetOAuth2AccessToken = function () {
 			$('#apiOAuth2AccessToken').val("");
 			$('#apiOAuth2AccessTokenContainer').slideUp();
 		};
 
-		// @todo
+		// @done
 		self.setOAuth2AccessToken = function (token) {
 			$('#apiOAuth2AccessToken').val(token);
 			$('#apiOAuth2AccessTokenContainer').slideDown();
 		};
 
-		// @todo
+		// @done
 		self.getAccessTokenFromPasswordCred = function (client_id, client_secret, username, password) {
 
 			$.ajax({
@@ -769,7 +769,7 @@ $(document).ready((function () {
 			});
 		};
 
-		// @todo
+		// @done
 		self.getAccessTokenFromClientCred = function (client_id, client_secret) {
 
 			$.ajax({
@@ -802,7 +802,7 @@ $(document).ready((function () {
 			});
 		};
 
-		// @todo
+		// @done
 		self.exchangeAuthCodeforAccessToken = function () {
 			$.ajax({
 				async: true,
