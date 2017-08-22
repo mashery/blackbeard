@@ -1,12 +1,5 @@
-/*!
- * blackbeard v0.2.0: Future portal layout
- * (c) 2017 Chris Ferdinandi
- * LicenseRef-All Rights Reserved License
- * http://github.com/mashery/blackbeard
- */
-
 // Make iodocs object available only when page is finished rendering
-$(document).ready((function () {
+$(document).ready(function () {
 	// Set global var
 	window.iodocs = (function () {
 
@@ -201,7 +194,7 @@ $(document).ready((function () {
 		self.initApiSchemas = function () {
 			var arrayCleaned = false;
 			// For each API (root ul element)
-			apiEndpointListBoxes.each((function () {
+			apiEndpointListBoxes.each(function () {
 
 				if (!arrayCleaned) {
 					arrayCleaned = true;
@@ -218,16 +211,16 @@ $(document).ready((function () {
 				var apiSchemas = $.data($(this).get(0), 'apiSchemas');
 				if (apiSchemas && !$.isEmptyObject(apiSchemas)) {
 
-					$.each(apiSchemas, (function (schemaId, schema) {
+					$.each(apiSchemas, function (schemaId, schema) {
 
 						if (!schema.title) {
 							schema.title = schemaId;
 						}
 
 						self.initApiSchemaProperties(schema.properties);
-					}));
+					});
 				}
-			}));
+			});
 		};
 
 		// Recursively initialize the properties of an object defined within a JSON schema.
@@ -235,11 +228,11 @@ $(document).ready((function () {
 		self.initApiSchemaProperties = function (properties) {
 
 			if (properties) {
-				$.each(properties, (function (propertyName, property) {
+				$.each(properties, function (propertyName, property) {
 
 					if (!property.title) {
 						// Default to using the property name if no title is specified for the property
-						property.title = propertyName.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/^./, (function (str) { return str.toUpperCase(); }));
+						property.title = propertyName.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/^./, function (str) { return str.toUpperCase(); });
 					}
 
 					// Re-write object schema references to enable alpaca's support for schema references
@@ -262,7 +255,7 @@ $(document).ready((function () {
 						// Recursively initialize the properties of the nested schema
 						self.initApiSchemaProperties(property.items.properties);
 					}
-				}));
+				});
 			}
 
 		};
@@ -286,7 +279,7 @@ $(document).ready((function () {
 				var options = {}; // init options
 
 				if (schema.properties) { // ensure valid properties
-					$.each(schema.properties, (function (key, value) { // generate schema options from the schema
+					$.each(schema.properties, function (key, value) { // generate schema options from the schema
 						if (value.type === 'array') {
 							var arrayOptions = getSchemaOptions(value.items); // recurse!
 
@@ -308,14 +301,14 @@ $(document).ready((function () {
 							}
 							options[key].fields = getSchemaOptions(value); // recurse!
 						}
-					}));
+					});
 				}
 
 				return options;
 			}
 
 			// For each API (root ul element)
-			apiEndpointListBoxes.each((function () {
+			apiEndpointListBoxes.each(function () {
 				// Get the schemas associated with this API
 				var apiSchemas = $.data($(this).get(0), 'apiSchemas');
 
@@ -323,7 +316,7 @@ $(document).ready((function () {
 					// Find all of the nested elements that should contain alpaca form for the request body
 					var requestBodySchemaContainers = $(this).find('.requestBodySchemaContainer');
 
-					requestBodySchemaContainers.each((function () {
+					requestBodySchemaContainers.each(function () {
 						// Get the schema ID associated with the request body
 						var requestBodySchemaId = $(this).attr('data-request-body-schema-id');
 
@@ -354,9 +347,9 @@ $(document).ready((function () {
 								});
 							}
 						}
-					}));
+					});
 				}
-			}));
+			});
 		};
 
         /**
@@ -367,7 +360,7 @@ $(document).ready((function () {
          */
 		// @done
 		self.initAceEditor = function () {
-			$('.method > div.title').click((function () { // when the method is expanded
+			$('.method > div.title').click(function () { // when the method is expanded
 				var textarea = $(this).siblings('form').find('.requestBody'); // jquery textarea
 				var parameters = textarea.siblings('.parameters'); // get the parameters for this definition
 				var mode = 'text'; // default editor mode
@@ -380,16 +373,16 @@ $(document).ready((function () {
 						}
 						this.editor = ace.edit(editorEl[0]); // instantiate editor
 						this.editor.getSession().setMode('ace/mode/' + mode); // set the editor mode
-						this.editor.getSession().on('change', $.proxy((function () { // on value change let's resize the height
+						this.editor.getSession().on('change', $.proxy(function () { // on value change let's resize the height
 							var height = this.editor.getSession().getScreenLength() * this.editor.renderer.lineHeight + this.editor.renderer.scrollBar.getWidth();
 							if (height > textarea.height()) { // ensure not  less than the original text area
 								editorEl.css('height', height + 'px'); // set element height
 								this.editor.resize(); // set resize
 							}
-						}), this));
-						this.editor.on('blur', $.proxy((function () { // when we lose focus
+						}, this));
+						this.editor.on('blur', $.proxy(function () { // when we lose focus
 							textarea.val(this.editor.getSession().getValue()); // update the text area
-						}), this));
+						}, this));
 					}
 
 					textarea.hide(); // hide original textarea
@@ -397,7 +390,7 @@ $(document).ready((function () {
 					this.editor.resize(); // update editor size
 					this.editor.focus(); // focus editor
 				}
-			}));
+			});
 		};
 
         /**
@@ -441,9 +434,9 @@ $(document).ready((function () {
 
 			self.hideAllApiCredentialBoxes();
 
-			apiCredentialForm.each((function () {
+			apiCredentialForm.each(function () {
 				this.reset();
-			}));
+			});
 
 			var apiStoreElem = $('#api' + apiSelectBox.val()),
 				auth_type = self.getCurrentAuthType(),
@@ -464,7 +457,7 @@ $(document).ready((function () {
 
 						$('#apiKeySecret').empty();
 
-						$.each(available_keys, (function (k, v) {
+						$.each(available_keys, function (k, v) {
 							var label = '';
 							if (v.application) {
 								label = v.application + ": " + v.key;
@@ -472,7 +465,7 @@ $(document).ready((function () {
 								label = v.key;
 							}
 							$('#apiKeySecret').append($('<option>', { value: v.key, "data-secret": v.secret }).text(label));
-						}));
+						});
 
 						$('#apiKeySecretListContainer').slideDown();
 
@@ -498,7 +491,7 @@ $(document).ready((function () {
 					$('#apiOAuth2PresetKeysContainer').hide();
 
 					if (auth_flows) {
-						$.each(auth_flows, (function (k, v) {
+						$.each(auth_flows, function (k, v) {
 
 							var auth_flow_desc = function (v) {
 								switch (v) {
@@ -516,16 +509,16 @@ $(document).ready((function () {
 							};
 
 							$('#apiOAuth2FlowType').append($('<option>', { value: v }).text(auth_flow_desc(v)));
-						}));
+						});
 					}
 
 					if (available_keys && available_keys.length) {
 						$('#apiOAuth2PresetKeys').empty();
 						$('#apiOAuth2PresetKeys').append($('<option>', { value: "__manual" }).text("Manual Input"));
 
-						$.each(available_keys, (function (k, v) {
+						$.each(available_keys, function (k, v) {
 							$('#apiOAuth2PresetKeys').append($('<option>', { value: v.key, "data-secret": v.secret }).text(v.application));
-						}));
+						});
 
 						$('#apiOAuth2PresetKeysContainer').slideDown();
 					}
@@ -539,7 +532,7 @@ $(document).ready((function () {
 
 					if (token_types) {
 
-						$.each(token_types, (function (k, v) {
+						$.each(token_types, function (k, v) {
 
 							if (v == 'soapWssUserNameToken') {
 
@@ -562,7 +555,7 @@ $(document).ready((function () {
 								$('#apiSoapWssBinarySecurityTokenAuthCredFlowContainer').slideDown();
 							}
 
-						}));
+						});
 					}
 
 					break;
@@ -603,13 +596,13 @@ $(document).ready((function () {
 			var oAuth2AuthWindow = window.open(null, "masheryOAuth2AuthWindow", "width=300,height=400");
 
 			window.clearInterval(self.authTimer); // clear the timer
-			self.authTimer = window.setInterval((function () {
+			self.authTimer = window.setInterval(function () {
 				if (oAuth2AuthWindow.closed !== false) { // when the window is closed
 					window.clearInterval(self.authTimer); // clear the timer
 					self.setOAuth2AuthorizeCode(window.auth_code); // set the auth code from the popup window
 					delete window.auth_code; // clear the auth code just in case
 				}
-			}), 200);
+			}, 200);
 
 			$.ajax({
 				async: true,
@@ -682,13 +675,13 @@ $(document).ready((function () {
 			var oAuth2AuthWindow = window.open(null, "masheryOAuth2AuthWindow", "width=300,height=400");
 
 			window.clearInterval(self.authTimer); // clear the timer
-			self.authTimer = window.setInterval((function () {
+			self.authTimer = window.setInterval(function () {
 				if (oAuth2AuthWindow.closed !== false) { // when the window is closed
 					window.clearInterval(self.authTimer); // clear the timer
 					self.sendImplicitAccessToken(window.access_token); // set the auth code from the popup window
 					delete window.access_token; // clear the auth code just in case
 				}
-			}), 200);
+			}, 200);
 
 			$.ajax({
 				async: true,
@@ -837,12 +830,12 @@ $(document).ready((function () {
 
 
 		// Callback for OAuth Success
-		// @todo
+		// @done Not porting over - it's not used anywhere
 		self.oauthSuccess = function () {
 			alert('You have successfully logged in');
 		};
 
-		// @todo
+		// @done
 		self.getWssFields = function () {
 
 			var wssFields,
@@ -867,13 +860,13 @@ $(document).ready((function () {
 		apiTitle.text(apiSelectBox.find('option:selected').text()).width(apiSelectBox.outerWidth()).height(apiSelectBox.outerHeight());
 
 		// @done
-		apiSelectBox.change((function () {
+		apiSelectBox.change(function () {
 			self.selectApiById(apiSelectBox.val());
 			apiTitle.text(apiSelectBox.find('option:selected').text());
-		}));
+		});
 
 		// @done
-		$('#apiOAuth2PresetKeys').change((function (event) {
+		$('#apiOAuth2PresetKeys').change(function (event) {
 
 			var selectedPresetKey = $('#apiOAuth2PresetKeys').find('> :selected');
 
@@ -885,10 +878,10 @@ $(document).ready((function () {
 				$('.oauth2_client_secret_field').val(selectedPresetKey.attr('data-secret'));
 			}
 
-		}));
+		});
 
 		// @done
-		apiOAuth2FlowType.change((function (event) {
+		apiOAuth2FlowType.change(function (event) {
 
 			self.hideOAuth2CredentialInputs();
 
@@ -913,49 +906,50 @@ $(document).ready((function () {
 					break;
 			}
 
-		}));
+		});
 
-		// @todo
-		apiOAuth2PCBtn.click((function (event) {
+		// @done
+		apiOAuth2PCBtn.click(function (event) {
 			event.preventDefault();
 			self.getAccessTokenFromPasswordCred(
 				$('#apiOAuth2ClientIdPasswordCred').val(),
 				$('#apiOAuth2ClientSecretPasswordCred').val(),
 				$('#apiOAuth2Username').val(),
-				$('#apiOAuth2Password').val());
-		}));
+				$('#apiOAuth2Password').val()
+			);
+		});
 
-		// @todo
-		apiOAuth2CCBtn.click((function (event) {
+		// @done
+		apiOAuth2CCBtn.click(function (event) {
 			event.preventDefault();
 			self.getAccessTokenFromClientCred(
 				$('#apiOAuth2ClientIdClientCred').val(),
 				$('#apiOAuth2ClientSecretClientCred').val());
-		}));
+		});
 
-		// @todo
-		apiOAuth2AuthBtn.click((function (event) {
+		// @done
+		apiOAuth2AuthBtn.click(function (event) {
 			event.preventDefault();
 			self.getAuthorizationCode(
 				$('#apiOAuth2ClientIdAuthCode').val(),
 				$('#apiOAuth2ClientSecretAuthCode').val());
-		}));
+		});
 
-		// @todo
-		apiOAuth2ImplABtn.click((function (event) {
+		// @done
+		apiOAuth2ImplABtn.click(function (event) {
 			event.preventDefault();
 			self.getImplicitAccessToken(
 				$('#apiOAuth2ClientIdImplicit').val());
-		}));
+		});
 
-		// @todo
-		apiOAuth2AccessBtn.click((function (event) {
+		// @done
+		apiOAuth2AccessBtn.click(function (event) {
 			event.preventDefault();
 			self.exchangeAuthCodeforAccessToken();
-		}));
+		});
 
-		// @todo
-		showManualKeySecret.click((function (event) {
+		// @done
+		showManualKeySecret.click(function (event) {
 			// Disable following link
 			event.preventDefault();
 
@@ -969,61 +963,61 @@ $(document).ready((function () {
 			if (apiStoreElem.attr('data-secret') === "1") {
 				$('#apiSecretContainer').slideDown();
 			}
-		}));
+		});
 
 		// @done
-		toggleEndpointsLink.click((function (event) {
+		toggleEndpointsLink.click(function (event) {
 			// Disable following link
 			event.preventDefault();
 
 			self.hideAllSelectedMethods();
 			self.toggleAllSelectedEndpoints();
-		}));
+		});
 
 		// @done
-		toggleMethodsLink.click((function (event) {
+		toggleMethodsLink.click(function (event) {
 			// Disable following link
 			event.preventDefault();
 
 			self.toggleAllSelectedMethods();
-		}));
+		});
 
 		// @done
-		$('.endpoint > h3 > span.name').click((function (event) {
+		$('.endpoint > h3 > span.name').click(function (event) {
 			// Disable following link
 			event.preventDefault();
 
 			// Toggle methods
 			$(this).closest('.endpoint').find('.methods').slideToggle();
-		}));
+		});
 
 		// @done Not porting over
-		$('.list-methods > a').click((function (event) {
+		$('.list-methods > a').click(function (event) {
 			// Disable following link
 			event.preventDefault();
 
 			$(this).closest('.endpoint').find('.methods:hidden').slideDown();
-		}));
+		});
 
 		// @done Not porting over
-		$('.expand-methods > a').click((function (event) {
+		$('.expand-methods > a').click(function (event) {
 			// Disable following link
 			event.preventDefault();
 
 			$(this).closest('.endpoint').find('.methods:hidden').slideDown();
 			$(this).closest('.endpoint').find('.method:visible > form:hidden').slideDown();
-		}));
+		});
 
 		// @done
-		$('.method > div.title').click((function (event) {
+		$('.method > div.title').click(function (event) {
 			// Disable following link
 			event.preventDefault();
 
 			$(this).parent().find('form').slideToggle();
-		}));
+		});
 
 		// @todo
-		$('.method > form').submit((function (event) {
+		$('.method > form').submit(function (event) {
 			// Disable actual submission
 			event.preventDefault();
 
@@ -1114,10 +1108,10 @@ $(document).ready((function () {
 			if (fileFields.length > 0) { // we got some file fields
 				var formData = new FormData(); // create a form data object to post
 
-				$.each(params, (function (index, param) { // add current params to formdata
+				$.each(params, function (index, param) { // add current params to formdata
 					formData.append(param.name, param.value); // add param to form data
-				}));
-				$.each(fileFields, (function (index, field) { // iterate all file fields
+				});
+				$.each(fileFields, function (index, field) { // iterate all file fields
 					var file = field.files[0]; // get reference to the first file
 
 					if (file && (file.size > fileLimit)) {
@@ -1125,7 +1119,7 @@ $(document).ready((function () {
 					} else {
 						formData.append($(field).attr('name'), file || ''); // add the file field or empty string
 					}
-				}));
+				});
 
 				params = formData; // let's use the new formdata as our params
 			}
@@ -1135,29 +1129,29 @@ $(document).ready((function () {
 				// Add clear link
 				$('<a class="clear-results" href="#">Clear Results</a>').css({
 					display: 'none'
-				}).click((function (event) {
+				}).click(function (event) {
 					// Don't follow link
 					event.preventDefault();
 
 					// Delete clear link
-					$(this).fadeOut((function () {
+					$(this).fadeOut(function () {
 						$(this).remove();
-					}));
+					});
 
 					// Slide up the response and delete it and the clear link
-					$(responseBox).slideUp((function () {
+					$(responseBox).slideUp(function () {
 						responseBox.remove();
-					}));
-				})).insertAfter($(this).find('> input[type=submit]')).fadeIn();
+					});
+				}).insertAfter($(this).find('> input[type=submit]')).fadeIn();
 
 				// Build select link
-				var selectLink = $('<a class="select-all" href="#">Select content</a>').click((function (event) {
+				var selectLink = $('<a class="select-all" href="#">Select content</a>').click(function (event) {
 					// Don't follow link
 					event.preventDefault();
 
 					// Select the content from the response node
 					selectElementText($(this).parent().next('pre')[0]);
-				}));
+				});
 
 				// Build response box
 				responseBox = $('<div class="result" />').css({
@@ -1276,15 +1270,15 @@ $(document).ready((function () {
 						responseBox.find('.requestBody').toggle(data.requestBody ? true : false);
 
 						// Set up response status
-						responseBox.find('pre.responseStatus').text(data.status.code + ' ' + data.status.text).toggleClass('error', data.status.code >= 400).removeClass((function (index, css) {
+						responseBox.find('pre.responseStatus').text(data.status.code + ' ' + data.status.text).toggleClass('error', data.status.code >= 400).removeClass(function (index, css) {
 							return (css.match(/(^|\s)status-code-\d+/g) || []).join(' ');
-						})).addClass('status-code-' + data.status.code);
+						}).addClass('status-code-' + data.status.code);
 						responseBox.find('.responseStatus').toggle((data.status.code > 0 || data.status.text) ? true : false);
 
 						// Set up response headers
-						responseBox.find('pre.headers').text(formatHeaders(data.responseHeaders)).toggleClass('error', data.status.code >= 400).removeClass((function (index, css) {
+						responseBox.find('pre.headers').text(formatHeaders(data.responseHeaders)).toggleClass('error', data.status.code >= 400).removeClass(function (index, css) {
 							return (css.match(/(^|\s)status-code-\d+/g) || []).join(' ');
-						})).addClass('status-code-' + data.status.code);
+						}).addClass('status-code-' + data.status.code);
 						responseBox.find('.headers').toggle($(data.responseHeaders).length ? true : false);
 
 						// Filter format if available content type
@@ -1319,9 +1313,9 @@ $(document).ready((function () {
 						}
 
 						// Set response text
-						responseBox.children('pre.response').text(formattedText).toggleClass('error', data.status.code >= 400).removeClass((function (index, css) {
+						responseBox.children('pre.response').text(formattedText).toggleClass('error', data.status.code >= 400).removeClass(function (index, css) {
 							return (css.match(/(^|\s)status-code-\d+/g) || []).join(' ');
-						})).addClass('status-code-' + data.status.code);
+						}).addClass('status-code-' + data.status.code);
 						responseBox.find('.response').toggle(validResponse ? true : false);
 
 						// display service errors
@@ -1335,7 +1329,7 @@ $(document).ready((function () {
 					}
 				});
 			}
-		}));
+		});
 
 		// Auto enable endpoint list if only one exists
 		// @done
@@ -1357,4 +1351,4 @@ $(document).ready((function () {
 		// Return master object
 		return self;
 	}());
-}));
+});

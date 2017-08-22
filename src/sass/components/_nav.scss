@@ -21,7 +21,8 @@
 	@extend .margin-bottom;
 	border-bottom: calc-em(1px) solid $color-gray-light;
 
-	.loading & {
+	.loading &,
+	.full-width & {
 		@extend .no-margin-bottom;
 	}
 }

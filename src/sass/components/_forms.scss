@@ -189,6 +189,14 @@ button:-moz-focusring,
 
 
 /**
+ * Button Elements
+ */
+#main-wrapper button {
+	@extend .btn;
+}
+
+
+/**
  * Search
  */
 

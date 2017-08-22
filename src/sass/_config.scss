@@ -9,14 +9,19 @@
 
 // Colors
 $color-primary: #0088cc;
+$color-secondary: #ffdd2f;
+$color-tertiary: #b4d253;
+$color-mashery: #a42032;
 $color-black: #272727;
 $color-white: #ffffff;
 
-$color-info: #0088cc; // Blue
-$color-success: #377f31; // Green
-$color-danger: #880e14; // Red
+$color-code: #dd1144; // Fuscia
+$color-rss: #e06c33; // Orange
+
+$color-alert: #0888cd; // Blue
+$color-success: #99B247; // Green
 $color-warning: #dba909; // Yellow
-$color-code: #dd1144;
+$color-danger: #880e14; // Red
 
 $color-gray-dark: #808080;
 $color-gray-light: #e5e5e5;
@@ -85,7 +90,7 @@ $grid-dynamic: (
 	// $class - {string} the grid class
 	// $breakpoint - {string|variable} the breakpoint
 	// $width - {string|variable} width of the grid at the breakpoint
-	(".grid-dynamic", $bp-xsmall, map-get($grid-sizes, half))
-	(".grid-dynamic", $bp-small, map-get($grid-sizes, third))
-	(".grid-dynamic", $bp-medium, map-get($grid-sizes, fourth))
+	(".grid-dynamic", $bp-medium, map-get($grid-sizes, half))
+	// (".grid-dynamic", $bp-small, map-get($grid-sizes, third))
+	(".grid-dynamic", $bp-large, map-get($grid-sizes, fourth))
 );

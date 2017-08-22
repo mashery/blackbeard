@@ -137,3 +137,8 @@ var clearDOM = function () {
 };
 window.requestAnimationFrame(clearDOM);
 var mash = {};
+var portalOptions = {
+	templates: {},
+	labels: {},
+	callbacks: {}
+};

@@ -1,3 +1,10 @@
+/*!
+ * atomic v3.2.0: Vanilla JavaScript Ajax requests with chained success/error callbacks and JSON parsing
+ * (c) 2017 Chris Ferdinandi
+ * MIT License
+ * https://github.com/cferdinandi/atomic
+ * Originally created and maintained by Todd Motto - https://toddmotto.com
+ */
 (function (root, factory) {
 	if (typeof define === 'function' && define.amd) {
 		define([], factory(root));
@@ -6,7 +13,7 @@
 	} else {
 		root.atomic = factory(root);
 	}
-})(typeof global !== 'undefined' ? global : this.window || this.global, function (root) {
+})(typeof global !== 'undefined' ? global : this.window || this.global, (function (root) {
 
 	'use strict';
 
@@ -50,10 +57,10 @@
 
 		// Merge the object into the extended object
 		var merge = function (obj) {
-			for ( var prop in obj ) {
-				if ( Object.prototype.hasOwnProperty.call( obj, prop ) ) {
-					if ( Object.prototype.toString.call(obj[prop]) === '[object Object]' ) {
-						extended[prop] = extend( true, extended[prop], obj[prop] );
+			for (var prop in obj) {
+				if (Object.prototype.hasOwnProperty.call(obj, prop)) {
+					if (Object.prototype.toString.call(obj[prop]) === '[object Object]') {
+						extended[prop] = extend(true, extended[prop], obj[prop]);
 					} else {
 						extended[prop] = obj[prop];
 					}
@@ -94,20 +101,19 @@
 	 * Convert an object into a query string
 	 * @private
 	 * @@link  https://blog.garstasio.com/you-dont-need-jquery/ajax/
-	 * @param  {Object} obj The object
-	 * @return {String}     The query string
+	 * @param  {Object|Array|String} obj The object
+	 * @return {String}                  The query string
 	 */
 	var param = function (obj) {
-		var encodedString = '';
+		if (typeof (obj) === 'string') return obj;
+		if (/application\/json/i.test(settings.headers['Content-type']) || Object.prototype.toString.call(obj) === '[object Array]') return JSON.stringify(obj);
+		var encoded = [];
 		for (var prop in obj) {
 			if (obj.hasOwnProperty(prop)) {
-				if (encodedString.length > 0) {
-					encodedString += '&';
-				}
-				encodedString += encodeURI(prop + '=' + obj[prop]);
+				encoded.push(encodeURIComponent(prop) + '=' + encodeURIComponent(obj[prop]));
 			}
 		}
-		return encodedString;
+		return encoded.join('&');
 	};
 
 	/**
@@ -119,9 +125,9 @@
 
 		// Our default methods
 		var methods = {
-			success: function () {},
-			error: function () {},
-			always: function () {}
+			success: function () { },
+			error: function () { },
+			always: function () { }
 		};
 
 		// Override defaults with user methods and setup chaining
@@ -147,7 +153,7 @@
 		request.onreadystatechange = function () {
 
 			// Only run if the request is complete
-			if ( request.readyState !== 4 ) return;
+			if (request.readyState !== 4) return;
 
 			// Parse the response text
 			var req = parse(request);
@@ -195,13 +201,13 @@
 	 */
 	var jsonp = function () {
 		// Create script with the url and callback
-		var ref = root.document.getElementsByTagName( 'script' )[ 0 ];
-		var script = root.document.createElement( 'script' );
+		var ref = root.document.getElementsByTagName('script')[0];
+		var script = root.document.createElement('script');
 		settings.data.callback = settings.callback;
-		script.src = settings.url + (settings.url.indexOf( '?' ) + 1 ? '&' : '?') + param(settings.data);
+		script.src = settings.url + (settings.url.indexOf('?') + 1 ? '&' : '?') + param(settings.data);
 
 		// Insert script tag into the DOM (append to <head>)
-		ref.parentNode.insertBefore( script, ref );
+		ref.parentNode.insertBefore(script, ref);
 
 		// After the script is loaded and executed, remove it
 		script.onload = function () {
@@ -218,13 +224,13 @@
 	atomic.ajax = function (options) {
 
 		// feature test
-		if ( !supports ) return;
+		if (!supports) return;
 
 		// Merge user options with defaults
-		settings = extend( defaults, options || {} );
+		settings = extend(defaults, options || {});
 
 		// Make our Ajax or JSONP request
-		return ( settings.type.toLowerCase() === 'jsonp' ? jsonp() : xhr() );
+		return (settings.type.toLowerCase() === 'jsonp' ? jsonp() : xhr());
 
 	};
 
@@ -235,4 +241,4 @@
 
 	return atomic;
 
-});
+}));

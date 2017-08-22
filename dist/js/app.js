@@ -38,6 +38,13 @@ if (!Object.prototype.forEach) {
 		}
 	});
 }
+/*!
+ * atomic v3.2.0: Vanilla JavaScript Ajax requests with chained success/error callbacks and JSON parsing
+ * (c) 2017 Chris Ferdinandi
+ * MIT License
+ * https://github.com/cferdinandi/atomic
+ * Originally created and maintained by Todd Motto - https://toddmotto.com
+ */
 (function (root, factory) {
 	if (typeof define === 'function' && define.amd) {
 		define([], factory(root));
@@ -90,10 +97,10 @@ if (!Object.prototype.forEach) {
 
 		// Merge the object into the extended object
 		var merge = function (obj) {
-			for ( var prop in obj ) {
-				if ( Object.prototype.hasOwnProperty.call( obj, prop ) ) {
-					if ( Object.prototype.toString.call(obj[prop]) === '[object Object]' ) {
-						extended[prop] = extend( true, extended[prop], obj[prop] );
+			for (var prop in obj) {
+				if (Object.prototype.hasOwnProperty.call(obj, prop)) {
+					if (Object.prototype.toString.call(obj[prop]) === '[object Object]') {
+						extended[prop] = extend(true, extended[prop], obj[prop]);
 					} else {
 						extended[prop] = obj[prop];
 					}
@@ -134,20 +141,19 @@ if (!Object.prototype.forEach) {
 	 * Convert an object into a query string
 	 * @private
 	 * @@link  https://blog.garstasio.com/you-dont-need-jquery/ajax/
-	 * @param  {Object} obj The object
-	 * @return {String}     The query string
+	 * @param  {Object|Array|String} obj The object
+	 * @return {String}                  The query string
 	 */
 	var param = function (obj) {
-		var encodedString = '';
+		if (typeof (obj) === 'string') return obj;
+		if (/application\/json/i.test(settings.headers['Content-type']) || Object.prototype.toString.call(obj) === '[object Array]') return JSON.stringify(obj);
+		var encoded = [];
 		for (var prop in obj) {
 			if (obj.hasOwnProperty(prop)) {
-				if (encodedString.length > 0) {
-					encodedString += '&';
-				}
-				encodedString += encodeURI(prop + '=' + obj[prop]);
+				encoded.push(encodeURIComponent(prop) + '=' + encodeURIComponent(obj[prop]));
 			}
 		}
-		return encodedString;
+		return encoded.join('&');
 	};
 
 	/**
@@ -159,9 +165,9 @@ if (!Object.prototype.forEach) {
 
 		// Our default methods
 		var methods = {
-			success: function () {},
-			error: function () {},
-			always: function () {}
+			success: function () { },
+			error: function () { },
+			always: function () { }
 		};
 
 		// Override defaults with user methods and setup chaining
@@ -187,7 +193,7 @@ if (!Object.prototype.forEach) {
 		request.onreadystatechange = function () {
 
 			// Only run if the request is complete
-			if ( request.readyState !== 4 ) return;
+			if (request.readyState !== 4) return;
 
 			// Parse the response text
 			var req = parse(request);
@@ -235,13 +241,13 @@ if (!Object.prototype.forEach) {
 	 */
 	var jsonp = function () {
 		// Create script with the url and callback
-		var ref = root.document.getElementsByTagName( 'script' )[ 0 ];
-		var script = root.document.createElement( 'script' );
+		var ref = root.document.getElementsByTagName('script')[0];
+		var script = root.document.createElement('script');
 		settings.data.callback = settings.callback;
-		script.src = settings.url + (settings.url.indexOf( '?' ) + 1 ? '&' : '?') + param(settings.data);
+		script.src = settings.url + (settings.url.indexOf('?') + 1 ? '&' : '?') + param(settings.data);
 
 		// Insert script tag into the DOM (append to <head>)
-		ref.parentNode.insertBefore( script, ref );
+		ref.parentNode.insertBefore(script, ref);
 
 		// After the script is loaded and executed, remove it
 		script.onload = function () {
@@ -258,13 +264,13 @@ if (!Object.prototype.forEach) {
 	atomic.ajax = function (options) {
 
 		// feature test
-		if ( !supports ) return;
+		if (!supports) return;
 
 		// Merge user options with defaults
-		settings = extend( defaults, options || {} );
+		settings = extend(defaults, options || {});
 
 		// Make our Ajax or JSONP request
-		return ( settings.type.toLowerCase() === 'jsonp' ? jsonp() : xhr() );
+		return (settings.type.toLowerCase() === 'jsonp' ? jsonp() : xhr());
 
 	};
 
@@ -276,6 +282,1591 @@ if (!Object.prototype.forEach) {
 	return atomic;
 
 }));
+/* axios v0.16.2 | (c) 2017 by Matt Zabriskie */
+(function webpackUniversalModuleDefinition(root, factory) {
+	if(typeof exports === 'object' && typeof module === 'object')
+		module.exports = factory();
+	else if(typeof define === 'function' && define.amd)
+		define([], factory);
+	else if(typeof exports === 'object')
+		exports["axios"] = factory();
+	else
+		root["axios"] = factory();
+})(this, (function() {
+return /******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+/******/
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId])
+/******/ 			return installedModules[moduleId].exports;
+/******/
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			exports: {},
+/******/ 			id: moduleId,
+/******/ 			loaded: false
+/******/ 		};
+/******/
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/
+/******/ 		// Flag the module as loaded
+/******/ 		module.loaded = true;
+/******/
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/
+/******/
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+/******/
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+/******/
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "";
+/******/
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(0);
+/******/ })
+/************************************************************************/
+/******/ ([
+/* 0 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	module.exports = __webpack_require__(1);
+
+/***/ }),
+/* 1 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var utils = __webpack_require__(2);
+	var bind = __webpack_require__(3);
+	var Axios = __webpack_require__(5);
+	var defaults = __webpack_require__(6);
+	
+	/**
+	 * Create an instance of Axios
+	 *
+	 * @param {Object} defaultConfig The default config for the instance
+	 * @return {Axios} A new instance of Axios
+	 */
+	function createInstance(defaultConfig) {
+	  var context = new Axios(defaultConfig);
+	  var instance = bind(Axios.prototype.request, context);
+	
+	  // Copy axios.prototype to instance
+	  utils.extend(instance, Axios.prototype, context);
+	
+	  // Copy context to instance
+	  utils.extend(instance, context);
+	
+	  return instance;
+	}
+	
+	// Create the default instance to be exported
+	var axios = createInstance(defaults);
+	
+	// Expose Axios class to allow class inheritance
+	axios.Axios = Axios;
+	
+	// Factory for creating new instances
+	axios.create = function create(instanceConfig) {
+	  return createInstance(utils.merge(defaults, instanceConfig));
+	};
+	
+	// Expose Cancel & CancelToken
+	axios.Cancel = __webpack_require__(23);
+	axios.CancelToken = __webpack_require__(24);
+	axios.isCancel = __webpack_require__(20);
+	
+	// Expose all/spread
+	axios.all = function all(promises) {
+	  return Promise.all(promises);
+	};
+	axios.spread = __webpack_require__(25);
+	
+	module.exports = axios;
+	
+	// Allow use of default import syntax in TypeScript
+	module.exports.default = axios;
+
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var bind = __webpack_require__(3);
+	var isBuffer = __webpack_require__(4);
+	
+	/*global toString:true*/
+	
+	// utils is a library of generic helper functions non-specific to axios
+	
+	var toString = Object.prototype.toString;
+	
+	/**
+	 * Determine if a value is an Array
+	 *
+	 * @param {Object} val The value to test
+	 * @returns {boolean} True if value is an Array, otherwise false
+	 */
+	function isArray(val) {
+	  return toString.call(val) === '[object Array]';
+	}
+	
+	/**
+	 * Determine if a value is an ArrayBuffer
+	 *
+	 * @param {Object} val The value to test
+	 * @returns {boolean} True if value is an ArrayBuffer, otherwise false
+	 */
+	function isArrayBuffer(val) {
+	  return toString.call(val) === '[object ArrayBuffer]';
+	}
+	
+	/**
+	 * Determine if a value is a FormData
+	 *
+	 * @param {Object} val The value to test
+	 * @returns {boolean} True if value is an FormData, otherwise false
+	 */
+	function isFormData(val) {
+	  return (typeof FormData !== 'undefined') && (val instanceof FormData);
+	}
+	
+	/**
+	 * Determine if a value is a view on an ArrayBuffer
+	 *
+	 * @param {Object} val The value to test
+	 * @returns {boolean} True if value is a view on an ArrayBuffer, otherwise false
+	 */
+	function isArrayBufferView(val) {
+	  var result;
+	  if ((typeof ArrayBuffer !== 'undefined') && (ArrayBuffer.isView)) {
+	    result = ArrayBuffer.isView(val);
+	  } else {
+	    result = (val) && (val.buffer) && (val.buffer instanceof ArrayBuffer);
+	  }
+	  return result;
+	}
+	
+	/**
+	 * Determine if a value is a String
+	 *
+	 * @param {Object} val The value to test
+	 * @returns {boolean} True if value is a String, otherwise false
+	 */
+	function isString(val) {
+	  return typeof val === 'string';
+	}
+	
+	/**
+	 * Determine if a value is a Number
+	 *
+	 * @param {Object} val The value to test
+	 * @returns {boolean} True if value is a Number, otherwise false
+	 */
+	function isNumber(val) {
+	  return typeof val === 'number';
+	}
+	
+	/**
+	 * Determine if a value is undefined
+	 *
+	 * @param {Object} val The value to test
+	 * @returns {boolean} True if the value is undefined, otherwise false
+	 */
+	function isUndefined(val) {
+	  return typeof val === 'undefined';
+	}
+	
+	/**
+	 * Determine if a value is an Object
+	 *
+	 * @param {Object} val The value to test
+	 * @returns {boolean} True if value is an Object, otherwise false
+	 */
+	function isObject(val) {
+	  return val !== null && typeof val === 'object';
+	}
+	
+	/**
+	 * Determine if a value is a Date
+	 *
+	 * @param {Object} val The value to test
+	 * @returns {boolean} True if value is a Date, otherwise false
+	 */
+	function isDate(val) {
+	  return toString.call(val) === '[object Date]';
+	}
+	
+	/**
+	 * Determine if a value is a File
+	 *
+	 * @param {Object} val The value to test
+	 * @returns {boolean} True if value is a File, otherwise false
+	 */
+	function isFile(val) {
+	  return toString.call(val) === '[object File]';
+	}
+	
+	/**
+	 * Determine if a value is a Blob
+	 *
+	 * @param {Object} val The value to test
+	 * @returns {boolean} True if value is a Blob, otherwise false
+	 */
+	function isBlob(val) {
+	  return toString.call(val) === '[object Blob]';
+	}
+	
+	/**
+	 * Determine if a value is a Function
+	 *
+	 * @param {Object} val The value to test
+	 * @returns {boolean} True if value is a Function, otherwise false
+	 */
+	function isFunction(val) {
+	  return toString.call(val) === '[object Function]';
+	}
+	
+	/**
+	 * Determine if a value is a Stream
+	 *
+	 * @param {Object} val The value to test
+	 * @returns {boolean} True if value is a Stream, otherwise false
+	 */
+	function isStream(val) {
+	  return isObject(val) && isFunction(val.pipe);
+	}
+	
+	/**
+	 * Determine if a value is a URLSearchParams object
+	 *
+	 * @param {Object} val The value to test
+	 * @returns {boolean} True if value is a URLSearchParams object, otherwise false
+	 */
+	function isURLSearchParams(val) {
+	  return typeof URLSearchParams !== 'undefined' && val instanceof URLSearchParams;
+	}
+	
+	/**
+	 * Trim excess whitespace off the beginning and end of a string
+	 *
+	 * @param {String} str The String to trim
+	 * @returns {String} The String freed of excess whitespace
+	 */
+	function trim(str) {
+	  return str.replace(/^\s*/, '').replace(/\s*$/, '');
+	}
+	
+	/**
+	 * Determine if we're running in a standard browser environment
+	 *
+	 * This allows axios to run in a web worker, and react-native.
+	 * Both environments support XMLHttpRequest, but not fully standard globals.
+	 *
+	 * web workers:
+	 *  typeof window -> undefined
+	 *  typeof document -> undefined
+	 *
+	 * react-native:
+	 *  navigator.product -> 'ReactNative'
+	 */
+	function isStandardBrowserEnv() {
+	  if (typeof navigator !== 'undefined' && navigator.product === 'ReactNative') {
+	    return false;
+	  }
+	  return (
+	    typeof window !== 'undefined' &&
+	    typeof document !== 'undefined'
+	  );
+	}
+	
+	/**
+	 * Iterate over an Array or an Object invoking a function for each item.
+	 *
+	 * If `obj` is an Array callback will be called passing
+	 * the value, index, and complete array for each item.
+	 *
+	 * If 'obj' is an Object callback will be called passing
+	 * the value, key, and complete object for each property.
+	 *
+	 * @param {Object|Array} obj The object to iterate
+	 * @param {Function} fn The callback to invoke for each item
+	 */
+	function forEach(obj, fn) {
+	  // Don't bother if no value provided
+	  if (obj === null || typeof obj === 'undefined') {
+	    return;
+	  }
+	
+	  // Force an array if not already something iterable
+	  if (typeof obj !== 'object' && !isArray(obj)) {
+	    /*eslint no-param-reassign:0*/
+	    obj = [obj];
+	  }
+	
+	  if (isArray(obj)) {
+	    // Iterate over array values
+	    for (var i = 0, l = obj.length; i < l; i++) {
+	      fn.call(null, obj[i], i, obj);
+	    }
+	  } else {
+	    // Iterate over object keys
+	    for (var key in obj) {
+	      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+	        fn.call(null, obj[key], key, obj);
+	      }
+	    }
+	  }
+	}
+	
+	/**
+	 * Accepts varargs expecting each argument to be an object, then
+	 * immutably merges the properties of each object and returns result.
+	 *
+	 * When multiple objects contain the same key the later object in
+	 * the arguments list will take precedence.
+	 *
+	 * Example:
+	 *
+	 * ```js
+	 * var result = merge({foo: 123}, {foo: 456});
+	 * console.log(result.foo); // outputs 456
+	 * ```
+	 *
+	 * @param {Object} obj1 Object to merge
+	 * @returns {Object} Result of all merge properties
+	 */
+	function merge(/* obj1, obj2, obj3, ... */) {
+	  var result = {};
+	  function assignValue(val, key) {
+	    if (typeof result[key] === 'object' && typeof val === 'object') {
+	      result[key] = merge(result[key], val);
+	    } else {
+	      result[key] = val;
+	    }
+	  }
+	
+	  for (var i = 0, l = arguments.length; i < l; i++) {
+	    forEach(arguments[i], assignValue);
+	  }
+	  return result;
+	}
+	
+	/**
+	 * Extends object a by mutably adding to it the properties of object b.
+	 *
+	 * @param {Object} a The object to be extended
+	 * @param {Object} b The object to copy properties from
+	 * @param {Object} thisArg The object to bind function to
+	 * @return {Object} The resulting value of object a
+	 */
+	function extend(a, b, thisArg) {
+	  forEach(b, (function assignValue(val, key) {
+	    if (thisArg && typeof val === 'function') {
+	      a[key] = bind(val, thisArg);
+	    } else {
+	      a[key] = val;
+	    }
+	  }));
+	  return a;
+	}
+	
+	module.exports = {
+	  isArray: isArray,
+	  isArrayBuffer: isArrayBuffer,
+	  isBuffer: isBuffer,
+	  isFormData: isFormData,
+	  isArrayBufferView: isArrayBufferView,
+	  isString: isString,
+	  isNumber: isNumber,
+	  isObject: isObject,
+	  isUndefined: isUndefined,
+	  isDate: isDate,
+	  isFile: isFile,
+	  isBlob: isBlob,
+	  isFunction: isFunction,
+	  isStream: isStream,
+	  isURLSearchParams: isURLSearchParams,
+	  isStandardBrowserEnv: isStandardBrowserEnv,
+	  forEach: forEach,
+	  merge: merge,
+	  extend: extend,
+	  trim: trim
+	};
+
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports) {
+
+	'use strict';
+	
+	module.exports = function bind(fn, thisArg) {
+	  return function wrap() {
+	    var args = new Array(arguments.length);
+	    for (var i = 0; i < args.length; i++) {
+	      args[i] = arguments[i];
+	    }
+	    return fn.apply(thisArg, args);
+	  };
+	};
+
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports) {
+
+	/*!
+	 * Determine if an object is a Buffer
+	 *
+	 * @author   Feross Aboukhadijeh <feross@feross.org> <http://feross.org>
+	 * @license  MIT
+	 */
+	
+	// The _isBuffer check is for Safari 5-7 support, because it's missing
+	// Object.prototype.constructor. Remove this eventually
+	module.exports = function (obj) {
+	  return obj != null && (isBuffer(obj) || isSlowBuffer(obj) || !!obj._isBuffer)
+	}
+	
+	function isBuffer (obj) {
+	  return !!obj.constructor && typeof obj.constructor.isBuffer === 'function' && obj.constructor.isBuffer(obj)
+	}
+	
+	// For Node v0.10 support. Remove this eventually.
+	function isSlowBuffer (obj) {
+	  return typeof obj.readFloatLE === 'function' && typeof obj.slice === 'function' && isBuffer(obj.slice(0, 0))
+	}
+
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var defaults = __webpack_require__(6);
+	var utils = __webpack_require__(2);
+	var InterceptorManager = __webpack_require__(17);
+	var dispatchRequest = __webpack_require__(18);
+	var isAbsoluteURL = __webpack_require__(21);
+	var combineURLs = __webpack_require__(22);
+	
+	/**
+	 * Create a new instance of Axios
+	 *
+	 * @param {Object} instanceConfig The default config for the instance
+	 */
+	function Axios(instanceConfig) {
+	  this.defaults = instanceConfig;
+	  this.interceptors = {
+	    request: new InterceptorManager(),
+	    response: new InterceptorManager()
+	  };
+	}
+	
+	/**
+	 * Dispatch a request
+	 *
+	 * @param {Object} config The config specific for this request (merged with this.defaults)
+	 */
+	Axios.prototype.request = function request(config) {
+	  /*eslint no-param-reassign:0*/
+	  // Allow for axios('example/url'[, config]) a la fetch API
+	  if (typeof config === 'string') {
+	    config = utils.merge({
+	      url: arguments[0]
+	    }, arguments[1]);
+	  }
+	
+	  config = utils.merge(defaults, this.defaults, { method: 'get' }, config);
+	  config.method = config.method.toLowerCase();
+	
+	  // Support baseURL config
+	  if (config.baseURL && !isAbsoluteURL(config.url)) {
+	    config.url = combineURLs(config.baseURL, config.url);
+	  }
+	
+	  // Hook up interceptors middleware
+	  var chain = [dispatchRequest, undefined];
+	  var promise = Promise.resolve(config);
+	
+	  this.interceptors.request.forEach((function unshiftRequestInterceptors(interceptor) {
+	    chain.unshift(interceptor.fulfilled, interceptor.rejected);
+	  }));
+	
+	  this.interceptors.response.forEach((function pushResponseInterceptors(interceptor) {
+	    chain.push(interceptor.fulfilled, interceptor.rejected);
+	  }));
+	
+	  while (chain.length) {
+	    promise = promise.then(chain.shift(), chain.shift());
+	  }
+	
+	  return promise;
+	};
+	
+	// Provide aliases for supported request methods
+	utils.forEach(['delete', 'get', 'head', 'options'], (function forEachMethodNoData(method) {
+	  /*eslint func-names:0*/
+	  Axios.prototype[method] = function(url, config) {
+	    return this.request(utils.merge(config || {}, {
+	      method: method,
+	      url: url
+	    }));
+	  };
+	}));
+	
+	utils.forEach(['post', 'put', 'patch'], (function forEachMethodWithData(method) {
+	  /*eslint func-names:0*/
+	  Axios.prototype[method] = function(url, data, config) {
+	    return this.request(utils.merge(config || {}, {
+	      method: method,
+	      url: url,
+	      data: data
+	    }));
+	  };
+	}));
+	
+	module.exports = Axios;
+
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var utils = __webpack_require__(2);
+	var normalizeHeaderName = __webpack_require__(7);
+	
+	var DEFAULT_CONTENT_TYPE = {
+	  'Content-Type': 'application/x-www-form-urlencoded'
+	};
+	
+	function setContentTypeIfUnset(headers, value) {
+	  if (!utils.isUndefined(headers) && utils.isUndefined(headers['Content-Type'])) {
+	    headers['Content-Type'] = value;
+	  }
+	}
+	
+	function getDefaultAdapter() {
+	  var adapter;
+	  if (typeof XMLHttpRequest !== 'undefined') {
+	    // For browsers use XHR adapter
+	    adapter = __webpack_require__(8);
+	  } else if (typeof process !== 'undefined') {
+	    // For node use HTTP adapter
+	    adapter = __webpack_require__(8);
+	  }
+	  return adapter;
+	}
+	
+	var defaults = {
+	  adapter: getDefaultAdapter(),
+	
+	  transformRequest: [function transformRequest(data, headers) {
+	    normalizeHeaderName(headers, 'Content-Type');
+	    if (utils.isFormData(data) ||
+	      utils.isArrayBuffer(data) ||
+	      utils.isBuffer(data) ||
+	      utils.isStream(data) ||
+	      utils.isFile(data) ||
+	      utils.isBlob(data)
+	    ) {
+	      return data;
+	    }
+	    if (utils.isArrayBufferView(data)) {
+	      return data.buffer;
+	    }
+	    if (utils.isURLSearchParams(data)) {
+	      setContentTypeIfUnset(headers, 'application/x-www-form-urlencoded;charset=utf-8');
+	      return data.toString();
+	    }
+	    if (utils.isObject(data)) {
+	      setContentTypeIfUnset(headers, 'application/json;charset=utf-8');
+	      return JSON.stringify(data);
+	    }
+	    return data;
+	  }],
+	
+	  transformResponse: [function transformResponse(data) {
+	    /*eslint no-param-reassign:0*/
+	    if (typeof data === 'string') {
+	      try {
+	        data = JSON.parse(data);
+	      } catch (e) { /* Ignore */ }
+	    }
+	    return data;
+	  }],
+	
+	  timeout: 0,
+	
+	  xsrfCookieName: 'XSRF-TOKEN',
+	  xsrfHeaderName: 'X-XSRF-TOKEN',
+	
+	  maxContentLength: -1,
+	
+	  validateStatus: function validateStatus(status) {
+	    return status >= 200 && status < 300;
+	  }
+	};
+	
+	defaults.headers = {
+	  common: {
+	    'Accept': 'application/json, text/plain, */*'
+	  }
+	};
+	
+	utils.forEach(['delete', 'get', 'head'], (function forEachMethodNoData(method) {
+	  defaults.headers[method] = {};
+	}));
+	
+	utils.forEach(['post', 'put', 'patch'], (function forEachMethodWithData(method) {
+	  defaults.headers[method] = utils.merge(DEFAULT_CONTENT_TYPE);
+	}));
+	
+	module.exports = defaults;
+
+
+/***/ }),
+/* 7 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var utils = __webpack_require__(2);
+	
+	module.exports = function normalizeHeaderName(headers, normalizedName) {
+	  utils.forEach(headers, (function processHeader(value, name) {
+	    if (name !== normalizedName && name.toUpperCase() === normalizedName.toUpperCase()) {
+	      headers[normalizedName] = value;
+	      delete headers[name];
+	    }
+	  }));
+	};
+
+
+/***/ }),
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var utils = __webpack_require__(2);
+	var settle = __webpack_require__(9);
+	var buildURL = __webpack_require__(12);
+	var parseHeaders = __webpack_require__(13);
+	var isURLSameOrigin = __webpack_require__(14);
+	var createError = __webpack_require__(10);
+	var btoa = (typeof window !== 'undefined' && window.btoa && window.btoa.bind(window)) || __webpack_require__(15);
+	
+	module.exports = function xhrAdapter(config) {
+	  return new Promise(function dispatchXhrRequest(resolve, reject) {
+	    var requestData = config.data;
+	    var requestHeaders = config.headers;
+	
+	    if (utils.isFormData(requestData)) {
+	      delete requestHeaders['Content-Type']; // Let the browser set it
+	    }
+	
+	    var request = new XMLHttpRequest();
+	    var loadEvent = 'onreadystatechange';
+	    var xDomain = false;
+	
+	    // For IE 8/9 CORS support
+	    // Only supports POST and GET calls and doesn't returns the response headers.
+	    // DON'T do this for testing b/c XMLHttpRequest is mocked, not XDomainRequest.
+	    if (("production") !== 'test' &&
+	        typeof window !== 'undefined' &&
+	        window.XDomainRequest && !('withCredentials' in request) &&
+	        !isURLSameOrigin(config.url)) {
+	      request = new window.XDomainRequest();
+	      loadEvent = 'onload';
+	      xDomain = true;
+	      request.onprogress = function handleProgress() {};
+	      request.ontimeout = function handleTimeout() {};
+	    }
+	
+	    // HTTP basic authentication
+	    if (config.auth) {
+	      var username = config.auth.username || '';
+	      var password = config.auth.password || '';
+	      requestHeaders.Authorization = 'Basic ' + btoa(username + ':' + password);
+	    }
+	
+	    request.open(config.method.toUpperCase(), buildURL(config.url, config.params, config.paramsSerializer), true);
+	
+	    // Set the request timeout in MS
+	    request.timeout = config.timeout;
+	
+	    // Listen for ready state
+	    request[loadEvent] = function handleLoad() {
+	      if (!request || (request.readyState !== 4 && !xDomain)) {
+	        return;
+	      }
+	
+	      // The request errored out and we didn't get a response, this will be
+	      // handled by onerror instead
+	      // With one exception: request that using file: protocol, most browsers
+	      // will return status as 0 even though it's a successful request
+	      if (request.status === 0 && !(request.responseURL && request.responseURL.indexOf('file:') === 0)) {
+	        return;
+	      }
+	
+	      // Prepare the response
+	      var responseHeaders = 'getAllResponseHeaders' in request ? parseHeaders(request.getAllResponseHeaders()) : null;
+	      var responseData = !config.responseType || config.responseType === 'text' ? request.responseText : request.response;
+	      var response = {
+	        data: responseData,
+	        // IE sends 1223 instead of 204 (https://github.com/mzabriskie/axios/issues/201)
+	        status: request.status === 1223 ? 204 : request.status,
+	        statusText: request.status === 1223 ? 'No Content' : request.statusText,
+	        headers: responseHeaders,
+	        config: config,
+	        request: request
+	      };
+	
+	      settle(resolve, reject, response);
+	
+	      // Clean up request
+	      request = null;
+	    };
+	
+	    // Handle low level network errors
+	    request.onerror = function handleError() {
+	      // Real errors are hidden from us by the browser
+	      // onerror should only fire if it's a network error
+	      reject(createError('Network Error', config, null, request));
+	
+	      // Clean up request
+	      request = null;
+	    };
+	
+	    // Handle timeout
+	    request.ontimeout = function handleTimeout() {
+	      reject(createError('timeout of ' + config.timeout + 'ms exceeded', config, 'ECONNABORTED',
+	        request));
+	
+	      // Clean up request
+	      request = null;
+	    };
+	
+	    // Add xsrf header
+	    // This is only done if running in a standard browser environment.
+	    // Specifically not if we're in a web worker, or react-native.
+	    if (utils.isStandardBrowserEnv()) {
+	      var cookies = __webpack_require__(16);
+	
+	      // Add xsrf header
+	      var xsrfValue = (config.withCredentials || isURLSameOrigin(config.url)) && config.xsrfCookieName ?
+	          cookies.read(config.xsrfCookieName) :
+	          undefined;
+	
+	      if (xsrfValue) {
+	        requestHeaders[config.xsrfHeaderName] = xsrfValue;
+	      }
+	    }
+	
+	    // Add headers to the request
+	    if ('setRequestHeader' in request) {
+	      utils.forEach(requestHeaders, (function setRequestHeader(val, key) {
+	        if (typeof requestData === 'undefined' && key.toLowerCase() === 'content-type') {
+	          // Remove Content-Type if data is undefined
+	          delete requestHeaders[key];
+	        } else {
+	          // Otherwise add header to the request
+	          request.setRequestHeader(key, val);
+	        }
+	      }));
+	    }
+	
+	    // Add withCredentials to request if needed
+	    if (config.withCredentials) {
+	      request.withCredentials = true;
+	    }
+	
+	    // Add responseType to request if needed
+	    if (config.responseType) {
+	      try {
+	        request.responseType = config.responseType;
+	      } catch (e) {
+	        // Expected DOMException thrown by browsers not compatible XMLHttpRequest Level 2.
+	        // But, this can be suppressed for 'json' type as it can be parsed by default 'transformResponse' function.
+	        if (config.responseType !== 'json') {
+	          throw e;
+	        }
+	      }
+	    }
+	
+	    // Handle progress if needed
+	    if (typeof config.onDownloadProgress === 'function') {
+	      request.addEventListener('progress', config.onDownloadProgress);
+	    }
+	
+	    // Not all browsers support upload events
+	    if (typeof config.onUploadProgress === 'function' && request.upload) {
+	      request.upload.addEventListener('progress', config.onUploadProgress);
+	    }
+	
+	    if (config.cancelToken) {
+	      // Handle cancellation
+	      config.cancelToken.promise.then((function onCanceled(cancel) {
+	        if (!request) {
+	          return;
+	        }
+	
+	        request.abort();
+	        reject(cancel);
+	        // Clean up request
+	        request = null;
+	      }));
+	    }
+	
+	    if (requestData === undefined) {
+	      requestData = null;
+	    }
+	
+	    // Send the request
+	    request.send(requestData);
+	  });
+	};
+
+
+/***/ }),
+/* 9 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var createError = __webpack_require__(10);
+	
+	/**
+	 * Resolve or reject a Promise based on response status.
+	 *
+	 * @param {Function} resolve A function that resolves the promise.
+	 * @param {Function} reject A function that rejects the promise.
+	 * @param {object} response The response.
+	 */
+	module.exports = function settle(resolve, reject, response) {
+	  var validateStatus = response.config.validateStatus;
+	  // Note: status is not exposed by XDomainRequest
+	  if (!response.status || !validateStatus || validateStatus(response.status)) {
+	    resolve(response);
+	  } else {
+	    reject(createError(
+	      'Request failed with status code ' + response.status,
+	      response.config,
+	      null,
+	      response.request,
+	      response
+	    ));
+	  }
+	};
+
+
+/***/ }),
+/* 10 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var enhanceError = __webpack_require__(11);
+	
+	/**
+	 * Create an Error with the specified message, config, error code, request and response.
+	 *
+	 * @param {string} message The error message.
+	 * @param {Object} config The config.
+	 * @param {string} [code] The error code (for example, 'ECONNABORTED').
+	 * @param {Object} [request] The request.
+	 * @param {Object} [response] The response.
+	 * @returns {Error} The created error.
+	 */
+	module.exports = function createError(message, config, code, request, response) {
+	  var error = new Error(message);
+	  return enhanceError(error, config, code, request, response);
+	};
+
+
+/***/ }),
+/* 11 */
+/***/ (function(module, exports) {
+
+	'use strict';
+	
+	/**
+	 * Update an Error with the specified config, error code, and response.
+	 *
+	 * @param {Error} error The error to update.
+	 * @param {Object} config The config.
+	 * @param {string} [code] The error code (for example, 'ECONNABORTED').
+	 * @param {Object} [request] The request.
+	 * @param {Object} [response] The response.
+	 * @returns {Error} The error.
+	 */
+	module.exports = function enhanceError(error, config, code, request, response) {
+	  error.config = config;
+	  if (code) {
+	    error.code = code;
+	  }
+	  error.request = request;
+	  error.response = response;
+	  return error;
+	};
+
+
+/***/ }),
+/* 12 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var utils = __webpack_require__(2);
+	
+	function encode(val) {
+	  return encodeURIComponent(val).
+	    replace(/%40/gi, '@').
+	    replace(/%3A/gi, ':').
+	    replace(/%24/g, '$').
+	    replace(/%2C/gi, ',').
+	    replace(/%20/g, '+').
+	    replace(/%5B/gi, '[').
+	    replace(/%5D/gi, ']');
+	}
+	
+	/**
+	 * Build a URL by appending params to the end
+	 *
+	 * @param {string} url The base of the url (e.g., http://www.google.com)
+	 * @param {object} [params] The params to be appended
+	 * @returns {string} The formatted url
+	 */
+	module.exports = function buildURL(url, params, paramsSerializer) {
+	  /*eslint no-param-reassign:0*/
+	  if (!params) {
+	    return url;
+	  }
+	
+	  var serializedParams;
+	  if (paramsSerializer) {
+	    serializedParams = paramsSerializer(params);
+	  } else if (utils.isURLSearchParams(params)) {
+	    serializedParams = params.toString();
+	  } else {
+	    var parts = [];
+	
+	    utils.forEach(params, (function serialize(val, key) {
+	      if (val === null || typeof val === 'undefined') {
+	        return;
+	      }
+	
+	      if (utils.isArray(val)) {
+	        key = key + '[]';
+	      }
+	
+	      if (!utils.isArray(val)) {
+	        val = [val];
+	      }
+	
+	      utils.forEach(val, (function parseValue(v) {
+	        if (utils.isDate(v)) {
+	          v = v.toISOString();
+	        } else if (utils.isObject(v)) {
+	          v = JSON.stringify(v);
+	        }
+	        parts.push(encode(key) + '=' + encode(v));
+	      }));
+	    }));
+	
+	    serializedParams = parts.join('&');
+	  }
+	
+	  if (serializedParams) {
+	    url += (url.indexOf('?') === -1 ? '?' : '&') + serializedParams;
+	  }
+	
+	  return url;
+	};
+
+
+/***/ }),
+/* 13 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var utils = __webpack_require__(2);
+	
+	/**
+	 * Parse headers into an object
+	 *
+	 * ```
+	 * Date: Wed, 27 Aug 2014 08:58:49 GMT
+	 * Content-Type: application/json
+	 * Connection: keep-alive
+	 * Transfer-Encoding: chunked
+	 * ```
+	 *
+	 * @param {String} headers Headers needing to be parsed
+	 * @returns {Object} Headers parsed into an object
+	 */
+	module.exports = function parseHeaders(headers) {
+	  var parsed = {};
+	  var key;
+	  var val;
+	  var i;
+	
+	  if (!headers) { return parsed; }
+	
+	  utils.forEach(headers.split('\n'), (function parser(line) {
+	    i = line.indexOf(':');
+	    key = utils.trim(line.substr(0, i)).toLowerCase();
+	    val = utils.trim(line.substr(i + 1));
+	
+	    if (key) {
+	      parsed[key] = parsed[key] ? parsed[key] + ', ' + val : val;
+	    }
+	  }));
+	
+	  return parsed;
+	};
+
+
+/***/ }),
+/* 14 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var utils = __webpack_require__(2);
+	
+	module.exports = (
+	  utils.isStandardBrowserEnv() ?
+	
+	  // Standard browser envs have full support of the APIs needed to test
+	  // whether the request URL is of the same origin as current location.
+	  (function standardBrowserEnv() {
+	    var msie = /(msie|trident)/i.test(navigator.userAgent);
+	    var urlParsingNode = document.createElement('a');
+	    var originURL;
+	
+	    /**
+	    * Parse a URL to discover it's components
+	    *
+	    * @param {String} url The URL to be parsed
+	    * @returns {Object}
+	    */
+	    function resolveURL(url) {
+	      var href = url;
+	
+	      if (msie) {
+	        // IE needs attribute set twice to normalize properties
+	        urlParsingNode.setAttribute('href', href);
+	        href = urlParsingNode.href;
+	      }
+	
+	      urlParsingNode.setAttribute('href', href);
+	
+	      // urlParsingNode provides the UrlUtils interface - http://url.spec.whatwg.org/#urlutils
+	      return {
+	        href: urlParsingNode.href,
+	        protocol: urlParsingNode.protocol ? urlParsingNode.protocol.replace(/:$/, '') : '',
+	        host: urlParsingNode.host,
+	        search: urlParsingNode.search ? urlParsingNode.search.replace(/^\?/, '') : '',
+	        hash: urlParsingNode.hash ? urlParsingNode.hash.replace(/^#/, '') : '',
+	        hostname: urlParsingNode.hostname,
+	        port: urlParsingNode.port,
+	        pathname: (urlParsingNode.pathname.charAt(0) === '/') ?
+	                  urlParsingNode.pathname :
+	                  '/' + urlParsingNode.pathname
+	      };
+	    }
+	
+	    originURL = resolveURL(window.location.href);
+	
+	    /**
+	    * Determine if a URL shares the same origin as the current location
+	    *
+	    * @param {String} requestURL The URL to test
+	    * @returns {boolean} True if URL shares the same origin, otherwise false
+	    */
+	    return function isURLSameOrigin(requestURL) {
+	      var parsed = (utils.isString(requestURL)) ? resolveURL(requestURL) : requestURL;
+	      return (parsed.protocol === originURL.protocol &&
+	            parsed.host === originURL.host);
+	    };
+	  })() :
+	
+	  // Non standard browser envs (web workers, react-native) lack needed support.
+	  (function nonStandardBrowserEnv() {
+	    return function isURLSameOrigin() {
+	      return true;
+	    };
+	  })()
+	);
+
+
+/***/ }),
+/* 15 */
+/***/ (function(module, exports) {
+
+	'use strict';
+	
+	// btoa polyfill for IE<10 courtesy https://github.com/davidchambers/Base64.js
+	
+	var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+	
+	function E() {
+	  this.message = 'String contains an invalid character';
+	}
+	E.prototype = new Error;
+	E.prototype.code = 5;
+	E.prototype.name = 'InvalidCharacterError';
+	
+	function btoa(input) {
+	  var str = String(input);
+	  var output = '';
+	  for (
+	    // initialize result and counter
+	    var block, charCode, idx = 0, map = chars;
+	    // if the next str index does not exist:
+	    //   change the mapping table to "="
+	    //   check if d has no fractional digits
+	    str.charAt(idx | 0) || (map = '=', idx % 1);
+	    // "8 - idx % 1 * 8" generates the sequence 2, 4, 6, 8
+	    output += map.charAt(63 & block >> 8 - idx % 1 * 8)
+	  ) {
+	    charCode = str.charCodeAt(idx += 3 / 4);
+	    if (charCode > 0xFF) {
+	      throw new E();
+	    }
+	    block = block << 8 | charCode;
+	  }
+	  return output;
+	}
+	
+	module.exports = btoa;
+
+
+/***/ }),
+/* 16 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var utils = __webpack_require__(2);
+	
+	module.exports = (
+	  utils.isStandardBrowserEnv() ?
+	
+	  // Standard browser envs support document.cookie
+	  (function standardBrowserEnv() {
+	    return {
+	      write: function write(name, value, expires, path, domain, secure) {
+	        var cookie = [];
+	        cookie.push(name + '=' + encodeURIComponent(value));
+	
+	        if (utils.isNumber(expires)) {
+	          cookie.push('expires=' + new Date(expires).toGMTString());
+	        }
+	
+	        if (utils.isString(path)) {
+	          cookie.push('path=' + path);
+	        }
+	
+	        if (utils.isString(domain)) {
+	          cookie.push('domain=' + domain);
+	        }
+	
+	        if (secure === true) {
+	          cookie.push('secure');
+	        }
+	
+	        document.cookie = cookie.join('; ');
+	      },
+	
+	      read: function read(name) {
+	        var match = document.cookie.match(new RegExp('(^|;\\s*)(' + name + ')=([^;]*)'));
+	        return (match ? decodeURIComponent(match[3]) : null);
+	      },
+	
+	      remove: function remove(name) {
+	        this.write(name, '', Date.now() - 86400000);
+	      }
+	    };
+	  })() :
+	
+	  // Non standard browser env (web workers, react-native) lack needed support.
+	  (function nonStandardBrowserEnv() {
+	    return {
+	      write: function write() {},
+	      read: function read() { return null; },
+	      remove: function remove() {}
+	    };
+	  })()
+	);
+
+
+/***/ }),
+/* 17 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var utils = __webpack_require__(2);
+	
+	function InterceptorManager() {
+	  this.handlers = [];
+	}
+	
+	/**
+	 * Add a new interceptor to the stack
+	 *
+	 * @param {Function} fulfilled The function to handle `then` for a `Promise`
+	 * @param {Function} rejected The function to handle `reject` for a `Promise`
+	 *
+	 * @return {Number} An ID used to remove interceptor later
+	 */
+	InterceptorManager.prototype.use = function use(fulfilled, rejected) {
+	  this.handlers.push({
+	    fulfilled: fulfilled,
+	    rejected: rejected
+	  });
+	  return this.handlers.length - 1;
+	};
+	
+	/**
+	 * Remove an interceptor from the stack
+	 *
+	 * @param {Number} id The ID that was returned by `use`
+	 */
+	InterceptorManager.prototype.eject = function eject(id) {
+	  if (this.handlers[id]) {
+	    this.handlers[id] = null;
+	  }
+	};
+	
+	/**
+	 * Iterate over all the registered interceptors
+	 *
+	 * This method is particularly useful for skipping over any
+	 * interceptors that may have become `null` calling `eject`.
+	 *
+	 * @param {Function} fn The function to call for each interceptor
+	 */
+	InterceptorManager.prototype.forEach = function forEach(fn) {
+	  utils.forEach(this.handlers, (function forEachHandler(h) {
+	    if (h !== null) {
+	      fn(h);
+	    }
+	  }));
+	};
+	
+	module.exports = InterceptorManager;
+
+
+/***/ }),
+/* 18 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var utils = __webpack_require__(2);
+	var transformData = __webpack_require__(19);
+	var isCancel = __webpack_require__(20);
+	var defaults = __webpack_require__(6);
+	
+	/**
+	 * Throws a `Cancel` if cancellation has been requested.
+	 */
+	function throwIfCancellationRequested(config) {
+	  if (config.cancelToken) {
+	    config.cancelToken.throwIfRequested();
+	  }
+	}
+	
+	/**
+	 * Dispatch a request to the server using the configured adapter.
+	 *
+	 * @param {object} config The config that is to be used for the request
+	 * @returns {Promise} The Promise to be fulfilled
+	 */
+	module.exports = function dispatchRequest(config) {
+	  throwIfCancellationRequested(config);
+	
+	  // Ensure headers exist
+	  config.headers = config.headers || {};
+	
+	  // Transform request data
+	  config.data = transformData(
+	    config.data,
+	    config.headers,
+	    config.transformRequest
+	  );
+	
+	  // Flatten headers
+	  config.headers = utils.merge(
+	    config.headers.common || {},
+	    config.headers[config.method] || {},
+	    config.headers || {}
+	  );
+	
+	  utils.forEach(
+	    ['delete', 'get', 'head', 'post', 'put', 'patch', 'common'],
+	    (function cleanHeaderConfig(method) {
+	      delete config.headers[method];
+	    })
+	  );
+	
+	  var adapter = config.adapter || defaults.adapter;
+	
+	  return adapter(config).then((function onAdapterResolution(response) {
+	    throwIfCancellationRequested(config);
+	
+	    // Transform response data
+	    response.data = transformData(
+	      response.data,
+	      response.headers,
+	      config.transformResponse
+	    );
+	
+	    return response;
+	  }), (function onAdapterRejection(reason) {
+	    if (!isCancel(reason)) {
+	      throwIfCancellationRequested(config);
+	
+	      // Transform response data
+	      if (reason && reason.response) {
+	        reason.response.data = transformData(
+	          reason.response.data,
+	          reason.response.headers,
+	          config.transformResponse
+	        );
+	      }
+	    }
+	
+	    return Promise.reject(reason);
+	  }));
+	};
+
+
+/***/ }),
+/* 19 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var utils = __webpack_require__(2);
+	
+	/**
+	 * Transform the data for a request or a response
+	 *
+	 * @param {Object|String} data The data to be transformed
+	 * @param {Array} headers The headers for the request or response
+	 * @param {Array|Function} fns A single function or Array of functions
+	 * @returns {*} The resulting transformed data
+	 */
+	module.exports = function transformData(data, headers, fns) {
+	  /*eslint no-param-reassign:0*/
+	  utils.forEach(fns, (function transform(fn) {
+	    data = fn(data, headers);
+	  }));
+	
+	  return data;
+	};
+
+
+/***/ }),
+/* 20 */
+/***/ (function(module, exports) {
+
+	'use strict';
+	
+	module.exports = function isCancel(value) {
+	  return !!(value && value.__CANCEL__);
+	};
+
+
+/***/ }),
+/* 21 */
+/***/ (function(module, exports) {
+
+	'use strict';
+	
+	/**
+	 * Determines whether the specified URL is absolute
+	 *
+	 * @param {string} url The URL to test
+	 * @returns {boolean} True if the specified URL is absolute, otherwise false
+	 */
+	module.exports = function isAbsoluteURL(url) {
+	  // A URL is considered absolute if it begins with "<scheme>://" or "//" (protocol-relative URL).
+	  // RFC 3986 defines scheme name as a sequence of characters beginning with a letter and followed
+	  // by any combination of letters, digits, plus, period, or hyphen.
+	  return /^([a-z][a-z\d\+\-\.]*:)?\/\//i.test(url);
+	};
+
+
+/***/ }),
+/* 22 */
+/***/ (function(module, exports) {
+
+	'use strict';
+	
+	/**
+	 * Creates a new URL by combining the specified URLs
+	 *
+	 * @param {string} baseURL The base URL
+	 * @param {string} relativeURL The relative URL
+	 * @returns {string} The combined URL
+	 */
+	module.exports = function combineURLs(baseURL, relativeURL) {
+	  return relativeURL
+	    ? baseURL.replace(/\/+$/, '') + '/' + relativeURL.replace(/^\/+/, '')
+	    : baseURL;
+	};
+
+
+/***/ }),
+/* 23 */
+/***/ (function(module, exports) {
+
+	'use strict';
+	
+	/**
+	 * A `Cancel` is an object that is thrown when an operation is canceled.
+	 *
+	 * @class
+	 * @param {string=} message The message.
+	 */
+	function Cancel(message) {
+	  this.message = message;
+	}
+	
+	Cancel.prototype.toString = function toString() {
+	  return 'Cancel' + (this.message ? ': ' + this.message : '');
+	};
+	
+	Cancel.prototype.__CANCEL__ = true;
+	
+	module.exports = Cancel;
+
+
+/***/ }),
+/* 24 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var Cancel = __webpack_require__(23);
+	
+	/**
+	 * A `CancelToken` is an object that can be used to request cancellation of an operation.
+	 *
+	 * @class
+	 * @param {Function} executor The executor function.
+	 */
+	function CancelToken(executor) {
+	  if (typeof executor !== 'function') {
+	    throw new TypeError('executor must be a function.');
+	  }
+	
+	  var resolvePromise;
+	  this.promise = new Promise(function promiseExecutor(resolve) {
+	    resolvePromise = resolve;
+	  });
+	
+	  var token = this;
+	  executor((function cancel(message) {
+	    if (token.reason) {
+	      // Cancellation has already been requested
+	      return;
+	    }
+	
+	    token.reason = new Cancel(message);
+	    resolvePromise(token.reason);
+	  }));
+	}
+	
+	/**
+	 * Throws a `Cancel` if cancellation has been requested.
+	 */
+	CancelToken.prototype.throwIfRequested = function throwIfRequested() {
+	  if (this.reason) {
+	    throw this.reason;
+	  }
+	};
+	
+	/**
+	 * Returns an object that contains a new `CancelToken` and a function that, when called,
+	 * cancels the `CancelToken`.
+	 */
+	CancelToken.source = function source() {
+	  var cancel;
+	  var token = new CancelToken(function executor(c) {
+	    cancel = c;
+	  });
+	  return {
+	    token: token,
+	    cancel: cancel
+	  };
+	};
+	
+	module.exports = CancelToken;
+
+
+/***/ }),
+/* 25 */
+/***/ (function(module, exports) {
+
+	'use strict';
+	
+	/**
+	 * Syntactic sugar for invoking a function and expanding an array for arguments.
+	 *
+	 * Common use case would be to use `Function.prototype.apply`.
+	 *
+	 *  ```js
+	 *  function f(x, y, z) {}
+	 *  var args = [1, 2, 3];
+	 *  f.apply(null, args);
+	 *  ```
+	 *
+	 * With `spread` this example can be re-written.
+	 *
+	 *  ```js
+	 *  spread(function(x, y, z) {})([1, 2, 3]);
+	 *  ```
+	 *
+	 * @param {Function} callback
+	 * @returns {Function}
+	 */
+	module.exports = function spread(callback) {
+	  return function wrap(arr) {
+	    return callback.apply(null, arr);
+	  };
+	};
+
+
+/***/ })
+/******/ ])
+}));
+;
+//# sourceMappingURL=axios.map
 /**
  * Test the strength of user passwords
  */
@@ -541,7 +2132,7 @@ var getContent = function (type) {
 	var content = window.mashery.content;
 
 	// Variable placeholders
-	var h1, appDataBasic, appDataDetails;
+	var h1, headerEdit, appDataBasic, appDataDetails;
 
 
 	//
@@ -561,13 +2152,43 @@ var getContent = function (type) {
 
 	// Custom Pages
 	if (type === 'page') {
+
+		// Remove header edit link
+		headerEdit = dom.querySelector('#header-edit');
+		if (headerEdit) {
+			headerEdit.remove();
+		}
+
+		// Heading
+		h1 = dom.querySelector('h1.first');
+		content.heading = h1.innerText;
+		h1.remove();
+
+		// Main Content
 		content.main = dom.querySelector('#main').innerHTML;
+
 	}
 
 	// Documentation
 	else if (type === 'docs') {
+
+		// Remove header edit link
+		headerEdit = dom.querySelector('#header-edit');
+		if (headerEdit) {
+			headerEdit.remove();
+		}
+
+		// Heading
+		h1 = dom.querySelector('h1.first');
+		content.heading = h1.innerText;
+		h1.remove();
+
+		// Main Content
 		content.main = dom.querySelector('#main').innerHTML;
+
+		// Sidebar Navigation
 		content.secondary = dom.querySelector('#sub ul').innerHTML;
+
 	}
 
 	// Sign In Page
@@ -669,6 +2290,34 @@ var getContent = function (type) {
 			status: secret ? data[3].innerHTML.trim() : data[2].innerHTML.trim(),
 			created: created ? created.getAttribute('title') : ''
 		};
+
+	}
+
+	// Key Activity
+	else if (type === 'keyActivity') {
+
+		// Variables
+		var reports = dom.querySelector('#date_selector');
+		data = dom.querySelectorAll('div.key dd');
+		secret = data.length === 5 ? true : false;
+		created = secret ? data[4].querySelector('abbr') : data[3].querySelector('abbr');
+
+		// Get the main content
+		content.main = '<div id="developerReport" class="reports"><div id="date_selector">' + reports.innerHTML + '</div></div>';
+
+		// Get the key data
+		content.secondary = {
+			api: dom.querySelector('#main .section-body h2').innerHTML,
+			application: data[0].innerHTML.trim(),
+			key: data[1].innerHTML.trim(),
+			secret: secret ? data[2].innerHTML.trim() : null,
+			status: secret ? data[3].innerHTML.trim() : data[2].innerHTML.trim(),
+			created: created ? created.getAttribute('title') : '',
+			limits: '<table>' + dom.querySelector('div.key table.key').innerHTML + '<table>',
+		};
+
+		// Init function
+		content.init = dom.innerHTML.match(/initCharts\(.*?\)/);
 
 	}
 
@@ -1063,9 +2712,16 @@ var getContentType = function (elem) {
 
 	}
 
-	// Delete Key
-	else if (elem.classList.contains('page-key') && elem.classList.contains('delete-key')) {
-		type = 'keyDelete';
+	// Individual Keys
+	else if (elem.classList.contains('page-key')) {
+
+		// Delete Key
+		if (elem.classList.contains('delete-key')) {
+			type = 'keyDelete';
+		} else if (elem.classList.contains('key-activity')) {
+			type = 'keyActivity';
+		}
+
 	}
 
 	// Account Pages
@@ -1362,12 +3018,6 @@ var m$ = (function () {
 	// Placeholder for public methods
 	var m$ = {};
 
-	// If true, use the new vanilla JS IO Docs script
-	var vanillaIODocs = true;
-
-	// Ignore on Ajax page load
-	var ajaxIgnore = vanillaIODocs ? '.clear-results, h4 .select-all, #toggleEndpoints, #toggleMethods' : '.clear-results, h4 .select-all, #toggleEndpoints, #toggleMethods, [href*="/io-docs"]';
-
 	// Setup internally global variables
 	var settings, main, data;
 
@@ -1395,6 +3045,11 @@ var m$ = (function () {
 
 		// The favicon sizes
 		faviconSizes: '16x16 32x32',
+
+		// Files to load
+		loadCSS: [],
+		loadJSHeader: [],
+		loadJSFooter: [],
 
 		/**
 		 * Logo
@@ -1428,7 +3083,7 @@ var m$ = (function () {
 			 * The layout for the page displaying a users registered applications.
 			 */
 			accountApps: function () {
-				var template = 	'<h1>{{content.headingMyApps}}</h1><ul id="nav-account">{{content.navItemsAccount}}</ul>';
+				var template = 	'<h1>{{content.heading}}</h1><ul id="nav-account">{{content.navItemsAccount}}</ul>';
 				if (Object.keys(mashery.content.main).length > 0) {
 					mashery.content.main.forEach((function (app) {
 						template +=
@@ -1466,7 +3121,7 @@ var m$ = (function () {
 			 * The layout for the page where users can change their Mashery email address.
 			 */
 			accountEmail:	'<div class="main container container-small" id="main">' +
-								'<h1>{{content.headingChangeEmail}}</h1>' +
+								'<h1>{{content.heading}}</h1>' +
 								'<ul id="nav-account">{{content.navItemsAccount}}</ul>' +
 								'<ul id="nav-mashery-account">{{content.navItemsMasheryAccount}}</ul>' +
 								'{{content.main}}' +
@@ -1477,10 +3132,10 @@ var m$ = (function () {
 			 * The layout for the page confirming email change was successful
 			 */
 			accountEmailSuccess:	'<div class="main container container-small" id="main">' +
-										'<h1>{{content.headingChangeEmailSuccess}}</h1>' +
+										'<h1>{{content.heading}}</h1>' +
 										'<ul id="nav-account">{{content.navItemsAccount}}</ul>' +
 										'<ul id="nav-mashery-account">{{content.navItemsMasheryAccount}}</ul>' +
-										'{{content.emailChanged}}' +
+										'{{content.main}}' +
 									'</div>',
 
 			/**
@@ -1488,7 +3143,7 @@ var m$ = (function () {
 			 * The layout for the page displaying a users API keys.
 			 */
 			accountKeys: function () {
-				var template = '<h1>{{content.headingMyApiKeys}}</h1><ul id="nav-account">{{content.navItemsAccount}}</ul>';
+				var template = '<h1>{{content.heading}}</h1><ul id="nav-account">{{content.navItemsAccount}}</ul>';
 				if (Object.keys(mashery.content.main).length > 0 ) {
 					mashery.content.main.forEach((function (plan) {
 						template += '<h2>' + plan.name + '</h2>';
@@ -1504,7 +3159,10 @@ var m$ = (function () {
 										'<li>Created: ' + key.created + '</li>' +
 									'</ul>' +
 									key.limits +
-									'<p><a class="btn btn-delete-key" id="btn-delete-key" href="' + key.delete + '">Delete This Key</a></p>';
+									'<p>' +
+										'<a class="btn btn-key-report" id="btn-key-report" href="' + key.report + '">View Report</a>' +
+										'<a class="btn btn-delete-key" id="btn-delete-key" href="' + key.delete + '">Delete This Key</a>' +
+									'</p>';
 							}));
 						} else {
 							template += '<p>{{content.noPlanKeys}}</p>';
@@ -1527,10 +3185,10 @@ var m$ = (function () {
 			 * The layout for the page where users can manage their Mashery Account details.
 			 */
 			accountManage:	'<div class="main container container-small" id="main">' +
-								'<h1>{{content.headingAccount}}</h1>' +
+								'<h1>{{content.heading}}</h1>' +
 								'<ul id="nav-account">{{content.navItemsAccount}}</ul>' +
 								'<ul id="nav-mashery-account">{{content.navItemsMasheryAccount}}</ul>' +
-								'<h2>{{content.headingAccountInfo}}</h2>' +
+								'<h2>{{content.subheading}}</h2>' +
 								'{{content.main}}' +
 							'</div>',
 
@@ -1539,21 +3197,21 @@ var m$ = (function () {
 			 * The layout for the page where users can change their Mashery password.
 			 */
 			accountPassword:	'<div class="main container container-small" id="main">' +
-									'<h1>{{content.headingChangePassword}}</h1>' +
+									'<h1>{{content.heading}}</h1>' +
 									'<ul id="nav-account">{{content.navItemsAccount}}</ul>' +
 									'<ul id="nav-mashery-account">{{content.navItemsMasheryAccount}}</ul>' +
 									'{{content.main}}' +
 								'</div>',
 
 			/**
-			 * My Account: Password
-			 * The layout for the page where users can change their Mashery password.
+			 * My Account: Password Success
+			 * The layout for the page after users have successfully changed their password.
 			 */
 			accountPasswordSuccess:	'<div class="main container container-small" id="main">' +
-										'<h1>{{content.headingChangePasswordSuccess}}</h1>' +
+										'<h1>{{content.heading}}</h1>' +
 										'<ul id="nav-account">{{content.navItemsAccount}}</ul>' +
 										'<ul id="nav-mashery-account">{{content.navItemsMasheryAccount}}</ul>' +
-										'{{content.passwordChanged}}' +
+										'{{content.main}}' +
 									'</div>',
 
 			/**
@@ -1677,7 +3335,10 @@ var m$ = (function () {
 			 */
 			docs:	'<div class="main container" id="main">' +
 						'<div class="row">' +
-							'<div class="grid-two-thirds">{{content.main}}</div>' +
+							'<div class="grid-two-thirds">' +
+								'{{content.heading}}' +
+								'{{content.main}}' +
+							'</div>' +
 							'<div class="grid-third">' +
 								'<h2>{{content.subheading}}</h2>' +
 								'<ul>{{content.secondary}}</ul>' +
@@ -1741,24 +3402,53 @@ var m$ = (function () {
 			/**
 			 * Join Success
 			 * The layout for the page confirming that an existing Mashery user has joined a new area.
-			 * @todo Convert the text into variables
 			 */
 			joinSuccess:	'<div class="main container container-small" id="main">' +
 								'<h1>{{content.heading}}</h1>' +
 								'{{content.main}}' +
 							'</div>',
 
+			/**
+			 * Key Activity
+			 * Layout for the key activity report page.
+			 */
+			keyActivity: function () {
+				var template =
+					'<h1>{{content.heading}}</h1>' +
+
+					'<ul id="nav-account">{{content.navItemsAccount}}</ul>' +
+
+					'<h2>{{content.subheadingAPI}}</h2>' +
+					'<ul>' +
+						'<li><strong>{{content.applicationLabel}}</strong> ' + window.mashery.content.secondary.application + '</li>' +
+						'<li><strong>{{content.keyLabel}}</strong> ' + window.mashery.content.secondary.key + '</li>' +
+						(window.mashery.content.secondary.secret ? '<li><strong>{{content.secretLabel}}</strong> ' + window.mashery.content.secondary.secret + '</li>' : '') +
+						'<li><strong>{{content.statusLabel}}</strong> ' + window.mashery.content.secondary.status + '</li>' +
+						'<li><strong>{{content.createdLabel}}</strong> ' + window.mashery.content.secondary.created + '</li>' +
+					'</ul>' +
+
+					'{{content.limits}}' +
+
+					'{{content.main}}';
+
+				return '<div class="main container container-small" id="main">' + template + '</div>';
+			},
+
+			/**
+			 * Key Delete
+			 * Layout for the delete key page.
+			 */
 			keyDelete: function () {
 				var template =
 					'<h1>{{content.heading}}</h1>' +
 
 					'<h2>{{content.subheadingAPI}}</h2>' +
 					'<ul>' +
-						'<li><strong>{{content.applicationLabel}}</strong> ' + window.mashery.content.secondary.application + '</li>' +
-						'<li><strong>{content.keyLabel}}</strong> ' + window.mashery.content.secondary.key + '</li>' +
-						(window.mashery.content.secondary.secret ? '<li><strong>{content.secretLabel}}</strong> ' + window.mashery.content.secondary.secret + '</li>' : '') +
-						'<li><strong>{{content.statusLabel}}</strong> ' + window.mashery.content.secondary.status + '</li>' +
-						'<li><strong>{{content.createdLabel}}</strong> ' + window.mashery.content.secondary.created + '</li>' +
+					'<li><strong>{{content.applicationLabel}}</strong> ' + window.mashery.content.secondary.application + '</li>' +
+					'<li><strong>{{content.keyLabel}}</strong> ' + window.mashery.content.secondary.key + '</li>' +
+					(window.mashery.content.secondary.secret ? '<li><strong>{{content.secretLabel}}</strong> ' + window.mashery.content.secondary.secret + '</li>' : '') +
+					'<li><strong>{{content.statusLabel}}</strong> ' + window.mashery.content.secondary.status + '</li>' +
+					'<li><strong>{{content.createdLabel}}</strong> ' + window.mashery.content.secondary.created + '</li>' +
 					'</ul>' +
 
 					'<h2>{{content.subheadingConfirm}}</h2>' +
@@ -1874,6 +3564,7 @@ var m$ = (function () {
 			 * The layout for custom pages.
 			 */
 			page:	'<div class="main container" id="main">' +
+						'<h1>{{content.heading}}</h1>' +
 						'{{content.main}}' +
 					'</div>',
 
@@ -2080,21 +3771,55 @@ var m$ = (function () {
 		labels: {
 
 			/**
-			 * My Account
-			 * All of the account pages, including Keys, Apps, Mashery Account, Change Email, Change Password, and Remove Membership
+			 * My Apps
+			 * The page displaying a users registered applications.
 			 */
-			account: {
+			accountApps: {
+				heading: 'My Apps', // heading
+				noApps: 'You don\'t have any apps yet.', // The message to display when a user has no apps
+			},
 
-				// Headings
-				headingMyApiKeys: 'My API Keys', // The "My Keys" page heading
-				headingMyApps: 'My Apps', // The "My Apps" page heading
-				headingAccount: 'Manage Account', // The "Manage Account" page heading
-				headingAccountInfo: 'Account Information', // The "Account Information" subheading on the "Manage Account" page
-				headingChangeEmail: 'Change Email', // The "Change Email" page heading
-				headingChangeEmailSuccess: 'Email Successfully Changed', // The "Change Email Success" page heading
-				headingChangePassword: 'Change Password', // The "Change Password" page heading
-				headingChangePasswordSuccess: 'Password Successfully Changed', // The "Change Password Success" page heading
+			/**
+			 * My Account: Email
+			 * The page where users can change their Mashery email address.
+			 */
+			accountEmail: {
+				heading: 'Change Email' // The heading
+			},
 
+			/**
+			 * My Account: Email Success
+			 * The layout for the page confirming email change was successful
+			 */
+			accountEmailSuccess: {
+				heading: 'Email Successfully Changed', // the heading
+				main: '<p>An email confirming your change has been sent to the address you provided with your username. Please check your spam folder if you don\'t see it in your inbox.</p>' // The main content
+			},
+
+			/**
+			 * My Keys
+			 * The page displaying a users API keys.
+			 */
+			accountKeys: {
+				heading: 'My API Keys', // The heading
+				noKeys: 'You don\'t have any keys yet.', // The message to display when a user has no keys
+				noPlanKeys: 'You have not been issued keys for this API.', // The message to display when a user has no keys for a specific plan
+			},
+
+			/**
+			 * My Account
+			 * The page where users can manage their Mashery Account details.
+			 */
+			accountManage: {
+				heading: 'Manage Account', // Heading
+				subheading: 'Account Information' // The "Account Information" subheading
+			},
+
+			/**
+			 * Account Navigation
+			 * Labels for the account navigation menu
+			 */
+			accountNav: {
 				// Navigation Labels
 				keys: 'Keys', // The account nav label for "My Keys"
 				apps: 'Applications', // The account nav label for "My Applications"
@@ -2102,15 +3827,24 @@ var m$ = (function () {
 				changeEmail: 'Change Email', // The account nav label for "Change Email"
 				changePassword: 'Change Password', // The account nav label for "Change Password"
 				viewProfile: 'View My Public Profile', // The account nav label for "View My Profile"
-				removeMembership: 'Remove Membership from {{mashery.area}}', // The account nav label for "Remove Membership"
+				removeMembership: 'Remove Membership from {{mashery.area}}' // The account nav label for "Remove Membership"
+			},
 
-				// Messages
-				noKeys: 'You don\'t have any keys yet.', // The message to display when a user has no keys
-				noPlanKeys: 'You have not been issued keys for this API.', // The message to display when a user has no keys for a specific plan
-				noApps: 'You don\'t have any apps yet.', // The message to display when a user has no apps
-				emailChanged: '<p>An email confirming your change has been sent to the address you provided with your username. Please check your spam folder if you don\'t see it in your inbox.</p>',
-				passwordChanged: '<p>An email confirming your change has been sent to the address you provided with your username. If you use this account on other Mashery powered portals, remember to use your new password.</p>'
+			/**
+			 * My Account: Password
+			 * The page where users can change their Mashery password.
+			 */
+			accountPassword: {
+				heading: 'Change Password' // The heading
+			},
 
+			/**
+			 * My Account: Password Success
+			 * The layout for the page after users have successfully changed their password.
+			 */
+			accountPasswordSuccess: {
+				heading: 'Password Successfully Changed', // The heading
+				main: '<p>An email confirming your change has been sent to the address you provided with your username. If you use this account on other Mashery powered portals, remember to use your new password.</p>' // The main content
 			},
 
 			/**
@@ -2243,6 +3977,20 @@ var m$ = (function () {
 			joinSuccess: {
 				heading: 'Registration Successful', // The heading
 				main: '<p>You have successfully registered as {{content.main}}. Read our <a href="/docs">API documentation</a> to get started. You can view your keys and applications under <a href="{{path.keys}}">My Account</a>.</p>' // The success message
+			},
+
+			/**
+			 * Key Activity
+			 * The page to view key activity reports
+			 */
+			keyActivity: {
+				heading: 'Key Activity',
+				api: '{{content.api}}',
+				application: 'Application:',
+				key: 'Key:',
+				secret: 'Secret:',
+				status: 'Status:',
+				created: 'Created:'
 			},
 
 			/**
@@ -2534,7 +4282,9 @@ var m$ = (function () {
 			beforeRenderSecondaryNav: function () {}, // Before the secondary nav is rendered
 			afterRenderSecondaryNav: function () {}, // After the secondary nav is rendered
 			beforeRenderFooter: function () {}, // Before the footer is rendered
-			afterRenderFooter: function () {} // After the footer is rendered
+			afterRenderFooter: function () {}, // After the footer is rendered
+			beforeAjax: function () {}, // Before Ajax page load
+			afterAjax: function () {} // After Ajax page load
 		}
 
 	};
@@ -2648,6 +4398,106 @@ var m$ = (function () {
 	 * Holds placeholders specific to certain pages
 	 */
 	var localPlaceholders = {
+
+		// My apps page
+		accountApps: {
+
+			// Heading
+			'{{content.heading}}': function () {
+				return settings.labels.accountApps.heading;
+			},
+
+			// No Apps Content
+			'{{content.noApps}}': function () {
+				return settings.labels.accountApps.noApps;
+			}
+
+		},
+
+		// Change email page
+		accountEmail: {
+
+			// Heading
+			'{{content.heading}}': function () {
+				return settings.labels.accountEmail.heading;
+			}
+
+		},
+
+		// Email successfully changed
+		accountEmailSuccess: {
+
+			// The heading
+			'{{content.heading}}': function () {
+				return settings.labels.accountEmailSuccess.heading;
+			},
+
+			// The main content
+			'{{content.main}}': function () {
+				return settings.labels.accountEmailSuccess.main;
+			}
+
+		},
+
+		// User API Keys
+		accountKeys: {
+
+			// The heading
+			'{{content.heading}}': function () {
+				return settings.labels.accountKeys.heading;
+			},
+
+			// No Keys Content
+			'{{content.noKeys}}': function () {
+				return settings.labels.accountKeys.noKeys;
+			},
+
+			// No Keys for Plan Content
+			'{{content.noPlanKeys}}': function () {
+				return settings.labels.accountKeys.noPlanKeys;
+			}
+
+		},
+
+		// The My Account Page
+		accountManage: {
+
+			// Heading
+			'{{content.heading}}': function () {
+				return settings.labels.accountManage.heading;
+			},
+
+			// Subheading
+			'{{content.subheading}}': function () {
+				return settings.labels.accountManage.subheading;
+			}
+
+		},
+
+		// Change password page
+		accountPassword: {
+
+			// Heading
+			'{{content.heading}}': function () {
+				return settings.labels.accountPassword.heading;
+			}
+
+		},
+
+		// Change password success page
+		accountPasswordSuccess: {
+
+			// Heading
+			'{{content.heading}}': function () {
+				return settings.labels.accountPasswordSuccess.heading;
+			},
+
+			// Main Content
+			'{{content.main}}': function () {
+				return settings.labels.accountPasswordSuccess.main;
+			}
+
+		},
 
 		// Account pages
 		account: {
@@ -2964,6 +4814,56 @@ var m$ = (function () {
 			// Main Content
 			'{{content.main}}': function () {
 				return settings.labels.joinSuccess.main;
+			}
+
+		},
+
+		// Key Activity Page
+		keyActivity: {
+
+			// Heading
+			'{{content.heading}}': function () {
+				return settings.labels.keyActivity.heading;
+			},
+
+			// API Subheading
+			'{{content.subheadingAPI}}': function () {
+				return settings.labels.keyActivity.api;
+			},
+
+			// API
+			'{{content.api}}': function () {
+				return window.mashery.content.secondary.api;
+			},
+
+			// App Label
+			'{{content.applicationLabel}}': function () {
+				return settings.labels.keyActivity.application;
+			},
+
+			// Key Label
+			'{{content.keyLabel}}': function () {
+				return settings.labels.keyActivity.key;
+			},
+
+			// Secret Label
+			'{{content.secretLabel}}': function () {
+				return settings.labels.keyActivity.secret;
+			},
+
+			// Status Label
+			'{{content.statusLabel}}': function () {
+				return settings.labels.keyActivity.status;
+			},
+
+			// Created Label
+			'{{content.createdLabel}}': function () {
+				return settings.labels.keyActivity.created;
+			},
+
+			// Confirm Subheading
+			'{{content.limits}}': function () {
+				return window.mashery.content.secondary.limits;
 			}
 
 		},
@@ -3446,6 +5346,10 @@ var m$ = (function () {
 			return window.mashery.area;
 		},
 
+		'{{content.heading}}': function () {
+			return (window.mashery.content.heading ? window.mashery.content.heading : '');
+		},
+
 		// Main Content (if there's not one specific to the content type)
 		'{{content.main}}': function () {
 			return window.mashery.content.main;
@@ -3557,11 +5461,12 @@ var m$ = (function () {
 				}
 				return;
 			}
-			existing.parentNode.removeChild(existing);
+			existing.remove();
 		}
 		var ref = window.document.getElementsByTagName('script')[0];
 		var script = window.document.createElement('script');
 		script.src = src;
+		script.async = true;
 		ref.parentNode.insertBefore(script, ref);
 		if (callback && typeof (callback) === 'function') {
 			script.onload = callback;
@@ -3581,13 +5486,13 @@ var m$ = (function () {
 	m$.loadCSS = function (href, before, media) {
 		// Bail if CSS file already exists
 		if (document.querySelector('link[href*="' + href + '"]')) return;
-		var ss = window.document.createElement('link');
-		var ref = before || window.document.getElementsByTagName('script')[0];
+		var ss = window.document.createElement("link");
+		var ref = before || window.document.getElementsByTagName("script")[0];
 		var sheets = window.document.styleSheets;
-		ss.rel = 'stylesheet';
+		ss.rel = "stylesheet";
 		ss.href = href;
 		// temporarily, set media to something non-matching to ensure it'll fetch without blocking render
-		ss.media = 'only x';
+		ss.media = "only x";
 		// inject link
 		ref.parentNode.insertBefore(ss, ref);
 		// This function sets the link's media back to `all` so that the stylesheet applies once it loads
@@ -3600,7 +5505,7 @@ var m$ = (function () {
 				}
 			}
 			if (defined) {
-				ss.media = media || 'all';
+				ss.media = media || "all";
 			}
 			else {
 				setTimeout(toggleMedia);
@@ -3608,6 +5513,41 @@ var m$ = (function () {
 		}
 		toggleMedia();
 		return ss;
+	};
+
+	/**
+	 * Detect when CSS is loaded and run a callback
+	 * @public
+	 * @copyright 2017 Filament Group, Inc.
+	 * @license MIT
+	 * @param {Node}     ss        The stylesheet
+	 * @param {Function} callback  The callback to run
+	 */
+	m$.onloadCSS = function (ss, callback) {
+		var called;
+		function newcb() {
+			if (!called && callback) {
+				called = true;
+				callback.call(ss);
+			}
+		}
+		if (ss.addEventListener) {
+			ss.addEventListener("load", newcb);
+		}
+		if (ss.attachEvent) {
+			ss.attachEvent("onload", newcb);
+		}
+
+		// This code is for browsers that don’t support onload
+		// No support for onload (it'll bind but never fire):
+		//	* Android 4.3 (Samsung Galaxy S4, Browserstack)
+		//	* Android 4.2 Browser (Samsung Galaxy SIII Mini GT-I8200L)
+		//	* Android 2.3 (Pantech Burst P9070)
+
+		// Weak inference targets Android < 4.4
+		if ("isApplicationInstalled" in navigator && "onloadcssdefined" in ss) {
+			ss.onloadcssdefined(newcb);
+		}
 	};
 
 	/**
@@ -3657,30 +5597,28 @@ var m$ = (function () {
 
 		// Variables
 		var extended = {};
-		var deep = false;
-
-		// Check if a deep merge
-		if (typeof (arguments[0]) === 'boolean') {
-			deep = arguments[0];
-			delete arguments[0];
-		}
+		var i = 0;
+		var length = arguments.length;
 
 		// Merge the object into the extended object
 		var merge = function (obj) {
-			obj.forEach((function(prop, key) {
-				// If deep merge and property is an object, merge properties
-				if (deep && Object.prototype.toString.call(obj[prop]) === '[object Object]') {
-					extended[key] = extend(true, extended[key], prop);
-				} else {
-					extended[key] = prop;
+			for (var prop in obj) {
+				if (Object.prototype.hasOwnProperty.call(obj, prop)) {
+					// If property is an object, merge properties
+					if (Object.prototype.toString.call(obj[prop]) === '[object Object]') {
+						extended[prop] = extend(extended[prop], obj[prop]);
+					} else {
+						extended[prop] = obj[prop];
+					}
 				}
-			}));
+			}
 		};
 
 		// Loop through each object and conduct a merge
-		arguments.forEach((function (obj) {
+		for (; i < length; i++) {
+			var obj = arguments[i];
 			merge(obj);
-		}));
+		}
 
 		return extended;
 
@@ -3715,9 +5653,8 @@ var m$ = (function () {
 
 		// Replace local placeholders (if they exist)
 		if (local) {
-			var tempLocal = /account/.test(local) ? 'account' : local;
-			if (localPlaceholders[tempLocal]) {
-				localPlaceholders[tempLocal].forEach((function (content, placeholder) {
+			if (localPlaceholders[local]) {
+				localPlaceholders[local].forEach((function (content, placeholder) {
 					template = template.replace(new RegExp(placeholder, 'g'), content);
 				}));
 			}
@@ -3767,9 +5704,9 @@ var m$ = (function () {
 	 */
 	var getAccountNavItems = function () {
 		var template =
-			'<li><a href="{{path.keys}}">' + settings.labels.account.keys + '</a></li>' +
-			'<li><a href="{{path.apps}}">' + settings.labels.account.apps + '</a></li>' +
-			'<li><a href="{{path.account}}">' + settings.labels.account.account + '</a></li>';
+			'<li><a href="{{path.keys}}">' + settings.labels.accountNav.keys + '</a></li>' +
+			'<li><a href="{{path.apps}}">' + settings.labels.accountNav.apps + '</a></li>' +
+			'<li><a href="{{path.account}}">' + settings.labels.accountNav.account + '</a></li>';
 		return replacePlaceholders(template);
 	};
 
@@ -3779,10 +5716,10 @@ var m$ = (function () {
 	 */
 	var getMasheryAccountNavItems = function () {
 		var template =
-			'<li><a href="{{path.changeEmail}}">' + settings.labels.account.changeEmail + '</a></li>' +
-			'<li><a href="{{path.changePassword}}">' + settings.labels.account.changePassword + '</a></li>' +
-			'<li><a href="{{path.viewProfile}}">' + settings.labels.account.viewProfile + '</a></li>' +
-			'<li><a href="{{path.removeMembership}}">' + settings.labels.account.removeMembership + '</a></li>';
+			'<li><a href="{{path.changeEmail}}">' + settings.labels.accountNav.changeEmail + '</a></li>' +
+			'<li><a href="{{path.changePassword}}">' + settings.labels.accountNav.changePassword + '</a></li>' +
+			'<li><a href="{{path.viewProfile}}">' + settings.labels.accountNav.viewProfile + '</a></li>' +
+			'<li><a href="{{path.removeMembership}}">' + settings.labels.accountNav.removeMembership + '</a></li>';
 		return replacePlaceholders(template);
 	};
 
@@ -3921,25 +5858,50 @@ var m$ = (function () {
 	};
 
 	/**
+	 * Load user CSS and header JS files
+	 * @public
+	 */
+	m$.loadHeaderFiles = function () {
+		settings.loadCSS.forEach((function (css) {
+			m$.loadCSS(css);
+		}));
+		settings.loadJSHeader.forEach((function (js) {
+			m$.loadJS(js);
+		}));
+	};
+
+	/**
+	 * Load user footer JS files
+	 * @public
+	 */
+	m$.loadFooterFiles = function () {
+		settings.loadJSFooter.forEach((function (js) {
+			m$.loadJS(js);
+		}));
+	};
+
+	/**
 	 * Load IO Docs scripts if they're not already present
 	 * @private
 	 */
 	var loadIODocsScripts = function () {
-		// @todo rewrite IO Docs in vanilla JS with an init
-		// m$.loadJS('/files/iodocs-vanilla.js', function () {
-		// 	ioDocs.init();
-		// });
-		m$.loadJS('/public/Mashery/scripts/Iodocs/prettify.js', (function () {
-			m$.loadJS('/public/Mashery/scripts/Mashery/beautify.js', (function () {
-				m$.loadJS('/public/Mashery/scripts/vendor/alpaca.min.js', (function () {
-					m$.loadJS('/public/Mashery/scripts/Iodocs/utilities.js', (function () {
-						m$.loadJS('/public/Mashery/scripts/Iodocs/iodocs.js', (function () {
-							m$.loadJS('/public/Mashery/scripts/Mashery/ace/ace.js');
-						}), true);
-					}), true);
-				}), true);
-			}), true);
-		}), true);
+
+		// Inject base styles
+		if (!document.querySelector('#iodocs-css')) {
+			var style = document.createElement('style');
+			style.id = 'iodocs-css';
+			style.innerHTML = '.io-docs-hide{display:none!important;visibility:hidden!important}.endpoint h3.title,.method div.title{cursor:pointer}';
+			document.querySelector('style').before(style);
+		}
+
+		// Invalidate old iodocs script
+		window.iodocs = null;
+
+		// Load IO Docs and initialize it
+		m$.loadJS('/files/iodocs-vanilla.js', (function () {
+			ioDocs.init();
+		}));
+
 	};
 
 	/**
@@ -3947,24 +5909,18 @@ var m$ = (function () {
 	 * @private
 	 */
 	var loadRequiredFilesIODocs = function () {
-		// If not IO Docs, bail
-		if (window.mashery.contentType !== 'ioDocs') return;
 
-		if (vanillaIODocs) {
-			window.iodocs = null;
-			// window.Alpaca = null;
-			m$.loadJS('/files/iodocs-vanilla.js', (function () {
-				ioDocs.init();
-			}));
-		} else {
-			if (!('jQuery' in window)) {
-				// If jQuery isn't loaded yet, load it
-				m$.loadJS('https://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js', loadIODocsScripts);
-			} else {
-				// Otherwise, just load our scripts
-				loadIODocsScripts();
+		// If not IO Docs, bail
+		if (window.mashery.contentType !== 'ioDocs') {
+			if ('ioDocs' in window) {
+				ioDocs.destroy();
 			}
+			return;
 		}
+
+		// Load IODocsScripts
+		loadIODocsScripts();
+
 	};
 
 	/**
@@ -4007,6 +5963,26 @@ var m$ = (function () {
 
 	};
 
+	var loadRequiredFilesReporting = function () {
+
+		// Only run on reports page
+		if (window.mashery.contentType !== 'keyActivity' || !Array.isArray(window.mashery.content.init)) return;
+
+		// Load required JS files
+		m$.loadJS('https://www.google.com/jsapi', (function () {
+			m$.loadJS('/public/Mashery/scripts/Mashery/source/underscore.js', (function () {
+				m$.loadJS('/public/Mashery/scripts/MasheryAdmin/Reports/config/defaults.js', (function () {
+					m$.loadJS('/public/Mashery/scripts/MasheryAdmin/Reports/config/packages/developer_drillin.js', (function () {
+						m$.loadJS('/public/Mashery/scripts/MasheryDeveloperReports.js', (function () {
+							initCharts(window.mashery.content.init.index);
+						}));
+					}));
+				}));
+			}));
+		}));
+
+	};
+
 	/**
 	 * Load any Mashery files that are required for a page to work
 	 * @private
@@ -4014,6 +5990,7 @@ var m$ = (function () {
 	var loadRequiredFiles = function () {
 		loadRequiredFilesIODocs(); // Load required files for IO Docs
 		loadRequiredFilesPasswords(); // Load required files for registration and password pages
+		loadRequiredFilesReporting(); // Load key activity reporting scripts
 		loadRequiredFilesMashtips(); // Load Mashtip functions for tooltips
 	};
 
@@ -4107,9 +6084,6 @@ var m$ = (function () {
 	 * @private
 	 */
 	var reloadIODocs = function () {
-
-		// Don't run if using vanilla JS IO Docs script
-		if (vanillaIODocs) return;
 
 		// Check if IO Docs has been reloaded yet
 		if (window.mashery.contentType !== 'ioDocs' || window.masheryIsAjax || window.masheryIsReloaded) return;
@@ -4239,7 +6213,7 @@ var m$ = (function () {
 		updateDeleteKeyConfirmModal();  // Update the delete key confirmation modal
 
 		// Forced reloads
-		reloadIODocs(); // Reload IO Docs
+		// reloadIODocs(); // Reload IO Docs
 
 	};
 
@@ -4278,17 +6252,32 @@ var m$ = (function () {
 	 * @param {Boolean} pushState  If true, update browser history
 	 */
 	var fetchContent = function (url, pushState) {
+
+		// Run before Ajax callback
+		settings.callbacks.beforeAjax();
+
 		atomic.ajax({
 			url: url,
 			responseType: 'document'
 		}).success((function (data) {
+
 			// Render our content on Success
 			renderWithAjax(data, url, pushState);
+
+			// Run after Ajax callback
+			settings.callbacks.afterAjax();
+
 		})).error((function (data, xhr) {
 			// If a 404, display 404 error
 			if (xhr.status === 404) {
+
 				renderWithAjax(data, url, pushState);
+
+				// Run after Ajax callback
+				settings.callbacks.afterAjax();
+
 				return;
+
 			}
 			// Otherwise, force page reload
 			window.location = url;
@@ -4302,17 +6291,21 @@ var m$ = (function () {
 	 */
 	var loadWithAjax = function (event) {
 
+		// Make sure clicked element is a link
+		var link = event.target.closest('a');
+		if (!link) return;
+
 		// Make sure Ajax is enabled and clicked object isn't on the ignore list
-		if (!settings.ajax || (settings.ajaxIgnore && event.target.matches(settings.ajaxIgnore)) || event.target.closest(ajaxIgnore)) return;
+		if (!settings.ajax || (settings.ajaxIgnore && link.matches(settings.ajaxIgnore))) return;
 
 		// Make sure clicked item was a valid, local link
-		if (event.target.tagName.toLowerCase() !== 'a' || !event.target.href || event.target.hostname !== window.location.hostname) return;
+		if (!link.href || link.hostname !== window.location.hostname) return;
 
 		// Skip Ajax on member remove success page
 		if (window.mashery.contentType === 'memberRemoveSuccess') return;
 
 		// Don't run if link is an anchor to the current page
-		if(event.target.pathname === window.location.pathname && event.target.hash.length > 0) return;
+		if (link.pathname === window.location.pathname && (link.hash.length > 0 || /#/.test(link.href))) return;
 
 		// Don't run if right-click or command/control + click
 		if (event.button !== 0 || event.metaKey || event.ctrlKey) return;
@@ -4321,7 +6314,7 @@ var m$ = (function () {
 		event.preventDefault();
 
 		// Get the content with Ajax
-		fetchContent(event.target.href, true);
+		fetchContent(link.href, true);
 
 	};
 
@@ -4429,6 +6422,7 @@ var m$ = (function () {
 		settings.callbacks.beforeRender(); // Run beforeRender() callback
 		document.documentElement.classList.add('rendering'); // Add rendering class to the DOM
 		renderHead(ajax); // <head> attributes
+		m$.loadHeaderFiles(); // Load user CSS and header JS files
 		m$.addStyleHooks(); // Content-specific classes
 		m$.renderLayout(); // Layout
 		m$.renderUserNav(); // User Navigation
@@ -4437,6 +6431,7 @@ var m$ = (function () {
 		m$.renderMain(); // Main Content
 		m$.renderTitle(); // Page Title
 		m$.renderFooter(); // Footer
+		m$.loadFooterFiles(); // Load user footer JS files
 		m$.renderCleanup(); // Cleanup DOM
 		m$.fixLocation(); // Jump to anchor
 		settings.callbacks.afterRender(); // Run afterRender() callback

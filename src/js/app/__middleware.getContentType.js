@@ -147,9 +147,16 @@ var getContentType = function (elem) {
 
 	}
 
-	// Delete Key
-	else if (elem.classList.contains('page-key') && elem.classList.contains('delete-key')) {
-		type = 'keyDelete';
+	// Individual Keys
+	else if (elem.classList.contains('page-key')) {
+
+		// Delete Key
+		if (elem.classList.contains('delete-key')) {
+			type = 'keyDelete';
+		} else if (elem.classList.contains('key-activity')) {
+			type = 'keyActivity';
+		}
+
 	}
 
 	// Account Pages

@@ -3,23 +3,101 @@ var ioDocs = (function () {
 	'use strict';
 
 	//
-	// @NOTES
-	//
-
-	//
 	// Variables
 	//
 
 	// Public API placeholder
 	var exports = {};
 	var hideClass = 'io-docs-hide';
-	var credentials, credentialsForm, descriptions, controls, endpointLists, apiSelect, methods, endpoints, enableHSSM, enableAce, authTimer, syncTokenValue;
+	var credentials, credentialsForm, descriptions, controls, endpointLists, apiSelect, methods, endpoints, enableHSSM, enableAce, enableBeautify, enablePrism, prismStyles, authTimer, syncTokenValue;
 
 
 
 	//
 	// Methods
 	//
+
+	var spaces = function (len) {
+		var s = '',
+			indent = len * 4;
+
+		for (var i = 0; i < indent; i++) {
+			s += " ";
+		}
+
+		return s;
+	};
+
+	var formatJSON = function (jsonString) {
+		return JSON.stringify(jsonString, null, '    ');
+	};
+
+	var formatHeaders = function (headerMap) {
+		var headersString = '';
+
+		for (var headerName in headerMap) {
+			if (headerMap.hasOwnProperty(headerName)) {
+				var headerValue = headerMap[headerName];
+				headersString += headerName + ': ' + headerValue + '\r\n';
+			}
+		}
+
+		return headersString;
+	};
+
+	// Cause the browser to "select" all the text in an element
+	var selectElementText = function (elem) {
+		elem.focus();
+		var range;
+		if (window.getSelection && document.createRange) {
+			var sel = window.getSelection();
+			range = document.createRange();
+			range.selectNodeContents(elem);
+			sel.removeAllRanges();
+			sel.addRange(range);
+		} else if (doc.body.createTextRange) {
+			range = document.body.createTextRange();
+			range.moveToElementText(el);
+			range.select();
+		}
+	};
+
+	var formatXML = function (str) {
+		var xml = '';
+
+		// add newlines
+		str = str.replace(/(>)(<)(\/*)/g, "$1\r$2$3");
+
+		// add indents
+		var pad = 0,
+			indent,
+			node;
+
+		// split the string
+		var strArr = str.split("\r");
+
+		// check the various tag states
+		for (var i = 0, len = strArr.length; i < len; i++) {
+			indent = 0;
+			node = strArr[i];
+
+			if (node.match(/.+<\/\w[^>]*>$/)) { //open and closing in the same line
+				indent = 0;
+			} else if (node.match(/^<\/\w/) && pad > 0) { // closing tag
+				pad -= 1;
+			} else if (node.match(/^<\w[^>]*[^\/]>.*$/)) { //opening tag
+				indent = 1;
+			} else {
+				indent = 0;
+			}
+
+			xml += spaces(pad) + node + "\r";
+			pad += indent;
+		}
+
+		return xml;
+
+	};
 
 	var getEditorMode = function (mode) {
 		// check for JSON
@@ -51,6 +129,11 @@ var ioDocs = (function () {
 		elem.classList.add(hideClass);
 	};
 
+	var toggle = function (elem) {
+		if (!elem) return;
+		elem.classList.toggle(hideClass);
+	};
+
 	var hideCredentials = function () {
 		credentials.forEach(function (credential) {
 			hide(credential);
@@ -78,7 +161,6 @@ var ioDocs = (function () {
 		if (!api || api.getAttribute('data-auto-exchange-auth-code') !== '1') return;
 		hide(document.querySelector('#apiOAuth2AuthExchangeButton'));
 
-		// @todo
 		exchangeAuthCodeforAccessToken();
 
 	};
@@ -102,9 +184,8 @@ var ioDocs = (function () {
 			}
 		}, 200);
 
-		atomic.ajax({
-			url: '/io-docs/getoauth2authuri',
-			type: 'POST',
+		$.ajax({
+			async: true,
 			headers: {
 				'X-Ajax-Synchronization-Token': syncTokenValue
 			},
@@ -114,29 +195,33 @@ var ioDocs = (function () {
 				client_secret: client_secret,
 				auth_flow: 'auth_code'
 			},
-			responseType: 'json',
-		}).success(function (data){
-			if (data.success) {
-				oAuth2AuthWindow.location.href = data.authorize_uri;
-				oAuth2AuthWindow.focus();
-				// } else {  @todo Should this return an error on failure?
-				// self.resetOAuth2AccessToken();
-				// alert(jqXHR.responseText);
-				// alert("ERROR: 324  --  Sorry there was an error getting an access token. Try again later.");
-			} else {
-				oAuth2AuthWindow.close();
+			dataType: 'json',
+			global: false,
+			timeout: 10000,
+			type: 'POST',
+			url: '/io-docs/getoauth2authuri',
+			error: function (jqXHR, textStatus, errorThrown) {
+				alert(jqXHR.responseText);
+			},
+			success: function (data, textStatus, jqXHR) {
+				if (data.success) {
+					oAuth2AuthWindow.location.href = data.authorize_uri;
+					oAuth2AuthWindow.focus();
+					// } else {  TODO:  Should this return an error on failure?
+					// self.resetOAuth2AccessToken();
+					// alert(jqXHR.responseText);
+					// alert("ERROR: 324  --  Sorry there was an error getting an access token. Try again later.");
+				} else {
+					oAuth2AuthWindow.close();
+				}
 			}
-		}).error(function (data) {
-			alert(data);
 		});
 
 	};
 
 	var sendImplicitAccessToken = function (token, errorCallback, successCallback) {
-
-		atomic.ajax({
-			url: '/io-docs/catchOauth2ImplicitToken',
-			type: 'POST',
+		$.ajax({
+			async: true,
 			headers: {
 				'X-Ajax-Synchronization-Token': syncTokenValue
 			},
@@ -146,18 +231,22 @@ var ioDocs = (function () {
 				expires_in: token.expires_in,
 				token_type: token.token_type
 			},
-			responseType: 'json',
-		}).success(function (data) {
-			if (data.success) {
-				// @todo
-				setOAuth2AccessToken(token.access_token);
-			} else {
-				alert('Sorry, but there was an error during the account authorization process. Either the credentials were not entered correctly, or permission was denied by the account holder. Please try again.');
+			dataType: 'json',
+			global: false,
+			timeout: 10000,
+			type: 'POST',
+			url: '/io-docs/catchOauth2ImplicitToken',
+			error: function () {
+				alert('Sorry, there was an error processing the response from the OAuth2 server. Try again later');
+			},
+			success: function (data) {
+				if (data.success) {
+					self.setOAuth2AccessToken(token.access_token);
+				} else {
+					alert('Sorry, but there was an error during the account authorization process. Either the credentials were not entered correctly, or permission was denied by the account holder. Please try again.');
+				}
 			}
-		}).error(function (data) {
-			alert('Sorry, there was an error processing the response from the OAuth2 server. Try again later.');
 		});
-
 	};
 
 	var getImplicitAccessToken = function (client_id) {
@@ -174,9 +263,8 @@ var ioDocs = (function () {
 			}
 		}, 200);
 
-		atomic.ajax({
-			url: '/io-docs/getoauth2authuri',
-			type: 'POST',
+		$.ajax({
+			async: true,
 			headers: {
 				'X-Ajax-Synchronization-Token': syncTokenValue
 			},
@@ -185,19 +273,25 @@ var ioDocs = (function () {
 				client_id: client_id,
 				auth_flow: 'implicit'
 			},
-			responseType: 'json',
-		}).success(function (data) {
-			if (data.success) {
-				oAuth2AuthWindow.location.href = data.authorize_uri;
-				oAuth2AuthWindow.focus();
-			} else {
-				oAuth2AuthWindow.close();
-				resetOAuth2AccessToken();
-				// @todo Should this display an error on failure?
-				// alert(jqXHR.responseText);
+			dataType: 'json',
+			global: false,
+			timeout: 10000,
+			type: 'POST',
+			url: '/io-docs/getoauth2authuri',
+			error: function (jqXHR, textStatus, errorThrown) {
+				alert(jqXHR.responseText);
+			},
+			success: function (data, textStatus, jqXHR) {
+				if (data.success) {
+					oAuth2AuthWindow.location.href = data.authorize_uri;
+					oAuth2AuthWindow.focus();
+				} else {
+					oAuth2AuthWindow.close();
+					self.resetOAuth2AccessToken();
+					// TODO:  Should this display an error on failure?
+					// alert(jqXHR.responseText);
+				}
 			}
-		}).error(function (data) {
-			alert(data);
 		});
 
 	};
@@ -219,10 +313,8 @@ var ioDocs = (function () {
 	};
 
 	var getAccessTokenFromPasswordCred = function (client_id, client_secret, username, password) {
-
-		atomic.ajax({
-			url: '/io-docs/getoauth2accesstoken',
-			type: 'GET',
+		$.ajax({
+			async: true,
 			headers: {
 				'X-Ajax-Synchronization-Token': syncTokenValue
 			},
@@ -234,25 +326,28 @@ var ioDocs = (function () {
 				username: username,
 				password: password
 			},
-			responseType: 'json',
-		}).success(function (data) {
-			if (data.success) {
-				setOAuth2AccessToken(data.result.access_token);
-			} else {
-				resetOAuth2AccessToken();
-				alert(data);
+			dataType: 'json',
+			global: false,
+			timeout: 10000,
+			type: 'GET',
+			url: '/io-docs/getoauth2accesstoken',
+			error: function (jqXHR, textStatus, errorThrown) {
+				alert(jqXHR.responseText);
+			},
+			success: function (data, textStatus, jqXHR) {
+				if (data.success) {
+					self.setOAuth2AccessToken(data.result.access_token);
+				} else {
+					self.resetOAuth2AccessToken();
+					alert(jqXHR.responseText);
+				}
 			}
-		}).error(function (data) {
-			alert(data);
 		});
-
 	};
 
 	var getAccessTokenFromClientCred = function (client_id, client_secret) {
-
-		atomic.ajax({
-			url: '/io-docs/getoauth2accesstoken',
-			type: 'GET',
+		$.ajax({
+			async: true,
 			headers: {
 				'X-Ajax-Synchronization-Token': syncTokenValue
 			},
@@ -262,45 +357,69 @@ var ioDocs = (function () {
 				client_id: client_id,
 				client_secret: client_secret
 			},
-			responseType: 'json',
-		}).success(function (data) {
-			if (data.success) {
-				setOAuth2AccessToken(data.result.access_token);
-			} else {
-				resetOAuth2AccessToken();
-				alert(data);
+			dataType: 'json',
+			global: false,
+			timeout: 10000,
+			type: 'GET',
+			url: '/io-docs/getoauth2accesstoken',
+			error: function (jqXHR, textStatus, errorThrown) {
+				alert(jqXHR.responseText);
+			},
+			success: function (data, textStatus, jqXHR) {
+				if (data.success) {
+					self.setOAuth2AccessToken(data.result.access_token);
+				} else {
+					self.resetOAuth2AccessToken();
+					alert(jqXHR.responseText);
+				}
 			}
-		}).error(function (data) {
-			alert(data);
 		});
-
 	};
 
 	var exchangeAuthCodeforAccessToken = function () {
 		var authCode = document.querySelector('#apiOAuth2AuthorizeCode');
-		atomic.ajax({
-			url: '/io-docs/getoauth2accesstoken',
-			type: 'GET',
+
+		$.ajax({
+			async: true,
 			headers: {
 				'X-Ajax-Synchronization-Token': syncTokenValue
 			},
 			data: {
 				apiId: apiSelect.value,
 				auth_flow: 'auth_code',
-				authorization_code: authCode ? authCode.value : null
+				authorization_code: document.querySelector('#apiOAuth2AuthorizeCode').value
 			},
-			responseType: 'json',
-		}).success(function (data) {
-			if (data.success) {
-				setOAuth2AccessToken(data.result.access_token);
-			} else {
-				resetOAuth2AccessToken();
-				alert(data);
+			dataType: 'json',
+			global: false,
+			timeout: 10000,
+			type: 'GET',
+			url: '/io-docs/getoauth2accesstoken',
+			error: function (jqXHR, textStatus, errorThrown) {
+				alert(jqXHR.responseText);
+			},
+			success: function (data, textStatus, jqXHR) {
+				if (data.success) {
+					self.setOAuth2AccessToken(data.result.access_token);
+				} else {
+					self.resetOAuth2AccessToken();
+					alert(jqXHR.responseText);
+				}
 			}
-		}).error(function (data) {
-			alert(data);
 		});
 
+	};
+
+	var getWssFields = function () {
+
+		var wssFields;
+		var apiStoreElem = document.querySelector('#api' + apiSelect.value);
+		var wssFieldsValue = apiStoreElem.getAttribute('data-auth-wss-fields');
+
+		if (wssFieldsValue && wssFieldsValue.length > 0) {
+			wssFields = JSON.parse(wssFieldsValue);
+		}
+
+		return wssFields || [];
 	};
 
 	var hideDescriptions = function () {
@@ -338,9 +457,11 @@ var ioDocs = (function () {
 		});
 	};
 
-	// @todo
 	var a11y = function () {
-		// 1. Add role="button" to links, heading, etc. that are clickable
+		var buttons = document.querySelectorAll('#toggleEndpoints, #toggleMethods, .method div.title');
+		buttons.forEach(function (button) {
+			button.setAttribute('role', 'button');
+		});
 	};
 
 	var showAllEndpoints = function () {
@@ -511,45 +632,48 @@ var ioDocs = (function () {
 
 				break;
 
-			// @todo
-			// case 'soapWssSecurityAuth':
+			case 'soapWssSecurityAuth':
 
-			// 	var token_types = $.parseJSON(apiStoreElem.attr('data-auth-wss-token-types'));
+				var token_types = JSON.parse(apiStoreElem.getAttribute('data-auth-wss-token-types'));
 
-			// 	if (token_types) {
+				if (token_types) {
 
-			// 		$.each(token_types, function (k, v) {
+					token_types.forEach(function (v, k) {
+						if (v === 'soapWssUserNameToken') {
 
-			// 			if (v == 'soapWssUserNameToken') {
+							var container = document.querySelector('#apiSoapWssUserNameTokenAuthCredFlowContainer');
+							var wssFields = getWssFields();
+							var i;
+							var newField;
 
-			// 				var container = $('#apiSoapWssUserNameTokenAuthCredFlowContainer').slideDown(),
-			// 					wssFields = self.getWssFields(),
-			// 					i,
-			// 					field;
+							show(container);
 
-			// 				// clear fields before adding to avoid duplicates
-			// 				container.find('.SoapWssUserNameTokenAuthGenerated').remove();
+							// clear fields before adding to avoid duplicates
+							container.querySelectorAll('.SoapWssUserNameTokenAuthGenerated').forEach(function (field) {
+								field.remove();
+							});
 
-			// 				for (i = 0; i < wssFields.length; i++) {
-			// 					field = '<div class="SoapWssUserNameTokenAuthGenerated">';
-			// 					field += '<label for="apiSoapWssUserNameTokenAuth' + wssFields[i] + '">' + wssFields[i] + ':</label>';
-			// 					field += '<input type="text"  id="apiSoapWssUserNameTokenAuth' + wssFields[i] + '"/>';
-			// 					field += '</div>';
-			// 					container.append(field);
-			// 				}
-			// 			} else if (v == 'soapWssBinarySecurityToken') {
-			// 				$('#apiSoapWssBinarySecurityTokenAuthCredFlowContainer').slideDown();
-			// 			}
+							wssFields.forEach(function (field) {
+								newField =
+									'<div class="SoapWssUserNameTokenAuthGenerated">' +
+										'<label for="apiSoapWssUserNameTokenAuth' + wssFields[i] + '">' + wssFields[i] + ':</label>' +
+										'<input type="text"  id="apiSoapWssUserNameTokenAuth' + wssFields[i] + '"/>' +
+									'</div>';
+								container.append(newField);
+							});
 
-			// 		});
-			// 	}
+						} else if (v == 'soapWssBinarySecurityToken') {
+							show(document.querySelector('#apiSoapWssBinarySecurityTokenAuthCredFlowContainer'));
+						}
+					});
+				}
 
-			// 	break;
-			// case 'soapBasic':
-			// 	$('#apiSoapBasicAuthCredFlowContainer').slideDown();
-			// 	break;
-			// default:
-			// 	break;
+				break;
+			case 'soapBasic':
+				show(document.querySelector('#apiSoapBasicAuthCredFlowContainer'));
+				break;
+			default:
+				break;
 		}
 
 		show(authBox);
@@ -570,8 +694,6 @@ var ioDocs = (function () {
 		showControls(); // self.showEMControlBox();
 		hideEndpointLists(); // self.hideAllUnselectedApiEndpointLists();
 		showEndpointLists(id); // self.showSelectedApiEndpointList();
-		// @todo potentially later
-		// self.showAllSelectedEndpoints();
 
 	};
 
@@ -612,9 +734,6 @@ var ioDocs = (function () {
 
 	var renderAceEditor = function (method) {
 
-		console.log(enableAce);
-		console.log(('ace' in window));
-
 		if (!enableAce || !('ace' in window)) return;
 
 		// when the method is expanded..
@@ -649,18 +768,10 @@ var ioDocs = (function () {
 			// 		method.editor.resize(); // set resize
 			// 	}
 			// }, method));
-
-			// method.editor.on('blur', $.proxy(function () { // when we lose focus
-			// 	textarea.val(method.editor.getSession().getValue()); // update the text area
-			// }, method));
 		}
 
 		hide(textarea); // hide original textarea
 		editorEl.style.height = window.getComputedStyle(textarea).height;
-		// show(editorEl);
-		// @todo
-		// this.editor.resize(); // update editor size
-		// this.editor.focus(); // focus editor
 
 	};
 
@@ -786,12 +897,13 @@ var ioDocs = (function () {
 					"schema": requestBodyAlpacaSchema,
 					"data": defaultValue,
 					"options": $.extend({ "name": "requestBody" }, { 'fields': schemaOptions }),
-					// @todo later
-					// "postRender": function (requestBodyAlpacaForm) {
-					// 	// In order to extract the alpaca form data as a JSON object on form submit,
-					// 	// store a reference to the alpaca form object in the method form element
-					// 	// $.data(methodForm, 'requestBodyAlpacaForm', requestBodyAlpacaForm);
-					// }
+					"postRender": function (requestBodyAlpacaForm) {
+						// In order to extract the alpaca form data as a JSON object on form submit,
+						// store a reference to the alpaca form object in the method form element
+						// @todo associated with list.id, not jQuery version of $data
+						// window.mashery.content.alpaca[list.id] = requestBodyAlpacaForm;
+						$.data(methodForm, 'requestBodyAlpacaForm', requestBodyAlpacaForm);
+					}
 				});
 
 			});
@@ -821,17 +933,8 @@ var ioDocs = (function () {
 			container.innerHTML = '';
 		});
 
-		// Load jQuery and Alpaca
-		if ('jQuery' in window) {
-			m$.loadJS('/public/Mashery/scripts/vendor/alpaca.min.js', renderAlpacaForms);
-		} else {
-			m$.loadJS('https://code.jquery.com/jquery-1.8.3.min.js', function () {
-				m$.loadJS('/public/Mashery/scripts/vendor/alpaca.min.js', renderAlpacaForms);
-			});
-		}
-
-		// Load Ace
-		m$.loadJS('/public/Mashery/scripts/Mashery/ace/ace.js');
+		// Render Alpaca forms
+		renderAlpacaForms();
 
 	};
 
@@ -851,33 +954,548 @@ var ioDocs = (function () {
 			selectAPI(event.target.value);
 		}
 
+		// @todo Fix this: resize Ace Editor on type
+		// if (event.target.closest('.ace_editor')) {
+		// 	console.log('yes');
+		// 	resizeEditor(event.target.closest('.ace_editor'));
+		// }
+
+	};
+
+	var resizeEditor = function (editor) {
+		var textarea = editor.closest('form').querySelector('.requestBody');
+		if (!textarea) return;
+		editor.style.height = '';
+		var editorHeight = window.getComputedStyle(editor).height;
+		var textHeight = window.getComputedStyle(textarea).height;
+
+		// ensure not  less than the original text area
+		if (parseInt(height, 10) > parseInt(window.getComputedStyle(textarea).height, 10)) {
+			editor.style.height = editorHeight;
+		} else {
+			editor.style.height = textHeight;
+		}
+	};
+
+	var showManualSecretHandler = function () {
+		var apiStoreElem = document.querySelector('#api' + apiSelect.value);
+
+		hide(document.querySelector('#apiSecretContainer'));
+		hide(document.querySelector('#apiKeySecretListContainer'));
+		hide(document.querySelector('#apiKeyContainer'));
+		show(document.querySelector('#apiKeyContainer'));
+
+		if (apiStoreElem.getAttribute('data-secret') === '1') {
+			show(document.querySelector('#apiSecretContainer'));
+		}
+	};
+
+	var clearResults = function (link) {
+
+		// Get responseBoxes
+		var responseBoxes = link.closest('form').querySelectorAll('div.result, div.error');
+
+		// Delete the response box
+		responseBoxes.forEach(function (box) {
+			box.remove();
+		});
+
+		// Delete clear link
+		link.remove();
 
 	};
 
 	var clickHandler = function (event) {
 
-		if (event.target.closest('.endpoint h3.title')) {
+		if (event.target.closest('.select-all')) {
+			event.preventDefault();
+			selectElementText(event.target.parentNode.querySelector('pre'));
+		}
+
+		else if (event.target.closest('.endpoint h3.title')) {
 			toggleEndpoint(event.target.closest('.endpoint'));
 		}
 
-		if (event.target.closest('.method div.title')) {
+		else if (event.target.closest('.method div.title')) {
 			toggleMethod(event.target.closest('.method'));
 			renderAceEditor(event.target);
 		}
 
-		if (event.target.closest('#toggleEndpoints')) {
+		else if (event.target.closest('#toggleEndpoints')) {
 			event.preventDefault();
 			toggleAllEndpoints();
 		}
 
-		if (event.target.closest('#toggleMethods')) {
+		else if (event.target.closest('#toggleMethods')) {
 			event.preventDefault();
 			toggleAllMethods();
+		}
+
+		else if (event.target.closest('#apiOAuth2AuthPassCredExchangeButton')) {
+			event.preventDefault();
+			getAccessTokenFromPasswordCred(
+				document.querySelector('#apiOAuth2ClientIdPasswordCred').value,
+				document.querySelector('#apiOAuth2ClientSecretPasswordCred').value,
+				document.querySelector('#apiOAuth2Username').value,
+				document.querySelector('#apiOAuth2Password').value
+			);
+		}
+
+		else if (event.target.closest('#apiOAuth2AuthClientCredExchangeButton')) {
+			event.preventDefault();
+			getAccessTokenFromClientCred(
+				document.querySelector('#apiOAuth2ClientIdClientCred').value,
+				document.querySelector('#apiOAuth2ClientSecretClientCred').value
+			);
+		}
+
+		else if (event.target.closest('#apiOAuth2AuthorizationButton')) {
+			event.preventDefault();
+			getAuthorizationCode(
+				document.querySelector('#apiOAuth2ClientIdAuthCode').value,
+				document.querySelector('#apiOAuth2ClientSecretAuthCode').value
+			);
+		}
+
+		else if (event.target.closest('#apiOAuth2ImplicitExchangeButton')) {
+			event.preventDefault();
+			getImplicitAccessToken(
+				document.querySelector('#apiOAuth2ClientIdImplicit').value
+			);
+		}
+
+		else if (event.target.closest('#apiOAuth2AuthExchangeButton')) {
+			event.preventDefault();
+			exchangeAuthCodeforAccessToken();
+		}
+
+		else if (event.target.closest('#showManualKeySecret')) {
+			event.preventDefault();
+			showManualSecretHandler();
+		}
+
+		else if (event.target.closest('.clear-results')) {
+			event.preventDefault();
+			clearResults(event.target.closest('.clear-results'));
+		}
+
+	};
+
+	// https://plainjs.com/javascript/ajax/serialize-form-data-into-an-array-46/
+	var serializeArray = function (form) {
+		var field, l, s = [];
+		if (typeof form === 'object' && form.nodeName === 'FORM') {
+			var len = form.elements.length;
+			for (var i = 0; i < len; i++) {
+				field = form.elements[i];
+				if (field.name && !field.disabled && field.type !== 'file' && field.type !== 'reset' && field.type !== 'submit' && field.type !== 'button') {
+					if (field.type === 'select-multiple') {
+						l = form.elements[i].options.length;
+						for (j = 0; j < l; j++) {
+							if (field.options[j].selected)
+								s[s.length] = { name: field.name, value: field.options[j].value };
+						}
+					} else if ((field.type !== 'checkbox' && field.type !== 'radio') || field.checked) {
+						s[s.length] = { name: field.name, value: field.value };
+					}
+				}
+			}
+		}
+		return s;
+	};
+
+	var submitHandler = function (event) {
+
+		if (!event.target.matches('.method > form')) return;
+
+		event.preventDefault();
+
+		// Get response box, form params, and api values
+		var responseBox = event.target.querySelector('div.result');
+		var errorBox = event.target.querySelector('div.error');
+		// var params = serializeArray(event.target);
+		var params = $(event.target).serializeArray();
+		var apiId = {
+			name: 'apiId',
+			value: apiSelect.value
+		};
+		var apiKey = {
+			name: 'apiKey',
+			value: document.querySelector('#apiKey').value
+		};
+		var apiSecret = {
+			name: 'apiSecret',
+			value: document.querySelector('#apiSecret').value
+		};
+		var basicAuthName = {
+			name: 'basicAuthName',
+			value: document.querySelector('#apiBasicAuthUsername').value
+		};
+		var basicAuthPass = {
+			name: 'basicAuthPass',
+			value: document.querySelector('#apiBasicAuthPassword').value
+		};
+		var soapBasicAuthName = {
+			name: 'soapBasicAuthName',
+			value: document.querySelector('#apiSoapBasicAuthUsername').value
+		};
+		var soapBasicAuthPass = {
+			name: 'soapBasicAuthPass',
+			value: document.querySelector('#apiSoapBasicAuthPassword').value
+		};
+		var soapWssUserNameTokenAuthName = {
+			name: 'soapWssUserNameTokenAuthName',
+			value: document.querySelector('#apiSoapWssUserNameTokenAuthUsername').value
+		};
+		var soapWssBinarySecurityTokenAuthToken = {
+			name: 'soapWssBinarySecurityTokenAuthToken',
+			value: document.querySelector('#apiSoapWssBinarySecurityTokenAuthToken').value
+		};
+
+		// Get the Alpaca-generated request body form (if the method defines request JSON schema).
+		var requestBodyAlpacaForm = $.data(event.target, 'requestBodyAlpacaForm');
+		// @todo switch to this later
+		// var requestBodyAlpacaForm = window.mashery.content.alpaca[event.target.closest('.endpointList').id];
+		var requestBodyJson;
+		var wssFields = getWssFields();
+		var fileFields = event.target.querySelectorAll('[type="file"]'); // get any file fields
+		var fileLimit = 850000; // setting matching file limit check
+		var fileLimitExceeded = false; // initial setting of file limit check
+
+		if (requestBodyAlpacaForm) {
+			requestBodyJson = {
+				name: 'requestBodyJson',
+				value: JSON.stringify(requestBodyAlpacaForm.getValue()) // @todo replace this jquery version with someone else
+			};
+		}
+
+		// Get api key and secret from key/secret list if enabled
+		var apiKeySecretInput = document.querySelector('#apiKeySecret');
+		if (!apiKeySecretInput.closest('#apiKeySecretListContainer.' + hideClass)) {
+			// Replace api key and secret values
+			apiKey.value = apiKeySecretInput.value;
+
+			if (!enableHSSM) { // if hssm NOT enabled get it from the data attribute
+				apiSecret.value = apiKeySecretInput.options[apiKeySecretInput.selectedIndex].getAttribute('data-secret');
+			}
+		}
+
+		// Add additional values to params
+		params.push(apiId, apiKey, apiSecret, basicAuthName, basicAuthPass, soapBasicAuthName, soapBasicAuthPass, soapWssUserNameTokenAuthName, soapWssBinarySecurityTokenAuthToken);
+
+		wssFields.forEach(function (value, index) {
+			var field = document.querySelector('#apiSoapWssUserNameTokenAuth' + value);
+			params.push({
+				name: 'soapWssUserNameTokenAuth' + value,
+				value: field.value
+			});
+		});
+
+		if (requestBodyJson) {
+			params.push(requestBodyJson);
+		}
+
+		if (fileFields.length > 0) { // we got some file fields
+			var formData = new FormData(); // create a form data object to post
+
+			params.forEach(function (param) {
+				formData.append(param.name, param.value); // add param to form data
+			});
+
+			fileFields.forEach(function (field) {
+				var file = field.files[0]; // get reference to the first file
+				if (file && (file.size > fileLimit)) {
+					fileLimitExceeded = true;
+				} else {
+					formData.append(field.getAttribute('name'), file || ''); // add the file field or empty string
+				}
+			});
+
+			params = formData; // let's use the new formdata as our params
+		}
+
+		// If response node doesn't exist, create it
+		if (!responseBox) {
+			// Add clear link
+			var clearLink = document.createElement('a');
+			clearLink.className = 'clear-results';
+			clearLink.setAttribute('href', '#');
+			clearLink.setAttribute('role', 'button');
+			clearLink.innerHTML = 'Clear Results';
+			event.target.querySelector('input[type=submit]').after(clearLink);
+
+			// Build select link
+			var selectLink = document.createElement('div');
+			selectLink.innerHTML = '<a class="select-all" role="button" href="#">Select Content</a>';
+
+			// Build response box
+			responseBox = document.createElement('div');
+			responseBox.className = 'result';
+			responseBox.innerHTML =
+				// Add request uri
+				'<div class="call">' +
+					'<h4 class="call">Request URI</h4>' +
+					'<pre class="call"></pre>' +
+				'</div>' +
+
+				// Add request headers
+			'<div class="requestHeaders ' + hideClass + '">' +
+					'<h4 class="requestHeaders">Request Headers</h4>' +
+					selectLink.innerHTML +
+					'<pre class="requestHeaders"></pre>' +
+				'</div>' +
+
+				// Add request cookies
+			'<div class="requestCookies ' + hideClass + '">' +
+					'<h4 class="requestCookies">Request Cookies</h4>' +
+					selectLink.innerHTML +
+					'<pre class="requestCookies prettyprint"></pre>' +
+				'</div>' +
+
+				// Add request body
+			'<div class="requestBody ' + hideClass + '">' +
+					'<h4 class="requestBody">Request Body</h4>' +
+					selectLink.innerHTML +
+					'<pre class="requestBody prettyprint"></pre>' +
+				'</div>' +
+
+				// Add response status
+				'<div class="responseStatus">' +
+					'<h4 class="responseStatus">Request Status</h4>' +
+					selectLink.innerHTML +
+					'<pre class="responseStatus"></pre>' +
+				'</div>' +
+
+				// Add response headers
+				'<div class="headers">' +
+					'<h4 class="headers">Response Headers</h4>' +
+					selectLink.innerHTML +
+					'<pre class="headers"></pre>' +
+				'</div>' +
+
+				// Add response cookies
+				'<div class="responseCookies ' + hideClass + '">' +
+					'<h4 class="responseCookies">Response Cookies</h4>' +
+					selectLink.innerHTML +
+					'<pre class="responseCookies prettyprint"></pre>' +
+				'</div>' +
+
+				// Add response body
+				'<div class="response">' +
+					'<h4 class="response">Response Body</h4>' +
+					selectLink.innerHTML +
+					'<pre class="response prettyprint"></pre>' +
+				'</div>';
+
+			// Add response box to form and show it
+			event.target.append(responseBox);
+		}
+
+		// Response Box is shown by default
+		show(responseBox);
+
+		if (!errorBox) {
+			// Build response box
+			errorBox = document.createElement('div');
+			errorBox.className = 'error ' + hideClass;
+			errorBox.innerHTML =
+				'<h4 class="error">Error</h4>' +
+				'<pre class="error prettyprint"></pre>';
+			event.target.append(errorBox);
+		}
+
+		// Error Box is hidden by default
+		hide(errorBox);
+
+		if (fileLimitExceeded) { // check for file limit
+			errorBox.querySelector('pre.error').innerHTML = 'The selected file exceeds the maximum allowed limit of ' + Math.ceil(fileLimit / 1000) + 'kb.';
+			hide(responseBox);
+			show(errorBox);
+		} else {
+			$.ajax({
+				url: '/io-docs/call-api',
+				type: 'POST',
+				headers: {
+					'X-Ajax-Synchronization-Token': syncTokenValue
+				},
+				data: params,
+				// check for file posting and change ajax options, else use defaults
+				contentType: (fileFields.length > 0 ? false : 'application/x-www-form-urlencoded; charset=UTF-8'),
+				processData: (fileFields.length > 0 ? false : true),
+				dataType: 'json',
+				beforeSend: function () {
+					// Show loading text for response areas
+					responseBox.querySelectorAll('pre').forEach(function (area) {
+						area.innerHTML = 'Loading...';
+						area.classList.remove('error');
+					});
+				},
+				error: function (jqXHR, textStatus, errorThrown) {
+					errorBox.querySelector('pre.error').innerHTML = jqXHR.responseText;
+					hide(responseBox);
+					show(errorBox);
+				},
+				success: function (data) {
+					// Init formatted text
+					var formattedText = data.responseBody;
+					var contentType = data.responseHeaders && data.responseHeaders['Content-Type'] || '';
+					var validResponse = (data.status.code > 0 || data.status.text) || formattedText.length > 0;
+
+					// Set up call request
+					responseBox.querySelector('pre.call').innerText = data.requestUri;
+
+					// Set up call request headers
+					if (Object.keys(data.requestHeaders).length > 0) {
+						var preRequestHeaders = responseBox.querySelector('pre.requestHeaders');
+						preRequestHeaders.innerText = formatHeaders(data.requestHeaders);
+						preRequestHeaders.classList.add('lang-http');
+						show(responseBox.querySelector('.requestHeaders'));
+					} else {
+						responseBox.querySelector('pre.requestHeaders').innerText = '';
+						hide(responseBox.querySelector('.requestHeaders'));
+					}
+
+					// Set up call request cookies
+					if (data.requestCookies.length > 0) {
+						var preRequestCookies = responseBox.querySelector('pre.requestCookies');
+						preRequestCookies.innerText = formatJSON(data.requestCookies);
+						preRequestCookies.classList.add('lang-javascript');
+						show(responseBox.querySelector('.requestCookies'));
+					} else {
+						responseBox.querySelector('pre.requestCookies').innerHTML = '';
+						hide(responseBox.querySelector('.requestCookies'));
+					}
+
+					// Set up call request body
+					if (data.requestBody.length > 0) {
+						var preRequestBody = responseBox.querySelector('pre.requestBody');
+						preRequestBody.innerText = data.requestBody;
+						preRequestBody.classList.add('lang-javascript');
+						show(responseBox.querySelector('.requestBody'));
+					} else {
+						responseBox.querySelector('pre.requestBody').innerHTML = '';
+						hide(responseBox.querySelector('.requestBody'));
+					}
+
+					// Set up response status
+					var respStatus = responseBox.querySelector('pre.responseStatus');
+					respStatus.innerText = data.status.code + ' ' + data.status.text;
+					if (data.status.code >= 400) {
+						respStatus.classList.add('error');
+					} else {
+						respStatus.classList.remove('error');
+					}
+					var respStatusClasses = (respStatus.className.match(/(^|\s)status-code-\d+/g) || []);
+					respStatusClasses.forEach(function (className) {
+						respStatus.classList.remove(className.trim());
+					});
+					respStatus.classList.add('status-code-' + data.status.code);
+					if (data.status.code > 0 || data.status.text) {
+						show(responseBox.querySelector('.responseStatus'));
+					} else {
+						hide(responseBox.querySelector('.responseStatus'));
+					}
+
+					// Set up response headers
+					var respHeaders = responseBox.querySelector('pre.headers');
+					respHeaders.innerText = formatHeaders(data.responseHeaders);
+					respHeaders.classList.add('lang-http');
+					if (data.status.code >= 400) {
+						respHeaders.classList.add('error');
+					} else {
+						respHeaders.classList.remove('error');
+					}
+					var respHeadersClasses = (respStatus.className.match(/(^|\s)status-code-\d+/g) || []);
+					respHeadersClasses.forEach(function (className) {
+						respHeaders.classList.remove(className.trim());
+					});
+					respHeaders.classList.add('status-code-' + data.status.code);
+					if (Object.keys(data.responseHeaders).length > 0) {
+						show(responseBox.querySelector('.headers'));
+					} else {
+						hide(responseBox.querySelector('.headers'));
+					}
+
+					// Filter format if available content type
+					switch (contentType.split(';')[0]) {
+						// Parse types as JSON
+						case 'application/javascript':
+						case 'application/json':
+						case 'application/x-javascript':
+						case 'application/x-json':
+						case 'text/javascript':
+						case 'text/json':
+						case 'text/x-javascript':
+						case 'text/x-json':
+							responseBox.querySelector('pre.response').classList.add('lang-javascript');
+							if (enableBeautify) {
+								try {
+									// js_beautify will format it if it's JSON or JSONP
+									formattedText = js_beautify(formattedText, { 'preserve_newlines': false });
+								} catch (err) {
+									// js_beautify didn't like it, return it as it was
+									formattedText = data.responseBody;
+								}
+							} else {
+								formattedText = data.responseBody;
+							}
+
+							break;
+
+						// Parse types as XHTML
+						case 'application/xml':
+						case 'text/xml':
+						case 'text/html':
+						case 'text/xhtml':
+							responseBox.querySelector('pre.response').classList.add('lang-markup');
+							formattedText = formatXML(formattedText) || '';
+							break;
+						default:
+							break;
+					}
+
+					// Set response text
+					var respBoxResp = responseBox.querySelector('pre.response');
+					respBoxResp.innerText = formattedText;
+					if (data.status.code >= 400) {
+						respBoxResp.classList.add('error');
+					} else {
+						respBoxResp.classList.remove('error');
+					}
+					var respBoxRespClasses = (respBoxResp.className.match(/(^|\s)status-code-\d+/g) || []);
+					respBoxRespClasses.forEach(function (className) {
+						respBoxResp.classList.remove(className.trim());
+					});
+					respBoxResp.classList.add('status-code-' + data.status.code);
+					if (validResponse) {
+						show(responseBox.querySelector('.response'));
+					} else {
+						hide(responseBox.querySelector('.response'));
+					}
+
+					// display service errors
+					if (data.errorMessage.length > 0) {
+						var errorBoxPre = errorBox.querySelector('pre.error');
+						errorBoxPre.innerText = data.errorMessage;
+						errorBoxPre.classList.add('lang-markup');
+						show(errorBox);
+					}
+
+					// Fire pretty print on nodes
+					// @todo replace this with Prism
+					// prettyPrint();
+					if (enablePrism) {
+						PrismIODocs.highlightAll();
+					}
+				}
+			});
 		}
 
 	};
 
 	var loadDependencies = function () {
+
+		// Load Alpaca
 		if ('jQuery' in window) {
 			m$.loadJS('/public/Mashery/scripts/vendor/alpaca.min.js', renderSchemas);
 		} else {
@@ -885,10 +1503,79 @@ var ioDocs = (function () {
 				m$.loadJS('/public/Mashery/scripts/vendor/alpaca.min.js', renderSchemas);
 			});
 		}
-		// m$.loadJS('/public/Mashery/scripts/Mashery/ace/ace.js');
+
+		// Load Ace
+		m$.loadJS('/public/Mashery/scripts/Mashery/ace/ace.js');
+
+		// Load Beautify
+		m$.loadJS('/public/Mashery/scripts/Mashery/beautify.js', function () {
+			enableBeautify = true;
+		});
+
+		// Load Prism
+		prismStyles = m$.loadCSS('/files/prism.min.css');
+		m$.loadJS('/files/prism.min.js', function () {
+			enablePrism = true;
+			PrismIODocs.plugins.NormalizeWhitespace.setDefaults({
+				'remove-trailing': false,
+				'remove-indent': true,
+				'left-trim': true,
+				'right-trim': true,
+				// 'break-lines': 80,
+				'indent': 4,
+				// 'remove-initial-line-feed': false,
+				// 'tabs-to-spaces': 4,
+				// 'spaces-to-tabs': 4
+			});
+		});
+
+	};
+
+	var blurHandler = function (event) {
+		if (typeof (event.target.closest) !== 'function') return;
+		var editor = event.target.closest('.ace_editor');
+		if (!editor) return;
+		var textarea = editor.closest('form').querySelector('.requestBody');
+		if (!textarea) return;
+		textarea.value = editor.querySelector('.ace_content').innerText;
+	};
+
+	exports.destroy = function () {
+
+		// Remove Prism styles if loaded just for this page
+		if (prismStyles) {
+			prismStyles.remove();
+		}
+
+		// Remove event listeners
+		window.removeEventListener('change', changeHandler, false);
+		document.removeEventListener('click', clickHandler, false);
+		document.removeEventListener('submit', submitHandler, false);
+		window.removeEventListener('blur', blurHandler, true);
+
+		// Reset variables
+		credentials = null;
+		credentialsForm = null;
+		descriptions = null;
+		controls = null;
+		endpointLists = null;
+		apiSelect = null;
+		methods = null;
+		endpoints = null;
+		enableHSSM = null;
+		enableAce = null;
+		enableBeautify = null;
+		enablePrism = null;
+		prismStyles = null;
+		authTimer = null;
+		syncTokenValue = null;
+
 	};
 
 	exports.init = function () {
+
+		// Destroy any previous inits
+		exports.destroy();
 
 		// Set variables
 		credentials = document.querySelectorAll('.credentials');
@@ -901,17 +1588,21 @@ var ioDocs = (function () {
 		endpoints = document.querySelectorAll('li.endpoint > ul.methods');
 		enableHSSM = document.querySelector('[name=enable_high_security_secret_management]') && document.querySelector('[name=enable_high_security_secret_management]').value.length > 0 ? true : false;
 
-		// Running!
-		console.log('IO Docs is running!');
+		// Setup
+		window.mashery.content.alpaca = {};
 
 		// Event listeners
 		window.addEventListener('change', changeHandler, false);
 		document.addEventListener('click', clickHandler, false);
+		document.addEventListener('submit', submitHandler, false);
+		window.addEventListener('blur', blurHandler, true);
 
 		// Methods
+		loadDependencies();
 		hideAllMethods();
-		renderSchemas();
+		// renderSchemas(); // Load dependencies is in here...
 		setSyncTokenValue();
+		a11y();
 
 		if (endpointLists.length === 1) {
 			apiSelect.value = apiSelect.options[1].value;

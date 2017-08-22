@@ -65,7 +65,7 @@ var getContent = function (type) {
 	var content = window.mashery.content;
 
 	// Variable placeholders
-	var h1, appDataBasic, appDataDetails;
+	var h1, headerEdit, appDataBasic, appDataDetails;
 
 
 	//
@@ -85,13 +85,43 @@ var getContent = function (type) {
 
 	// Custom Pages
 	if (type === 'page') {
+
+		// Remove header edit link
+		headerEdit = dom.querySelector('#header-edit');
+		if (headerEdit) {
+			headerEdit.remove();
+		}
+
+		// Heading
+		h1 = dom.querySelector('h1.first');
+		content.heading = h1.innerText;
+		h1.remove();
+
+		// Main Content
 		content.main = dom.querySelector('#main').innerHTML;
+
 	}
 
 	// Documentation
 	else if (type === 'docs') {
+
+		// Remove header edit link
+		headerEdit = dom.querySelector('#header-edit');
+		if (headerEdit) {
+			headerEdit.remove();
+		}
+
+		// Heading
+		h1 = dom.querySelector('h1.first');
+		content.heading = h1.innerText;
+		h1.remove();
+
+		// Main Content
 		content.main = dom.querySelector('#main').innerHTML;
+
+		// Sidebar Navigation
 		content.secondary = dom.querySelector('#sub ul').innerHTML;
+
 	}
 
 	// Sign In Page
@@ -193,6 +223,34 @@ var getContent = function (type) {
 			status: secret ? data[3].innerHTML.trim() : data[2].innerHTML.trim(),
 			created: created ? created.getAttribute('title') : ''
 		};
+
+	}
+
+	// Key Activity
+	else if (type === 'keyActivity') {
+
+		// Variables
+		var reports = dom.querySelector('#date_selector');
+		data = dom.querySelectorAll('div.key dd');
+		secret = data.length === 5 ? true : false;
+		created = secret ? data[4].querySelector('abbr') : data[3].querySelector('abbr');
+
+		// Get the main content
+		content.main = '<div id="developerReport" class="reports"><div id="date_selector">' + reports.innerHTML + '</div></div>';
+
+		// Get the key data
+		content.secondary = {
+			api: dom.querySelector('#main .section-body h2').innerHTML,
+			application: data[0].innerHTML.trim(),
+			key: data[1].innerHTML.trim(),
+			secret: secret ? data[2].innerHTML.trim() : null,
+			status: secret ? data[3].innerHTML.trim() : data[2].innerHTML.trim(),
+			created: created ? created.getAttribute('title') : '',
+			limits: '<table>' + dom.querySelector('div.key table.key').innerHTML + '<table>',
+		};
+
+		// Init function
+		content.init = dom.innerHTML.match(/initCharts\(.*?\)/);
 
 	}
 
