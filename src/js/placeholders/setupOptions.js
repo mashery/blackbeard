@@ -1,5 +1,4 @@
 var portalOptions = {
 	templates: {},
-	labels: {},
-	callbacks: {}
+	labels: {}
 };

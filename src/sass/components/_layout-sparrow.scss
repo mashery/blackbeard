@@ -1,0 +1,29 @@
+/**
+ * @section Nav
+ * Styling for navigation menus.
+ */
+
+
+#nav-user-wrapper {
+	@extend .bg-muted;
+}
+
+#nav-user-list {}
+
+#nav-primary {
+	@extend .margin-bottom;
+	border-bottom: calc-em(1px) solid $color-gray-light;
+
+	.loading &,
+	.full-width & {
+		@extend .no-margin-bottom;
+	}
+}
+
+#nav-secondary-list {
+	@extend .list-inline;
+}
+
+#nav-account {
+	@extend .list-inline;
+}

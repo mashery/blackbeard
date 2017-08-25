@@ -36,6 +36,7 @@ var setupMashery = function (doc) {
 		},
 		logout: logout ? logout : null,
 		title: doc.title,
+		scripts: [],
 		username: typeof mashery_info !== 'undefined' && mashery_info && mashery_info.username ? mashery_info.username : null,
 		userProfile: sessionStorage.getItem('masheryUserProfile')
 	};

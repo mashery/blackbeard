@@ -55,9 +55,6 @@ var m$ = (function () {
 		// If true, include viewport resizing meta tag
 		responsive: true,
 
-		// Polyfills placeholder
-		polyfills: '',
-
 		// If true, test password strength
 		testPassword: true,
 
@@ -327,7 +324,7 @@ var m$ = (function () {
 			docs:	'<div class="main container" id="main">' +
 						'<div class="row">' +
 							'<div class="grid-two-thirds">' +
-								'{{content.heading}}' +
+								'<h1>{{content.heading}}</h1>' +
 								'{{content.main}}' +
 							'</div>' +
 							'<div class="grid-third">' +
@@ -657,9 +654,14 @@ var m$ = (function () {
 			 * The layout for search results.
 			 */
 			search:	function () {
-				var template = '<h1>{{content.heading}}</h1>';
-				if (window.mashery.content.main) {
-					template += '<p>{{content.meta}}</p>';
+				var template = '';
+				if (window.mashery.content.newSearch) {
+					template += '<h1>{{content.headingNew}}</h1>' +
+								'{{content.searchForm}}';
+				} else if (window.mashery.content.main) {
+					template += '<h1>{{content.heading}}</h1>' +
+								'{{content.searchForm}}' +
+								'<p>{{content.meta}}</p>';
 					window.mashery.content.main.forEach(function (result) {
 						template +=
 							'<div class="search-result">' +
@@ -683,7 +685,9 @@ var m$ = (function () {
 					}
 					template += '</div>';
 				} else {
-					template += '{{content.noResults}}';
+					template +=	'<h1>{{content.heading}}</h1>' +
+								'{{content.searchForm}}' +
+								'{{content.noResults}}';
 				}
 
 				return '<div class="main container container-small" id="main">' + template + '</div>';
@@ -1172,6 +1176,7 @@ var m$ = (function () {
 
 				// Search results
 				heading: 'Search Results for "{{content.query}}"', // The search results page heading
+				headingNew: 'Search',
 				meta: 'Showing {{content.first}} to {{content.last}} of {{content.total}} results for "{{content.query}}"', // The meta data to show above search results
 				noResults: 'Your search for "{{content.query}}" returned no results.', // The message to display when no results are found
 				pagePrevious: '&larr; Previous Page', // The previous page link
@@ -1250,32 +1255,6 @@ var m$ = (function () {
 
 			}
 
-		},
-
-		/**
-		 * Callbacks
-		 * These are functions that can be run before and after Portal rendering events.
-		 * They allow you to hook into and extend the functionality of your Portal.
-		 */
-		callbacks: {
-			beforeInit: function () {}, // Before the first render
-			afterInit: function () {}, // After the first render
-			beforeRender: function () {}, // Before each page render
-			afterRender: function () {}, // After each page render
-			beforeRenderLayout: function () {}, // Before the layout is rendered
-			afterRenderLayout: function () {}, // After the layout is rendered
-			beforeRenderUserNav: function () {}, // Before the user nav is rendered
-			afterRenderUserNav: function () {}, // After the user nav is rendered
-			beforeRenderPrimaryNav: function () {}, // Before the primary nav is rendered
-			afterRenderPrimaryNav: function () {}, // After the primary nav is rendered
-			beforeRenderMain: function () {}, // Before the main content is rendered
-			afterRenderMain: function () {}, // After the main content is rendered
-			beforeRenderSecondaryNav: function () {}, // Before the secondary nav is rendered
-			afterRenderSecondaryNav: function () {}, // After the secondary nav is rendered
-			beforeRenderFooter: function () {}, // Before the footer is rendered
-			afterRenderFooter: function () {}, // After the footer is rendered
-			beforeAjax: function () {}, // Before Ajax page load
-			afterAjax: function () {} // After Ajax page load
 		}
 
 	};
@@ -2212,6 +2191,11 @@ var m$ = (function () {
 				return settings.labels.search.heading;
 			},
 
+			// Heading: New Search
+			'{{content.headingNew}}': function () {
+				return settings.labels.search.headingNew;
+			},
+
 			// Meta Info
 			'{{content.meta}}': function () {
 				return settings.labels.search.meta;
@@ -2616,6 +2600,23 @@ var m$ = (function () {
 	};
 
 	/**
+	 * Emit a custom event
+	 * @param {String} eventName  The name of the event to emit
+	 */
+	var emitEvent = function (eventName, elem) {
+
+		// Setup elem on which to dispatch event
+		elem = elem ? elem : window;
+
+		// Create a new event
+		var event = new Event(eventName);
+
+		// Dispatch the event
+		elem.dispatchEvent(event);
+
+	};
+
+	/**
 	 * Simulate a click event.
 	 * @public
 	 * @param {Element} elem  the element to simulate a click on
@@ -2730,10 +2731,10 @@ var m$ = (function () {
 	/**
 	 * Render content in the Portal
 	 * @private
-	 * @param {String}   selector The selector for the element to render the content into
-	 * @param {String}   key      The content type
-	 * @param {Function} before   The callback to run before rendering
-	 * @param {Function} after    The callback to run after rendering
+	 * @param {String}  selector The selector for the element to render the content into
+	 * @param {String}  key      The content type
+	 * @param {String}  before   The name of the event to emit before rendering
+	 * @param {String}  after    The name of the event to emit after rendering
 	 */
 	var render = function (selector, key, before, after) {
 
@@ -2741,9 +2742,9 @@ var m$ = (function () {
 		var content = document.querySelector(selector);
 		if (!content) return;
 
-		// Run the before callback
+		// Emit the before render event
 		if (before) {
-			before();
+			emitEvent(before);
 		}
 
 		// Render the content
@@ -2757,9 +2758,9 @@ var m$ = (function () {
 			});
 		}
 
-		// Run the after callback
+		// Emit the after render event
 		if (after) {
-			after();
+			emitEvent(after);
 		}
 
 	};
@@ -2866,9 +2867,20 @@ var m$ = (function () {
 	 * @public
 	 */
 	m$.loadFooterFiles = function () {
+
+		// Run user scripts
 		settings.loadJSFooter.forEach(function (js) {
 			m$.loadJS(js);
 		});
+
+		// Run inline scripts if Ajax on custom pages and documentation
+		if (!window.masheryIsAjax) return;
+		if (['page', 'docs'].indexOf(window.mashery.contentType) === -1) return;
+		window.mashery.scripts.forEach(function (script) {
+			var func = new Function(script);
+			func();
+		});
+
 	};
 
 	/**
@@ -2882,7 +2894,7 @@ var m$ = (function () {
 			var style = document.createElement('style');
 			style.id = 'iodocs-css';
 			style.innerHTML = '.io-docs-hide{display:none!important;visibility:hidden!important}.endpoint h3.title,.method div.title{cursor:pointer}';
-			document.querySelector('style').before(style);
+			document.querySelector('script').before(style);
 		}
 
 		// Invalidate old iodocs script
@@ -2975,10 +2987,74 @@ var m$ = (function () {
 	};
 
 	/**
+	 * Get the language class for an element
+	 * @private
+	 * @param {String} lang  The system-generated class for the code
+	 */
+	var getLangClass = function (lang) {
+
+		var langClass = '';
+
+		if (lang === 'bash') { langClass = 'lang-bash'; }
+		if (lang === 'csharp') { langClass = 'lang-clike'; }
+		if (lang === 'cpp') { langClass = 'lang-clike'; }
+		if (lang === 'css') { langClass = 'lang-css'; }
+		if (lang === 'java') { langClass = 'lang-java'; }
+		if (lang === 'jscript') { langClass = 'lang-javascript'; }
+		if (lang === 'php') { langClass = 'lang-php'; }
+		if (lang === 'python') { langClass = 'lang-python'; }
+		if (lang === 'ruby') { langClass = 'lang-ruby'; }
+		if (lang === 'xml') { langClass = 'lang-markup'; }
+
+		return langClass;
+
+	};
+
+	/**
+	 * Add language classes to all pre elements
+	 */
+	var addCodeLanguage = function () {
+		document.querySelectorAll('pre').forEach(function (pre) {
+			var lang = /brush: (.*?);/.exec(pre.className);
+			var code = pre.querySelector('code');
+			if (!lang || !Array.isArray(lang) || lang.length < 2) return;
+			var langClass = getLangClass(lang[1]);
+			pre.classList.add(langClass);
+			pre.className = pre.className.replace(/brush: (.*?);/, '');
+			if (!code) {
+				pre.innerHTML = '<code>' + pre.innerHTML + '</code>';
+			}
+		});
+	};
+
+	/**
+	 * Load Prism.js syntax highlighting
+	 * @private
+	 */
+	var loadPrism = function () {
+		addCodeLanguage();
+		m$.loadJS('/files/prism.min.js', function () {
+			// Prism.plugins.NormalizeWhitespace.setDefaults({
+			// 	'remove-trailing': false,
+			// 	'remove-indent': true,
+			// 	'left-trim': true,
+			// 	'right-trim': true,
+			// 	// 'break-lines': 80,
+			// 	'indent': 4,
+			// 	// 'remove-initial-line-feed': false,
+			// 	// 'tabs-to-spaces': 4,
+			// 	// 'spaces-to-tabs': 4
+			// });
+			Prism.highlightAll();
+		});
+	};
+
+	/**
 	 * Load any Mashery files that are required for a page to work
 	 * @private
 	 */
 	var loadRequiredFiles = function () {
+		loadPrism(); // Load syntax highlighter
 		loadRequiredFilesIODocs(); // Load required files for IO Docs
 		loadRequiredFilesPasswords(); // Load required files for registration and password pages
 		loadRequiredFilesReporting(); // Load key activity reporting scripts
@@ -3112,7 +3188,7 @@ var m$ = (function () {
 	 * @public
 	 */
 	m$.renderLayout = function () {
-		render('#app', 'layout', settings.callbacks.beforeRenderLayout, settings.callbacks.afterRenderLayout);
+		render('#app', 'layout', 'portalBeforeLayout', 'portalAfterLayout');
 		m$.verifyLoggedIn();
 	};
 
@@ -3129,7 +3205,7 @@ var m$ = (function () {
 	 * @public
 	 */
 	m$.renderUserNav = function () {
-		render('#nav-user-wrapper', 'userNav', settings.callbacks.beforeRenderUserNav, settings.callbacks.afterRenderUserNav);
+		render('#nav-user-wrapper', 'userNav', 'portalBeforeUserNav', 'portalAfterUserNav');
 	};
 
 	/**
@@ -3137,7 +3213,7 @@ var m$ = (function () {
 	 * @public
 	 */
 	m$.renderPrimaryNav = function () {
-		render('#nav-primary-wrapper', 'primaryNav', settings.callbacks.beforeRenderPrimaryNav, settings.callbacks.afterRenderPrimaryNav);
+		render('#nav-primary-wrapper', 'primaryNav', 'portalBeforeUserNav', 'portalAfterUserNav');
 	};
 
 	/**
@@ -3145,7 +3221,7 @@ var m$ = (function () {
 	 * @public
 	 */
 	m$.renderSecondaryNav = function () {
-		render('#nav-secondary-wrapper', 'secondaryNav', settings.callbacks.beforeRenderSecondaryNav, settings.callbacks.afterRenderSecondaryNav);
+		render('#nav-secondary-wrapper', 'secondaryNav', 'portalBeforeSecondaryNav', 'portalAfterSecondaryNav');
 	};
 
 	/**
@@ -3154,15 +3230,15 @@ var m$ = (function () {
 	 */
 	m$.renderFooter = function () {
 
-		// Run the before callback
-		settings.callbacks.beforeRenderFooter();
+		// Run the before render event
+		emitEvent('portalBeforeFooter');
 
 		// Render footers 1 and 2
 		render('#footer-1-wrapper', 'footer1');
 		render('#footer-2-wrapper', 'footer2');
 
-		// Run the after callback
-		settings.callbacks.afterRenderFooter();
+		// Run the after render event
+		emitEvent('portalAfterFooter');
 
 	};
 
@@ -3171,7 +3247,7 @@ var m$ = (function () {
 	 * @public
 	 */
 	m$.renderMain = function () {
-		render('#main-wrapper', window.mashery.contentType, settings.callbacks.beforeRenderMain, settings.callbacks.afterRenderMain);
+		render('#main-wrapper', window.mashery.contentType, 'portalBeforeMain', 'portalAfterMain');
 	};
 
 	/**
@@ -3244,8 +3320,8 @@ var m$ = (function () {
 	 */
 	var fetchContent = function (url, pushState) {
 
-		// Run before Ajax callback
-		settings.callbacks.beforeAjax();
+		// Run before Ajax event
+		emitEvent('portalBeforeAjax');
 
 		atomic.ajax({
 			url: url,
@@ -3255,8 +3331,8 @@ var m$ = (function () {
 			// Render our content on Success
 			renderWithAjax(data, url, pushState);
 
-			// Run after Ajax callback
-			settings.callbacks.afterAjax();
+			// Run after Ajax event
+			emitEvent('portalAfterAjax');
 
 		}).error(function (data, xhr) {
 			// If a 404, display 404 error
@@ -3264,8 +3340,8 @@ var m$ = (function () {
 
 				renderWithAjax(data, url, pushState);
 
-				// Run after Ajax callback
-				settings.callbacks.afterAjax();
+				// Run Ajax error event
+				emitEvent('portalAjaxError');
 
 				return;
 
@@ -3410,7 +3486,9 @@ var m$ = (function () {
 	 * @param {Boolean} ajax  If true, the page is being loaded via Ajax
 	 */
 	m$.renderPortal = function (ajax) {
-		settings.callbacks.beforeRender(); // Run beforeRender() callback
+		emitEvent('portalBeforeRender');  // Emit before render event
+		document.documentElement.classList.remove('loading'); // Remove loading class from the DOM
+		document.documentElement.classList.remove('complete'); // Remove rendering class from the DOM
 		document.documentElement.classList.add('rendering'); // Add rendering class to the DOM
 		renderHead(ajax); // <head> attributes
 		m$.loadHeaderFiles(); // Load user CSS and header JS files
@@ -3425,9 +3503,9 @@ var m$ = (function () {
 		m$.loadFooterFiles(); // Load user footer JS files
 		m$.renderCleanup(); // Cleanup DOM
 		m$.fixLocation(); // Jump to anchor
-		settings.callbacks.afterRender(); // Run afterRender() callback
-		document.documentElement.classList.remove('loading'); // Remove loading class from the DOM
+		emitEvent('portalAfterRender');  // Emit after render event
 		document.documentElement.classList.remove('rendering'); // Remove rendering class from the DOM
+		document.documentElement.classList.add('complete'); // Remove rendering class from the DOM
 	};
 
 	/**
@@ -3440,26 +3518,25 @@ var m$ = (function () {
 		// Merge user options with defaults
 		settings = extend(defaults, options || {});
 
-		m$.loadJS('https://cdn.polyfill.io/v2/polyfill.min.js?features=default,' + settings.polyfills, function () {
+		// Emit event before initializing
+		emitEvent('portalBeforeInit');
 
-			// Run callback before initializing
-			settings.callbacks.beforeInit();
+		// Render the Portal
+		m$.renderPortal();
 
-			// Render the Portal
-			m$.renderPortal();
+		// Setup Ajax variable
+		window.masheryIsAjax = false;
 
-			// Listen for click events
-			document.addEventListener('click', clickHandler, false);
+		// Listen for click events
+		document.addEventListener('click', clickHandler, false);
 
-			if (settings.ajax) {
-				window.addEventListener('popstate', popstateHandler, false);
-				window.addEventListener('submit', submitHandler, false);
-			}
+		if (settings.ajax) {
+			window.addEventListener('popstate', popstateHandler, false);
+			window.addEventListener('submit', submitHandler, false);
+		}
 
-			// Run callback after initializing
-			settings.callbacks.afterInit();
-
-		});
+		// Emit event after initializing
+		emitEvent('portalAfterInit');
 
 	};
 

@@ -81,7 +81,8 @@ $grid-breakpoints: (
 	// $include-offsets - {boolean} if true, include offset classes at this breakpoint
 	($bp-xsmall, ".row-start-xsmall", false),
 	($bp-small, ".row-start-small", false),
-	($bp-medium, null, true),
+	($bp-medium, ".row-start-medium", false),
+	($bp-large, null, true),
 );
 $grid-dynamic: (
 	// Create grid classes that vary in size at different breakpoints

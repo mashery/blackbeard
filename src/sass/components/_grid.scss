@@ -22,11 +22,21 @@
 	margin-right: $grid-margins * -1;
 }
 
+.row-no-padding {
+	margin-left: 0;
+	margin-right: 0;
+}
+
 %grid-base {
 	float: left;
 	padding-left: $grid-margins;
 	padding-right: $grid-margins;
 	width: 100%;
+
+	.row-no-padding > & {
+		padding-left: 0;
+		padding-right: 0;
+	}
 }
 
 @each $grid, $width in ($grid-sizes) {

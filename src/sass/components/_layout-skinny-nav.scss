@@ -4,16 +4,11 @@
  */
 
 
-#nav-user-wrapper {
-	@extend .bg-muted;
-}
+#nav-user-wrapper {}
 
-#nav-user-list {}
-
-#nav-user-username {
-	@media (max-width: $bp-medium) {
-		display: none;
-		visibility: hidden;
+#nav-user-list {
+	@media (min-width: $bp-large) {
+		float: right;
 	}
 }
 

@@ -425,7 +425,14 @@ figure {
  * @section Nav
  * Styling for navigation menus.
  */
-/* line 13, src/sass/components/_layout-sparrow.scss */
+@media (min-width: 60em) {
+  /* line 9, src/sass/components/_layout-skinny-nav.scss */
+  #nav-user-list {
+    float: right;
+  }
+}
+
+/* line 15, src/sass/components/_layout-skinny-nav.scss */
 #nav-primary {
   border-bottom: 1px solid #e5e5e5;
 }
@@ -1390,20 +1397,20 @@ td {
 /**
  * Text alignment
  */
-/* line 4, src/sass/components/_nav-sparrow.scss */
+/* line 4, src/sass/components/_nav-skinny-nav.scss */
 .nav-wrap {
   text-align: center;
 }
 
 @media (max-width: 60em) {
-  /* line 8, src/sass/components/_nav-sparrow.scss */
+  /* line 8, src/sass/components/_nav-skinny-nav.scss */
   .js-astro .nav-wrap.nav-collapse {
     text-align: left;
   }
 }
 
 @media (min-width: 60em) {
-  /* line 4, src/sass/components/_nav-sparrow.scss */
+  /* line 4, src/sass/components/_nav-skinny-nav.scss */
   .nav-wrap {
     text-align: left;
   }
@@ -1412,7 +1419,7 @@ td {
 /**
  * Logo
  */
-/* line 22, src/sass/components/_nav-sparrow.scss */
+/* line 22, src/sass/components/_nav-skinny-nav.scss */
 .logo {
   color: #272727;
   display: inline-block;
@@ -1421,21 +1428,21 @@ td {
   text-decoration: none;
 }
 
-/* line 30, src/sass/components/_nav-sparrow.scss */
+/* line 30, src/sass/components/_nav-skinny-nav.scss */
 .logo:hover {
   color: #272727;
   text-decoration: none;
 }
 
 @media (min-width: 60em) {
-  /* line 36, src/sass/components/_nav-sparrow.scss */
+  /* line 36, src/sass/components/_nav-skinny-nav.scss */
   .js-astro .nav-collapse .logo {
     float: left;
   }
 }
 
 @media (min-width: 60em) {
-  /* line 22, src/sass/components/_nav-sparrow.scss */
+  /* line 22, src/sass/components/_nav-skinny-nav.scss */
   .logo {
     float: left;
   }
@@ -1445,18 +1452,18 @@ td {
  * Navigation Menu Container
  */
 @media (max-width: 60em) {
-  /* line 55, src/sass/components/_nav-sparrow.scss */
+  /* line 55, src/sass/components/_nav-skinny-nav.scss */
   .js-astro .nav-collapse .nav-menu {
     box-sizing: border-box;
     display: none;
     margin-top: 0.5em;
     width: 100%;
   }
-  /* line 61, src/sass/components/_nav-sparrow.scss */
+  /* line 61, src/sass/components/_nav-skinny-nav.scss */
   .js-astro .nav-collapse .nav-menu.active {
     display: block;
   }
-  /* line 65, src/sass/components/_nav-sparrow.scss */
+  /* line 65, src/sass/components/_nav-skinny-nav.scss */
   .js-astro .nav-collapse .nav-menu li {
     display: block;
     width: 100%;
@@ -1469,14 +1476,14 @@ td {
 /**
  * Navigation Menu
  */
-/* line 80, src/sass/components/_nav-sparrow.scss */
+/* line 80, src/sass/components/_nav-skinny-nav.scss */
 .nav {
   list-style: none;
   margin: 0 -0.5em;
   padding: 0;
 }
 
-/* line 85, src/sass/components/_nav-sparrow.scss */
+/* line 85, src/sass/components/_nav-skinny-nav.scss */
 .nav > li {
   display: inline-block;
   float: none;
@@ -1484,31 +1491,17 @@ td {
   margin-right: 0.5em;
 }
 
-@media (max-width: 60em) {
-  /* line 96, src/sass/components/_nav-sparrow.scss */
-  .js-astro .nav-collapse .nav {
-    text-align: left;
-  }
-}
-
-@media (min-width: 60em) {
-  /* line 80, src/sass/components/_nav-sparrow.scss */
-  .nav {
-    text-align: right;
-  }
-}
-
 /**
  * Navigation Toggle
  */
-/* line 110, src/sass/components/_nav-sparrow.scss */
+/* line 104, src/sass/components/_nav-skinny-nav.scss */
 .nav-toggle {
   display: none;
   visibility: hidden;
 }
 
 @media (max-width: 60em) {
-  /* line 115, src/sass/components/_nav-sparrow.scss */
+  /* line 109, src/sass/components/_nav-skinny-nav.scss */
   .js-astro .nav-collapse .nav-toggle {
     display: block;
     float: right;
@@ -1519,14 +1512,14 @@ td {
 /**
  * Clearfix
  */
-/* line 128, src/sass/components/_nav-sparrow.scss */
+/* line 122, src/sass/components/_nav-skinny-nav.scss */
 .nav-wrap:before,
 .nav-wrap:after {
   display: table;
   content: "";
 }
 
-/* line 134, src/sass/components/_nav-sparrow.scss */
+/* line 128, src/sass/components/_nav-skinny-nav.scss */
 .nav-wrap:after {
   clear: both;
 }
@@ -2106,7 +2099,7 @@ pre.error {
 }
 
 /* line 25, src/sass/components/_overrides.scss */
-.bg-muted, #nav-user-wrapper {
+.bg-muted {
   background-color: #f2f2f2;
 }
 

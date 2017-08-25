@@ -20,3 +20,9 @@ if ( mashery.contentType === 'ioDocs') {
 
 // Get the content
 getContent(window.mashery.contentType);
+
+// // Undo default syntax highlighting
+// SyntaxHighlighter = {};
+// SyntaxHighlighter.all = function () {};
+// SyntaxHighlighter.regexLib = {};
+// SyntaxHighlighter.regexLib.xmlComments = function () {};

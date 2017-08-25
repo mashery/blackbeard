@@ -39,6 +39,10 @@ var ioDocs = (function () {
 		return JSON.stringify(jsonString, null, '    ');
 	};
 
+	var formatString = function (string) {
+		return string.replace(new RegExp('&nbsp;', 'g'), ' ').replace(new RegExp('<br>', 'g'), '\n');
+	};
+
 	var formatHeaders = function (headerMap) {
 		var headersString = '';
 
@@ -775,10 +779,12 @@ var ioDocs = (function () {
 			// 		method.editor.resize(); // set resize
 			// 	}
 			// }, method));
+
 		}
 
 		hide(textarea); // hide original textarea
 		editorEl.style.height = window.getComputedStyle(textarea).height;
+		editorEl.style.display = '';
 
 	};
 
@@ -1242,56 +1248,56 @@ var ioDocs = (function () {
 				// Add request uri
 				'<div class="call">' +
 					'<h4 class="call">Request URI</h4>' +
-					'<pre class="call"></pre>' +
+					'<pre class="call"><code id="callCode"></code></pre>' +
 				'</div>' +
 
 				// Add request headers
 			'<div class="requestHeaders ' + hideClass + '">' +
 					'<h4 class="requestHeaders">Request Headers</h4>' +
 					selectLink.innerHTML +
-					'<pre class="requestHeaders"></pre>' +
+					'<pre class="requestHeaders"><code id="requestHeadersCode"></code></pre>' +
 				'</div>' +
 
 				// Add request cookies
 			'<div class="requestCookies ' + hideClass + '">' +
 					'<h4 class="requestCookies">Request Cookies</h4>' +
 					selectLink.innerHTML +
-					'<pre class="requestCookies prettyprint"></pre>' +
+					'<pre class="requestCookies"><code id="requestCookiesCode"></code></pre>' +
 				'</div>' +
 
 				// Add request body
 			'<div class="requestBody ' + hideClass + '">' +
 					'<h4 class="requestBody">Request Body</h4>' +
 					selectLink.innerHTML +
-					'<pre class="requestBody prettyprint"></pre>' +
+					'<pre class="requestBody"><code id="requestBodyCode"></code></pre>' +
 				'</div>' +
 
 				// Add response status
 				'<div class="responseStatus">' +
 					'<h4 class="responseStatus">Request Status</h4>' +
 					selectLink.innerHTML +
-					'<pre class="responseStatus"></pre>' +
+					'<pre class="responseStatus"><code id="responseStatusCode"></code></pre>' +
 				'</div>' +
 
 				// Add response headers
 				'<div class="headers">' +
 					'<h4 class="headers">Response Headers</h4>' +
 					selectLink.innerHTML +
-					'<pre class="headers"></pre>' +
+					'<pre class="headers"><code id="headersCode"></code></pre>' +
 				'</div>' +
 
 				// Add response cookies
 				'<div class="responseCookies ' + hideClass + '">' +
 					'<h4 class="responseCookies">Response Cookies</h4>' +
 					selectLink.innerHTML +
-					'<pre class="responseCookies prettyprint"></pre>' +
+					'<pre class="responseCookies"><code id="responseCookiesCode"></code></pre>' +
 				'</div>' +
 
 				// Add response body
 				'<div class="response">' +
 					'<h4 class="response">Response Body</h4>' +
 					selectLink.innerHTML +
-					'<pre class="response prettyprint"></pre>' +
+					'<pre class="response"><code id="responseCode"></code></pre>' +
 				'</div>';
 
 			// Add response box to form and show it
@@ -1307,7 +1313,7 @@ var ioDocs = (function () {
 			errorBox.className = 'error ' + hideClass;
 			errorBox.innerHTML =
 				'<h4 class="error">Error</h4>' +
-				'<pre class="error prettyprint"></pre>';
+				'<pre class="error"><code id="errorCode"></code></pre>';
 			event.target.append(errorBox);
 		}
 
@@ -1315,7 +1321,7 @@ var ioDocs = (function () {
 		hide(errorBox);
 
 		if (fileLimitExceeded) { // check for file limit
-			errorBox.querySelector('pre.error').innerHTML = 'The selected file exceeds the maximum allowed limit of ' + Math.ceil(fileLimit / 1000) + 'kb.';
+			errorBox.querySelector('#errorCode').innerHTML = 'The selected file exceeds the maximum allowed limit of ' + Math.ceil(fileLimit / 1000) + 'kb.';
 			hide(responseBox);
 			show(errorBox);
 		} else {
@@ -1332,13 +1338,13 @@ var ioDocs = (function () {
 				dataType: 'json',
 				beforeSend: function () {
 					// Show loading text for response areas
-					responseBox.querySelectorAll('pre').forEach((function (area) {
+					responseBox.querySelectorAll('pre code').forEach((function (area) {
 						area.innerHTML = 'Loading...';
 						area.classList.remove('error');
 					}));
 				},
 				error: function (jqXHR, textStatus, errorThrown) {
-					errorBox.querySelector('pre.error').innerHTML = jqXHR.responseText;
+					errorBox.querySelector('#errorCode').innerHTML = jqXHR.responseText;
 					hide(responseBox);
 					show(errorBox);
 				},
@@ -1349,44 +1355,44 @@ var ioDocs = (function () {
 					var validResponse = (data.status.code > 0 || data.status.text) || formattedText.length > 0;
 
 					// Set up call request
-					responseBox.querySelector('pre.call').innerText = data.requestUri;
+					responseBox.querySelector('#callCode').innerHTML = data.requestUri;
 
 					// Set up call request headers
 					if (Object.keys(data.requestHeaders).length > 0) {
-						var preRequestHeaders = responseBox.querySelector('pre.requestHeaders');
-						preRequestHeaders.innerText = formatHeaders(data.requestHeaders);
+						var preRequestHeaders = responseBox.querySelector('#requestHeadersCode');
+						preRequestHeaders.innerHTML = formatHeaders(data.requestHeaders);
 						preRequestHeaders.classList.add('lang-http');
 						show(responseBox.querySelector('.requestHeaders'));
 					} else {
-						responseBox.querySelector('pre.requestHeaders').innerText = '';
+						responseBox.querySelector('#requestHeadersCode').innerHTML = '';
 						hide(responseBox.querySelector('.requestHeaders'));
 					}
 
 					// Set up call request cookies
 					if (data.requestCookies.length > 0) {
-						var preRequestCookies = responseBox.querySelector('pre.requestCookies');
-						preRequestCookies.innerText = formatJSON(data.requestCookies);
+						var preRequestCookies = responseBox.querySelector('#requestCookiesCode');
+						preRequestCookies.innerHTML = formatJSON(data.requestCookies);
 						preRequestCookies.classList.add('lang-javascript');
 						show(responseBox.querySelector('.requestCookies'));
 					} else {
-						responseBox.querySelector('pre.requestCookies').innerHTML = '';
+						responseBox.querySelector('#requestCookiesCode').innerHTML = '';
 						hide(responseBox.querySelector('.requestCookies'));
 					}
 
 					// Set up call request body
 					if (data.requestBody.length > 0) {
-						var preRequestBody = responseBox.querySelector('pre.requestBody');
-						preRequestBody.innerText = data.requestBody;
+						var preRequestBody = responseBox.querySelector('#requestBodyCode');
+						preRequestBody.innerHTML = data.requestBody;
 						preRequestBody.classList.add('lang-javascript');
 						show(responseBox.querySelector('.requestBody'));
 					} else {
-						responseBox.querySelector('pre.requestBody').innerHTML = '';
+						responseBox.querySelector('#requestBodyCode').innerHTML = '';
 						hide(responseBox.querySelector('.requestBody'));
 					}
 
 					// Set up response status
-					var respStatus = responseBox.querySelector('pre.responseStatus');
-					respStatus.innerText = data.status.code + ' ' + data.status.text;
+					var respStatus = responseBox.querySelector('#responseStatusCode');
+					respStatus.innerHTML = data.status.code + ' ' + data.status.text;
 					if (data.status.code >= 400) {
 						respStatus.classList.add('error');
 					} else {
@@ -1404,8 +1410,8 @@ var ioDocs = (function () {
 					}
 
 					// Set up response headers
-					var respHeaders = responseBox.querySelector('pre.headers');
-					respHeaders.innerText = formatHeaders(data.responseHeaders);
+					var respHeaders = responseBox.querySelector('#headersCode');
+					respHeaders.innerHTML = formatHeaders(data.responseHeaders);
 					respHeaders.classList.add('lang-http');
 					if (data.status.code >= 400) {
 						respHeaders.classList.add('error');
@@ -1434,7 +1440,7 @@ var ioDocs = (function () {
 						case 'text/json':
 						case 'text/x-javascript':
 						case 'text/x-json':
-							responseBox.querySelector('pre.response').classList.add('lang-javascript');
+							responseBox.querySelector('#responseCode').classList.add('lang-javascript');
 							if (enableBeautify) {
 								try {
 									// js_beautify will format it if it's JSON or JSONP
@@ -1454,7 +1460,7 @@ var ioDocs = (function () {
 						case 'text/xml':
 						case 'text/html':
 						case 'text/xhtml':
-							responseBox.querySelector('pre.response').classList.add('lang-markup');
+							responseBox.querySelector('#responseCode').classList.add('lang-markup');
 							formattedText = formatXML(formattedText) || '';
 							break;
 						default:
@@ -1462,8 +1468,8 @@ var ioDocs = (function () {
 					}
 
 					// Set response text
-					var respBoxResp = responseBox.querySelector('pre.response');
-					respBoxResp.innerText = formattedText;
+					var respBoxResp = responseBox.querySelector('#responseCode');
+					respBoxResp.innerHTML = formattedText;
 					if (data.status.code >= 400) {
 						respBoxResp.classList.add('error');
 					} else {
@@ -1482,17 +1488,15 @@ var ioDocs = (function () {
 
 					// display service errors
 					if (data.errorMessage.length > 0) {
-						var errorBoxPre = errorBox.querySelector('pre.error');
-						errorBoxPre.innerText = data.errorMessage;
+						var errorBoxPre = errorBox.querySelector('#errorCode');
+						errorBoxPre.innerHTML = data.errorMessage;
 						errorBoxPre.classList.add('lang-markup');
 						show(errorBox);
 					}
 
 					// Fire pretty print on nodes
-					// @todo replace this with Prism
-					// prettyPrint();
-					if (enablePrism) {
-						PrismIODocs.highlightAll();
+					if ('Prism' in window) {
+						Prism.highlightAll();
 					}
 				}
 			});
@@ -1517,23 +1521,6 @@ var ioDocs = (function () {
 		// Load Beautify
 		m$.loadJS('/public/Mashery/scripts/Mashery/beautify.js', (function () {
 			enableBeautify = true;
-		}));
-
-		// Load Prism
-		prismStyles = m$.loadCSS('/files/prism.min.css');
-		m$.loadJS('/files/prism.min.js', (function () {
-			enablePrism = true;
-			PrismIODocs.plugins.NormalizeWhitespace.setDefaults({
-				'remove-trailing': false,
-				'remove-indent': true,
-				'left-trim': true,
-				'right-trim': true,
-				// 'break-lines': 80,
-				'indent': 4,
-				// 'remove-initial-line-feed': false,
-				// 'tabs-to-spaces': 4,
-				// 'spaces-to-tabs': 4
-			});
 		}));
 
 	};

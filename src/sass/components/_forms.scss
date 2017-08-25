@@ -232,7 +232,7 @@ button:-moz-focusring,
  */
 .input-search,
 #search-input {
-		border-radius: calc-em(21px);
+	border-radius: calc-em(21px);
 	float: left;
 	margin-bottom: 0;
 	padding-left: calc-em(15px);
@@ -255,7 +255,9 @@ button:-moz-focusring,
 }
 
 .btn-search,
-#search-button {
+#search-button,
+#main-wrapper .btn-search,
+#main-wrapper #search-button {
 	display: inline;
 	color: $color-gray-dark;
 	border: none;

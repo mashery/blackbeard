@@ -437,8 +437,13 @@ var getContent = function (type) {
 	// Search Results
 	else if (type === 'search') {
 
+		// If it's a blank search page
+		if (!dom.querySelector('.result') && !dom.querySelector('.no-result')) {
+			content.newSearch = true;
+		}
+
 		// If there are no results
-		if (dom.querySelector('.no-result')) {
+		else if (dom.querySelector('.no-result')) {
 			content.main = null;
 			content.secondary = {
 				first: 0,
@@ -494,5 +499,10 @@ var getContent = function (type) {
 	// @todo Forum
 
 	// @todo Blog
+
+	// Get any inline scripts
+	dom.querySelectorAll('script').forEach(function (script) {
+		window.mashery.scripts.push(script.innerHTML);
+	});
 
 };

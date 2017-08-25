@@ -139,6 +139,5 @@ window.requestAnimationFrame(clearDOM);
 var mash = {};
 var portalOptions = {
 	templates: {},
-	labels: {},
-	callbacks: {}
+	labels: {}
 };

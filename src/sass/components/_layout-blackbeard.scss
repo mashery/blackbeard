@@ -1,0 +1,62 @@
+/**
+ * @section Nav
+ * Styling for navigation menus.
+ */
+
+.complete body {
+	@media (min-width: $bp-large) {
+		background-image: -webkit-linear-gradient(left, #f7f7f7 0%, #f7f7f7 25%, transparent 25%, transparent 100%);
+		background-image: linear-gradient(to right, #f7f7f7 0, #f7f7f7 25%, transparent 25%, transparent 100%);
+	}
+}
+
+#nav-user-wrapper {}
+
+#nav-user-list {
+	@extend .list-unstyled;
+
+	@media (max-width: $bp-large) {
+		padding: 0;
+
+		& > li {
+			display: inline-block;
+			margin-left: calc-em(8px);
+			margin-right: calc-em(8px);
+		}
+	}
+}
+
+#nav-primary {
+	@extend .margin-bottom;
+
+	.loading & {
+		@extend .no-margin-bottom;
+	}
+}
+
+#nav-primary-list {
+	@extend .list-unstyled;
+	@extend .margin-bottom-small;
+	@extend .padding-bottom-small;
+	border-bottom: calc-em(1px) solid $color-gray-light;
+
+	@media (max-width: $bp-large) {
+		padding: 0;
+
+		& > li {
+			display: inline-block;
+			margin-left: calc-em(8px);
+			margin-right: calc-em(8px);
+		}
+	}
+}
+
+#nav-secondary-list {
+	@extend .list-inline;
+}
+
+#nav-account {}
+
+#nav-docs {
+	@extend .list-unstyled;
+}
