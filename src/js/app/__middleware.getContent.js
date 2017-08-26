@@ -98,7 +98,7 @@ var getContent = function (type) {
 		h1.remove();
 
 		// Main Content
-		content.main = dom.querySelector('#main').innerHTML;
+		content.main = dom.querySelector('#main .section-body').innerHTML;
 
 	}
 
@@ -117,7 +117,7 @@ var getContent = function (type) {
 		h1.remove();
 
 		// Main Content
-		content.main = dom.querySelector('#main').innerHTML;
+		content.main = dom.querySelector('#main .section-body').innerHTML;
 
 		// Sidebar Navigation
 		content.secondary = dom.querySelector('#sub ul').innerHTML;

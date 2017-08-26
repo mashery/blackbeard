@@ -1,10 +1,10 @@
 portalOptions.templates.page = function () {
 	if (mashery.globals.fullWidth) {
-		return	'<div class="main" id="main">' +
+		return	'<div class="main content" id="main">' +
 					'{{content.main}}' +
 				'</div>';
 	} else {
-		return	'<div class="main container" id="main">' +
+		return	'<div class="main container content" id="main">' +
 					'<h1>{{content.heading}}</h1>' +
 					'{{content.main}}' +
 				'</div>';

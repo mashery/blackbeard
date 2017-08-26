@@ -10,7 +10,7 @@ var m$ = (function () {
 	var m$ = {};
 
 	// Setup internally global variables
-	var settings, main, data;
+	var settings, main, data, markdown;
 
 	// Defaults
 	var defaults = {
@@ -323,7 +323,7 @@ var m$ = (function () {
 			 */
 			docs:	'<div class="main container" id="main">' +
 						'<div class="row">' +
-							'<div class="grid-two-thirds">' +
+							'<div class="grid-two-thirds content">' +
 								'<h1>{{content.heading}}</h1>' +
 								'{{content.main}}' +
 							'</div>' +
@@ -551,7 +551,7 @@ var m$ = (function () {
 			 * Custom Pages
 			 * The layout for custom pages.
 			 */
-			page:	'<div class="main container" id="main">' +
+			page:	'<div class="main container content" id="main">' +
 						'<h1>{{content.heading}}</h1>' +
 						'{{content.main}}' +
 					'</div>',
@@ -2327,7 +2327,13 @@ var m$ = (function () {
 
 		// Main Content (if there's not one specific to the content type)
 		'{{content.main}}': function () {
-			return window.mashery.content.main;
+			if (['page', 'docs'].indexOf(window.mashery.contentType) === -1) {
+				return window.mashery.content.main;
+			} else {
+				return markdown.makeHtml(window.mashery.content.main.replace(/(&lt;.+)?&gt;/, function($0, $1) {
+					return $1 ? $0 : '>';
+				}).trim());
+			}
 		},
 
 		// Main Form (if there's not one specific to the content type)
@@ -3188,7 +3194,7 @@ var m$ = (function () {
 	 * @public
 	 */
 	m$.renderLayout = function () {
-		render('#app', 'layout', 'portalBeforeLayout', 'portalAfterLayout');
+		render('#app', 'layout', 'portalBeforeRenderLayout', 'portalAfterRenderLayout');
 		m$.verifyLoggedIn();
 	};
 
@@ -3205,7 +3211,7 @@ var m$ = (function () {
 	 * @public
 	 */
 	m$.renderUserNav = function () {
-		render('#nav-user-wrapper', 'userNav', 'portalBeforeUserNav', 'portalAfterUserNav');
+		render('#nav-user-wrapper', 'userNav', 'portalBeforeRenderUserNav', 'portalAfterRenderUserNav');
 	};
 
 	/**
@@ -3213,7 +3219,7 @@ var m$ = (function () {
 	 * @public
 	 */
 	m$.renderPrimaryNav = function () {
-		render('#nav-primary-wrapper', 'primaryNav', 'portalBeforeUserNav', 'portalAfterUserNav');
+		render('#nav-primary-wrapper', 'primaryNav', 'portalBeforeRenderUserNav', 'portalAfterRenderUserNav');
 	};
 
 	/**
@@ -3221,7 +3227,7 @@ var m$ = (function () {
 	 * @public
 	 */
 	m$.renderSecondaryNav = function () {
-		render('#nav-secondary-wrapper', 'secondaryNav', 'portalBeforeSecondaryNav', 'portalAfterSecondaryNav');
+		render('#nav-secondary-wrapper', 'secondaryNav', 'portalBeforeRenderSecondaryNav', 'portalAfterRenderSecondaryNav');
 	};
 
 	/**
@@ -3231,14 +3237,14 @@ var m$ = (function () {
 	m$.renderFooter = function () {
 
 		// Run the before render event
-		emitEvent('portalBeforeFooter');
+		emitEvent('portalBeforeRenderFooter');
 
 		// Render footers 1 and 2
 		render('#footer-1-wrapper', 'footer1');
 		render('#footer-2-wrapper', 'footer2');
 
 		// Run the after render event
-		emitEvent('portalAfterFooter');
+		emitEvent('portalAfterRenderFooter');
 
 	};
 
@@ -3247,7 +3253,7 @@ var m$ = (function () {
 	 * @public
 	 */
 	m$.renderMain = function () {
-		render('#main-wrapper', window.mashery.contentType, 'portalBeforeMain', 'portalAfterMain');
+		render('#main-wrapper', window.mashery.contentType, 'portalBeforeRenderMain', 'portalAfterRenderMain');
 	};
 
 	/**
@@ -3321,7 +3327,7 @@ var m$ = (function () {
 	var fetchContent = function (url, pushState) {
 
 		// Run before Ajax event
-		emitEvent('portalBeforeAjax');
+		emitEvent('portalBeforeRenderAjax');
 
 		atomic.ajax({
 			url: url,
@@ -3332,7 +3338,7 @@ var m$ = (function () {
 			renderWithAjax(data, url, pushState);
 
 			// Run after Ajax event
-			emitEvent('portalAfterAjax');
+			emitEvent('portalAfterRenderAjax');
 
 		}).error(function (data, xhr) {
 			// If a 404, display 404 error
@@ -3520,6 +3526,10 @@ var m$ = (function () {
 
 		// Emit event before initializing
 		emitEvent('portalBeforeInit');
+
+		// Setup markdown
+		markdown = new showdown.Converter();
+		markdown.setFlavor('github');
 
 		// Render the Portal
 		m$.renderPortal();
