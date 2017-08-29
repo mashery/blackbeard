@@ -1,0 +1,9 @@
+/**
+ * @section Registration
+ * Styling for API selection forms
+ */
+
+form[action*="/member/register"] dd > ul {
+	list-style: none;
+	margin-left: 2em;
+}

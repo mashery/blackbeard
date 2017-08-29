@@ -12,6 +12,24 @@ var m$ = (function () {
 	// Setup internally global variables
 	var settings, main, data, markdown;
 
+	// Path to Files
+	var filePaths = {
+
+		// IO Docs
+		ioDocsJS: '/files/iodocs-vanilla.js',
+
+		// Syntax Highlighting
+		prism: '/files/prism.min.js',
+
+		// API Reporting
+		googleJSAPI: 'https://www.google.com/jsapi',
+		underscore: '/public/Mashery/scripts/Mashery/source/underscore.js',
+		defaultsJS: '/public/Mashery/scripts/MasheryAdmin/Reports/config/defaults.js',
+		drillin: '/public/Mashery/scripts/MasheryAdmin/Reports/config/packages/developer_drillin.js',
+		reports: '/public/Mashery/scripts/MasheryDeveloperReports.js'
+
+	};
+
 	// Defaults
 	var defaults = {
 
@@ -28,6 +46,13 @@ var m$ = (function () {
 		// Use comma separated list for multiple selectors.
 		ajaxIgnore: null,
 
+		// Text to display in title while loading page
+		ajaxLoading: 'Loading...',
+
+		/**
+		 * Favicon
+		 */
+
 		// If true, inject a favicon
 		favicon: false,
 
@@ -37,10 +62,13 @@ var m$ = (function () {
 		// The favicon sizes
 		faviconSizes: '16x16 32x32',
 
-		// Files to load
-		loadCSS: [],
-		loadJSHeader: [],
-		loadJSFooter: [],
+
+		/**
+		 * Files to load
+		 */
+		loadCSS: [], // CSS (loaded in header)
+		loadJSHeader: [], // JS loaded before render
+		loadJSFooter: [], // JS loaded after render
 
 		/**
 		 * Logo
@@ -52,11 +80,11 @@ var m$ = (function () {
 		// If true, activate mashtip tooltips
 		mashtips: true,
 
+		// If true, test password strength
+		passwordStrength: true,
+
 		// If true, include viewport resizing meta tag
 		responsive: true,
-
-		// If true, test password strength
-		testPassword: true,
 
 		/**
 		 * Templates
@@ -450,7 +478,7 @@ var m$ = (function () {
 			 * Base layout
 			 * The markup structure that all of the content will get loaded into.
 			 */
-			layout:	'<a class="screen-reader screen-reader-focusable" href="#main">Skip to content</a>' +
+			layout:	'<a class="screen-reader screen-reader-focusable" href="#main-wrapper">Skip to content</a>' +
 					'{{layout.navUser}}' +
 					'{{layout.navPrimary}}' +
 					'{{layout.main}}' +
@@ -1698,7 +1726,7 @@ var m$ = (function () {
 
 			// Subheading
 			'{{content.main}}': function () {
-				return settings.labels.contact.maing;
+				return settings.labels.contact.main;
 			}
 
 		},
@@ -2607,15 +2635,18 @@ var m$ = (function () {
 
 	/**
 	 * Emit a custom event
+	 * @public
 	 * @param {String} eventName  The name of the event to emit
+	 * @param {Object} options    Options for the event
+	 * @param {Node}   elem       The element to dispatch the event on [optional - defaults to window]
 	 */
-	var emitEvent = function (eventName, elem) {
+	m$.emitEvent = function (eventName, options, elem) {
 
 		// Setup elem on which to dispatch event
 		elem = elem ? elem : window;
 
 		// Create a new event
-		var event = new Event(eventName);
+		var event = new CustomEvent(eventName, options);
 
 		// Dispatch the event
 		elem.dispatchEvent(event);
@@ -2735,6 +2766,21 @@ var m$ = (function () {
 	};
 
 	/**
+	 * Add selector class to all links that point to the current page
+	 * @private
+	 * @todo
+	 */
+	var addCurrentPageClass = function () {
+		document.querySelectorAll('a').forEach(function (link) {
+			document.querySelectorAll('a').forEach(function (link) {
+				if (link.href.toLowerCase() === (window.location.origin + window.location.pathname)) {
+					console.log(link);
+				}
+			});
+		});
+	};
+
+	/**
 	 * Render content in the Portal
 	 * @private
 	 * @param {String}  selector The selector for the element to render the content into
@@ -2750,7 +2796,7 @@ var m$ = (function () {
 
 		// Emit the before render event
 		if (before) {
-			emitEvent(before);
+			m$.emitEvent(before);
 		}
 
 		// Render the content
@@ -2766,17 +2812,17 @@ var m$ = (function () {
 
 		// Emit the after render event
 		if (after) {
-			emitEvent(after);
+			m$.emitEvent(after);
 		}
 
 	};
 
 	/**
 	 * Verify that a user logged in.
-	 * @public
+	 * @private
 	 * @bugfix Sometimes mashery variable provides wrong info at page load after logout event
 	 */
-	m$.verifyLoggedIn = function () {
+	var verifyLoggedIn = function () {
 
 		// Only run on logout and member remove pages
 		if (['logout', 'memberRemoveSuccess'].indexOf(window.mashery.contentType) === -1) return;
@@ -2836,9 +2882,9 @@ var m$ = (function () {
 
 	/**
 	 * Add class hooks for styling to the DOM, and a global JS variable for conditional functions
-	 * @public
+	 * @private
 	 */
-	m$.addStyleHooks = function () {
+	var addStyleHooks = function () {
 
 		// Get the app wrapper
 		var wrapper = document.querySelector('#app-wrapper');
@@ -2857,9 +2903,9 @@ var m$ = (function () {
 
 	/**
 	 * Load user CSS and header JS files
-	 * @public
+	 * @private
 	 */
-	m$.loadHeaderFiles = function () {
+	var loadHeaderFiles = function () {
 		settings.loadCSS.forEach(function (css) {
 			m$.loadCSS(css);
 		});
@@ -2870,9 +2916,9 @@ var m$ = (function () {
 
 	/**
 	 * Load user footer JS files
-	 * @public
+	 * @private
 	 */
-	m$.loadFooterFiles = function () {
+	var loadFooterFiles = function () {
 
 		// Run user scripts
 		settings.loadJSFooter.forEach(function (js) {
@@ -2907,7 +2953,7 @@ var m$ = (function () {
 		window.iodocs = null;
 
 		// Load IO Docs and initialize it
-		m$.loadJS('/files/iodocs-vanilla.js', function () {
+		m$.loadJS(filePaths.ioDocsJS, function () {
 			ioDocs.init();
 		});
 
@@ -2940,12 +2986,20 @@ var m$ = (function () {
 
 		// Only run on pages with password requirement lists
 		if (!document.querySelector('#passwd_requirements')) {
-			masheryTestPassword.destroy();
+			if ('masheryTestPassword' in window) {
+				masheryTestPassword.destroy();
+			}
 			return;
 		}
 
-		// Only run if testPassword is enabled
-		if (!settings.testPassword) return;
+		// Only run if passwordStrength is enabled
+		if (!settings.passwordStrength) {
+			// Remove indicator from the DOM
+			document.querySelectorAll('#passwd_requirements, label[for="passwd_strength_indicator"]').forEach(function (indicator) {
+				indicator.remove();
+			});
+			return;
+		}
 
 		// Initialize tests
 		masheryTestPassword.init();
@@ -2964,7 +3018,7 @@ var m$ = (function () {
 			return;
 		}
 
-		// Only run if testPassword is enabled
+		// Only run if passwordStrength is enabled
 		if (!settings.mashtips) return;
 
 		// Initialize tests
@@ -2978,11 +3032,11 @@ var m$ = (function () {
 		if (window.mashery.contentType !== 'keyActivity' || !Array.isArray(window.mashery.content.init)) return;
 
 		// Load required JS files
-		m$.loadJS('https://www.google.com/jsapi', function () {
-			m$.loadJS('/public/Mashery/scripts/Mashery/source/underscore.js', function () {
-				m$.loadJS('/public/Mashery/scripts/MasheryAdmin/Reports/config/defaults.js', function () {
-					m$.loadJS('/public/Mashery/scripts/MasheryAdmin/Reports/config/packages/developer_drillin.js', function () {
-						m$.loadJS('/public/Mashery/scripts/MasheryDeveloperReports.js', function () {
+		m$.loadJS(filePaths.googleJSAPI, function () {
+			m$.loadJS(filePaths.underscore, function () {
+				m$.loadJS(filePaths.defaultsJS, function () {
+					m$.loadJS(filePaths.drillin, function () {
+						m$.loadJS(filePaths.reports, function () {
 							initCharts(window.mashery.content.init.index);
 						});
 					});
@@ -3039,18 +3093,7 @@ var m$ = (function () {
 	 */
 	var loadPrism = function () {
 		addCodeLanguage();
-		m$.loadJS('/files/prism.min.js', function () {
-			// Prism.plugins.NormalizeWhitespace.setDefaults({
-			// 	'remove-trailing': false,
-			// 	'remove-indent': true,
-			// 	'left-trim': true,
-			// 	'right-trim': true,
-			// 	// 'break-lines': 80,
-			// 	'indent': 4,
-			// 	// 'remove-initial-line-feed': false,
-			// 	// 'tabs-to-spaces': 4,
-			// 	// 'spaces-to-tabs': 4
-			// });
+		m$.loadJS(filePaths.prism, function () {
 			Prism.highlightAll();
 		});
 	};
@@ -3191,68 +3234,68 @@ var m$ = (function () {
 
 	/**
 	 * Render the layout
-	 * @public
+	 * @private
 	 */
-	m$.renderLayout = function () {
+	var renderLayout = function () {
 		render('#app', 'layout', 'portalBeforeRenderLayout', 'portalAfterRenderLayout');
-		m$.verifyLoggedIn();
+		verifyLoggedIn();
 	};
 
 	/**
 	 * Render the title attribute
-	 * @public
+	 * @private
 	 */
-	m$.renderTitle = function () {
+	var renderTitle = function () {
 		document.title = replacePlaceholders(settings.labels.title, window.mashery.contentType);
 	};
 
 	/**
 	 * Render the user navigation
-	 * @public
+	 * @private
 	 */
-	m$.renderUserNav = function () {
+	var renderUserNav = function () {
 		render('#nav-user-wrapper', 'userNav', 'portalBeforeRenderUserNav', 'portalAfterRenderUserNav');
 	};
 
 	/**
 	 * Render the primary navigation
-	 * @public
+	 * @private
 	 */
-	m$.renderPrimaryNav = function () {
+	var renderPrimaryNav = function () {
 		render('#nav-primary-wrapper', 'primaryNav', 'portalBeforeRenderUserNav', 'portalAfterRenderUserNav');
 	};
 
 	/**
 	 * Render the secondary navigation
-	 * @public
+	 * @private
 	 */
-	m$.renderSecondaryNav = function () {
+	var renderSecondaryNav = function () {
 		render('#nav-secondary-wrapper', 'secondaryNav', 'portalBeforeRenderSecondaryNav', 'portalAfterRenderSecondaryNav');
 	};
 
 	/**
 	 * Render the footer
-	 * @public
+	 * @private
 	 */
-	m$.renderFooter = function () {
+	var renderFooter = function () {
 
 		// Run the before render event
-		emitEvent('portalBeforeRenderFooter');
+		m$.emitEvent('portalBeforeRenderFooter');
 
 		// Render footers 1 and 2
 		render('#footer-1-wrapper', 'footer1');
 		render('#footer-2-wrapper', 'footer2');
 
 		// Run the after render event
-		emitEvent('portalAfterRenderFooter');
+		m$.emitEvent('portalAfterRenderFooter');
 
 	};
 
 	/**
 	 * Render the main content
-	 * @public
+	 * @private
 	 */
-	m$.renderMain = function () {
+	var renderMain = function () {
 		render('#main-wrapper', window.mashery.contentType, 'portalBeforeRenderMain', 'portalAfterRenderMain');
 	};
 
@@ -3263,16 +3306,20 @@ var m$ = (function () {
 	 */
 	m$.fixLocation = function () {
 		if (window.location.hash) {
-			window.location.hash = window.location.hash;
+			var location = document.querySelector(window.location.hash);
+			if (!location) return;
+			location.focus();
 		} else {
 			document.querySelector('#app').focus();
+			window.scrollTo(0, 0);
 		}
 	};
 
 	/**
 	 * Add required content and make required DOM updates
+	 * @private
 	 */
-	m$.renderCleanup = function () {
+	var renderCleanup = function () {
 
 		// Render hidden forms and required content
 		loadRequiredFiles(); // Load required CSS/JS files into the DOM
@@ -3284,9 +3331,6 @@ var m$ = (function () {
 		// Make updates to DOM content
 		updateDeleteAppConfirmModal(); // Update the delete app confirmation modal
 		updateDeleteKeyConfirmModal();  // Update the delete key confirmation modal
-
-		// Forced reloads
-		// reloadIODocs(); // Reload IO Docs
 
 	};
 
@@ -3327,7 +3371,11 @@ var m$ = (function () {
 	var fetchContent = function (url, pushState) {
 
 		// Run before Ajax event
-		emitEvent('portalBeforeRenderAjax');
+		m$.emitEvent('portalBeforeRenderAjax');
+
+		if (settings.ajaxLoading) {
+			document.title = settings.ajaxLoading;
+		}
 
 		atomic.ajax({
 			url: url,
@@ -3338,7 +3386,7 @@ var m$ = (function () {
 			renderWithAjax(data, url, pushState);
 
 			// Run after Ajax event
-			emitEvent('portalAfterRenderAjax');
+			m$.emitEvent('portalAfterRenderAjax');
 
 		}).error(function (data, xhr) {
 			// If a 404, display 404 error
@@ -3347,7 +3395,7 @@ var m$ = (function () {
 				renderWithAjax(data, url, pushState);
 
 				// Run Ajax error event
-				emitEvent('portalAjaxError');
+				m$.emitEvent('portalAjaxError');
 
 				return;
 
@@ -3487,31 +3535,49 @@ var m$ = (function () {
 	};
 
 	/**
+	 * Processes to run before rendering starts
+	 * @private
+	 */
+	var beforeRenderHandler = function (event) {
+		document.documentElement.classList.remove('loading'); // Remove loading class from the DOM
+		document.documentElement.classList.remove('complete'); // Remove rendering class from the DOM
+		document.documentElement.classList.add('rendering'); // Add rendering class to the DOM
+		renderHead(event.detail); // <head> attributes
+		loadHeaderFiles(); // Load user CSS and header JS files
+		addStyleHooks(); // Content-specific classes
+	};
+
+	/**
+	 * Processes to run after rendering is complete
+	 * @private
+	 */
+	var afterRenderHandler = function () {
+		loadFooterFiles(); // Load user footer JS files
+		renderCleanup(); // Cleanup DOM
+		m$.fixLocation(); // Jump to anchor or top of page
+		document.documentElement.classList.remove('rendering'); // Remove rendering class from the DOM
+		document.documentElement.classList.add('complete'); // Remove rendering class from the DOM
+	};
+
+	/**
 	 * Render the Portal
 	 * @public
 	 * @param {Boolean} ajax  If true, the page is being loaded via Ajax
 	 */
 	m$.renderPortal = function (ajax) {
-		emitEvent('portalBeforeRender');  // Emit before render event
-		document.documentElement.classList.remove('loading'); // Remove loading class from the DOM
-		document.documentElement.classList.remove('complete'); // Remove rendering class from the DOM
-		document.documentElement.classList.add('rendering'); // Add rendering class to the DOM
-		renderHead(ajax); // <head> attributes
-		m$.loadHeaderFiles(); // Load user CSS and header JS files
-		m$.addStyleHooks(); // Content-specific classes
-		m$.renderLayout(); // Layout
-		m$.renderUserNav(); // User Navigation
-		m$.renderPrimaryNav(); // Primary Navigation
-		m$.renderSecondaryNav(); // Secondary Navigation
-		m$.renderMain(); // Main Content
-		m$.renderTitle(); // Page Title
-		m$.renderFooter(); // Footer
-		m$.loadFooterFiles(); // Load user footer JS files
-		m$.renderCleanup(); // Cleanup DOM
-		m$.fixLocation(); // Jump to anchor
-		emitEvent('portalAfterRender');  // Emit after render event
-		document.documentElement.classList.remove('rendering'); // Remove rendering class from the DOM
-		document.documentElement.classList.add('complete'); // Remove rendering class from the DOM
+		m$.emitEvent('portalBeforeRender', {
+			detail: ajax
+		});  // Emit before render event
+		renderLayout(); // Layout
+		renderUserNav(); // User Navigation
+		renderPrimaryNav(); // Primary Navigation
+		renderSecondaryNav(); // Secondary Navigation
+		renderMain(); // Main Content
+		renderTitle(); // Page Title
+		renderFooter(); // Footer
+		m$.emitEvent('portalAfterRender', {
+			detail: ajax
+		});  // Emit after render event
 	};
 
 	/**
@@ -3525,11 +3591,15 @@ var m$ = (function () {
 		settings = extend(defaults, options || {});
 
 		// Emit event before initializing
-		emitEvent('portalBeforeInit');
+		m$.emitEvent('portalBeforeInit');
 
 		// Setup markdown
 		markdown = new showdown.Converter();
 		markdown.setFlavor('github');
+
+		// Add render event handlers
+		window.addEventListener('portalBeforeRender', beforeRenderHandler, false);
+		window.addEventListener('portalAfterRender', afterRenderHandler, false);
 
 		// Render the Portal
 		m$.renderPortal();
@@ -3540,13 +3610,14 @@ var m$ = (function () {
 		// Listen for click events
 		document.addEventListener('click', clickHandler, false);
 
+		// Listen for form submissions and popstate events on Ajax
 		if (settings.ajax) {
 			window.addEventListener('popstate', popstateHandler, false);
 			window.addEventListener('submit', submitHandler, false);
 		}
 
 		// Emit event after initializing
-		emitEvent('portalAfterInit');
+		m$.emitEvent('portalAfterInit');
 
 	};
 

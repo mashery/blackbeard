@@ -1,1 +1,3 @@
-var mash = {};
+var mashery = {
+	globals: {}
+};

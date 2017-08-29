@@ -136,7 +136,9 @@ var clearDOM = function () {
 	window.requestAnimationFrame(clearDOM);
 };
 window.requestAnimationFrame(clearDOM);
-var mash = {};
+var mashery = {
+	globals: {}
+};
 var portalOptions = {
 	templates: {},
 	labels: {}

@@ -6,6 +6,7 @@
  */
 
 /* http://prismjs.com/download.html?themes=prism&languages=markup+css+clike+javascript+bash+c+csharp+cpp+ruby+http+java+php+python+sass+scss */
+/* jshint ignore:start */
 var _self = (typeof window !== 'undefined')
 	? window   // if in browser
 	: (
@@ -1372,3 +1373,4 @@ Prism.languages.insertBefore('scss', 'function', {
 });
 
 Prism.languages.scss['atrule'].inside.rest = Prism.util.clone(Prism.languages.scss);
+/* jshint ignore:end */
