@@ -203,7 +203,7 @@ To see how easy it is to change the look of your Portal, click one of the themes
 
 		// Update current theme
 		var setCurrentTheme = function () {
-			if (window.mashery.contentId !== 'docs-themes') return;
+			if (window.mashery.contentId !== 'docs-customizing-themes') return;
 			var currentSS = getStylesheet();
 			var currentTheme, currentToggle;
 			for (var theme in themeOptions) {
