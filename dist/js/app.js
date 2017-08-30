@@ -8255,7 +8255,7 @@ var m$ = (function () {
 	 * @private
 	 */
 	var renderPrimaryNav = function () {
-		render('#nav-primary-wrapper', 'primaryNav', 'portalBeforeRenderUserNav', 'portalAfterRenderUserNav');
+		render('#nav-primary-wrapper', 'primaryNav', 'portalBeforeRenderPrimaryNav', 'portalAfterRenderPrimaryNav');
 	};
 
 	/**

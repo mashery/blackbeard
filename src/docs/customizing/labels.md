@@ -15,7 +15,7 @@ portalOptions.labels.accountApps.heading = 'My Apps';
 portalOptions.labels.accountApps.noApps = 'You don\'t have any apps yet.';
 ```
 
-## My Account = Email
+## My Account: Email
 The page where users can change their Mashery email address.
 
 ```js
@@ -23,7 +23,7 @@ The page where users can change their Mashery email address.
 portalOptions.labels.accountEmail.heading = 'Change Email';
 ```
 
-## My Account = Email Success
+## My Account: Email Success
 The layout for the page confirming email change was successful
 
 ```js
