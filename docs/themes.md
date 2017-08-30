@@ -9,20 +9,22 @@
 
 Want to see how easy it is to customize layouts? Click one of the themes below.
 
-<a class="toggle-theme" data-options="blackbeard" href="#">
-	<h2 class="no-margin-bottom">Blackbeard</h2>
-	<img title="Blackbeard Theme" src="/files/blackbeard.jpg">
-</a>
+<div>
+	<a class="toggle-theme" data-options="blackbeard" href="#">
+		<h2 class="no-margin-bottom">Blackbeard</h2>
+		<img title="Blackbeard Theme" src="/files/blackbeard.jpg">
+	</a>
 
-<a class="toggle-theme" data-options="sparrow" href="#">
-	<h2 class="no-margin-bottom">Sparrow Neue</h2>
-	<img title="Sparrow Theme" src="/files/sparrow.jpg">
-</a>
+	<a class="toggle-theme" data-options="sparrow" href="#">
+		<h2 class="no-margin-bottom">Sparrow Neue</h2>
+		<img title="Sparrow Theme" src="/files/sparrow.jpg">
+	</a>
 
-<a class="toggle-theme" data-options="skinnyNav" href="#">
-	<h2 class="no-margin-bottom">Skinny Nav</h2>
-	<img title="Skinny Nav Theme" src="/files/skinny-nav.jpg">
-</a>
+	<a class="toggle-theme" data-options="skinnyNav" href="#">
+		<h2 class="no-margin-bottom">Skinny Nav</h2>
+		<img title="Skinny Nav Theme" src="/files/skinny-nav.jpg">
+	</a>
+</div>
 
 <script>
 	// Setup theme options object
@@ -215,10 +217,7 @@ Want to see how easy it is to customize layouts? Click one of the themes below.
 			event.preventDefault();
 
 			// Reset portalOptions
-			window.portalOptions = {
-				templates: {},
-				labels: {}
-			};
+			m$.resetOptions();
 
 			// Update portalOptions
 			themeOptions[options].options();
@@ -227,17 +226,19 @@ Want to see how easy it is to customize layouts? Click one of the themes below.
 			updateStyles(themeOptions[options].styles);
 
 			// Clear the DOM
-			document.documentElement.classList.remove('complete');
-			document.querySelector('#app').innerHTML = '';
+			// document.documentElement.classList.remove('complete');
+			// document.querySelector('#app').innerHTML = '';
 
 			// Re-render the Portal with new options
-			m$.init(portalOptions);
+			m$.setOptions(portalOptions);
+			m$.renderPortal();
+			//m$.init(portalOptions);
 
 		}, false);
 
 		// Update current theme
 		window.addEventListener('portalAfterRender', function () {
-			if (window.mashery.contentId !== 'themes') return;
+			if (window.mashery.contentId !== 'docs-themes') return;
 			var currentSS = getStylesheet();
 			var currentTheme, currentToggle;
 			for (var theme in themeOptions) {

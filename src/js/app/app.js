@@ -80,6 +80,9 @@ var m$ = (function () {
 		 */
 		logo: null,
 
+		// If true, enable markdown on docs and custom pages
+		markdown: true,
+
 		// If true, activate mashtip tooltips
 		mashtips: true,
 
@@ -2358,10 +2361,10 @@ var m$ = (function () {
 
 		// Main Content (if there's not one specific to the content type)
 		'{{content.main}}': function () {
-			if (['page', 'docs'].indexOf(window.mashery.contentType) === -1) {
+			if (['page', 'docs'].indexOf(window.mashery.contentType) === -1 || !settings.markdown || window.mashery.globals.noMarkdown) {
 				return window.mashery.content.main;
 			} else {
-				return markdown.makeHtml(window.mashery.content.main.replace(/(&lt;.+)?&gt;/, function($0, $1) {
+				return markdown.makeHtml(window.mashery.content.main.replace(/(&lt;.+)?&gt;/g, function($0, $1) {
 					return $1 ? $0 : '>';
 				}).trim());
 			}
@@ -2679,6 +2682,26 @@ var m$ = (function () {
 
 		return extended;
 
+	};
+
+	/**
+	 * Reset global Portal options
+	 * @public
+	 */
+	m$.resetOptions = function () {
+		window.portalOptions = {
+			templates: {},
+			labels: {}
+		};
+	};
+
+	/**
+	 * Merge user options into Portal settings
+	 * @public
+	 * @param {Object} options  User options to merge into defaults
+	 */
+	m$.setOptions = function (options) {
+		settings = extend(defaults, options || {});
 	};
 
 	/**
@@ -3619,7 +3642,7 @@ var m$ = (function () {
 		document.documentElement.classList.remove('loading'); // Remove loading class from the DOM
 		document.documentElement.classList.remove('complete'); // Remove rendering class from the DOM
 		document.documentElement.classList.add('rendering'); // Add rendering class to the DOM
-		renderHead(event.detail); // <head> attributes
+		renderHead(event.detail.ajax); // <head> attributes
 		loadHeaderFiles(); // Load user CSS and header JS files
 		addStyleHooks(); // Content-specific classes
 	};
@@ -3643,7 +3666,9 @@ var m$ = (function () {
 	 */
 	m$.renderPortal = function (ajax) {
 		m$.emitEvent('portalBeforeRender', {
-			detail: ajax
+			detail: {
+				ajax: ajax
+			}
 		});  // Emit before render event
 		renderLayout(); // Layout
 		renderUserNav(); // User Navigation
@@ -3653,7 +3678,9 @@ var m$ = (function () {
 		renderTitle(); // Page Title
 		renderFooter(); // Footer
 		m$.emitEvent('portalAfterRender', {
-			detail: ajax
+			detail: {
+				ajax: ajax
+			}
 		});  // Emit after render event
 	};
 
@@ -3665,7 +3692,7 @@ var m$ = (function () {
 	m$.init = function (options) {
 
 		// Merge user options with defaults
-		settings = extend(defaults, options || {});
+		m$.setOptions(options);
 
 		// Emit event before initializing
 		m$.emitEvent('portalBeforeInit');

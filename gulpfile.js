@@ -8,7 +8,7 @@ var settings = {
 	svgs: true,			// Turn on/off SVG tasks
 	images: true,		// Turn on/off image tasks
 	static: true,		// Turn on/off static file copying
-	docs: false,		// Turn on/off documentation generation
+	docs: true,			// Turn on/off documentation generation
 	cacheBust: false	// Turn on/off cache busting (adds a version number to minified files)
 };
 
@@ -49,8 +49,8 @@ var minify = settings.styles ? require('gulp-cssnano') : null;
 var svgmin = settings.svgs ? require('gulp-svgmin') : null;
 
 // Docs
-var markdown = settings.docs ? require('gulp-markdown') : null;
-var fileinclude = settings.docs ? require('gulp-file-include') : null;
+// var markdown = settings.docs ? require('gulp-markdown') : null;
+// var fileinclude = settings.docs ? require('gulp-file-include') : null;
 
 
 /**
@@ -82,9 +82,9 @@ var paths = {
 	},
 	docs: {
 		input: 'src/docs/*.{html,md,markdown}',
-		output: 'docs/',
-		templates: 'src/docs/_templates/',
-		assets: 'src/docs/assets/**'
+		output: 'docs/'
+		// templates: 'src/docs/_templates/',
+		// assets: 'src/docs/assets/**'
 	}
 };
 
@@ -225,17 +225,6 @@ gulp.task('build:docs', ['compile', 'clean:docs'], function() {
 
 	return gulp.src(paths.docs.input)
 		.pipe(plumber())
-		.pipe(fileinclude({
-			prefix: '@@',
-			basepath: '@file'
-		}))
-		.pipe(tap(function (file, t) {
-			if ( /\.md|\.markdown/.test(file.path) ) {
-				return t.through(markdown);
-			}
-		}))
-		.pipe(header(fs.readFileSync(paths.docs.templates + '/_header.html', 'utf8')))
-		.pipe(footer(fs.readFileSync(paths.docs.templates + '/_footer.html', 'utf8')))
 		.pipe(gulp.dest(paths.docs.output));
 });
 
@@ -249,13 +238,13 @@ gulp.task('copy:dist', ['compile', 'clean:docs'], function() {
 });
 
 // Copy documentation assets to docs
-gulp.task('copy:assets', ['clean:docs'], function() {
-	if ( !settings.docs ) return;
+// gulp.task('copy:assets', ['clean:docs'], function() {
+// 	if ( !settings.docs ) return;
 
-	return gulp.src(paths.docs.assets)
-		.pipe(plumber())
-		.pipe(gulp.dest(paths.docs.output + '/assets'));
-});
+// 	return gulp.src(paths.docs.assets)
+// 		.pipe(plumber())
+// 		.pipe(gulp.dest(paths.docs.output + '/assets'));
+// });
 
 // Remove prexisting content from docs folder
 gulp.task('clean:docs', function () {
@@ -297,8 +286,8 @@ gulp.task('compile', [
 gulp.task('docs', [
 	'clean:docs',
 	'build:docs',
-	'copy:dist',
-	'copy:assets'
+	// 'copy:dist',
+	// 'copy:assets'
 ]);
 
 // Compile files and generate docs (default)

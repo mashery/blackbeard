@@ -1,4 +1,22 @@
-Blackbeard supports [GitHub-flavored Markdown](https://github.github.com/gfm/) for documentation and custom pages. Here's how it works.
+Blackbeard supports [GitHub-flavored Markdown](https://github.github.com/gfm/) for documentation and custom pages.
+
+*__Note:__ To use markdown, you MUST disable TinyMCE by unchecking "Use TinyMCE" in Control Center. If you ever edit a page written in markdown with TinyMCE enabled, it will wrap your content in paragraph elements and break your page, preventing markdown from rendering.*
+
+## Disabling Markdown
+
+Markdown support is enabled for documentation and custom pages by default. You can disable it Portal-wide by setting the `markdown` Portal option to `false`.
+
+```js
+portalOptions.markdown = false;
+```
+
+You can also disable it on a page-by-page basis by setting a global option for `noMarkdown` anywhere in your content.
+
+```html
+<script>
+    mashery.globals.noMarkdown = true;
+</script>
+```
 
 ## Paragraphs
 
@@ -14,7 +32,7 @@ participated in an assault on a destroyer near the city of Los Angeles.
 
 ## Headings
 
-You can create a heading by adding one or more `#` symbols before your heading text. The number of `#` you use will determine the size of the heading. This is similar to [**atx style**][atx].
+You can create a heading by adding one or more `#` symbols before your heading text. The number of `#` you use will determine the size of the heading.
 
 ```md
 # The largest heading (an H1 tag)
@@ -39,7 +57,7 @@ If, for some reason, you need to keep a leading or trailing `#`, you can either 
 
 ### Header IDs
 
-Blackbeard markdown generates header IDs.
+Blackbeard markdown automatically generates header IDs.
 
 ```md
 # My cool header with ID
