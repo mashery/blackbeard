@@ -7,31 +7,22 @@
 	}
 </style>
 
-<p>Want to see how easy it is to customize layouts? Click one of the themes below.</p>
+Want to see how easy it is to customize layouts? Click one of the themes below.
 
-<div class="row">
-	<div class="grid-half">
-		<a class="toggle-theme" data-options="sparrow" href="#">
-			<h2 class="no-margin-bottom">Sparrow Neue</h2>
-			<img title="Sparrow Theme" src="/files/sparrow.jpg">
-		</a>
-	</div>
-	<div class="grid-half">
-		<a class="toggle-theme" data-options="blackbeard" href="#">
-			<h2 class="no-margin-bottom">Blackbeard</h2>
-			<img title="Blackbeard Theme" src="/files/blackbeard.jpg">
-		</a>
-	</div>
-</div>
+<a class="toggle-theme" data-options="blackbeard" href="#">
+	<h2 class="no-margin-bottom">Blackbeard</h2>
+	<img title="Blackbeard Theme" src="/files/blackbeard.jpg">
+</a>
 
-<div class="row">
-	<div class="grid-half">
-		<a class="toggle-theme" data-options="skinnyNav" href="#">
-			<h2 class="no-margin-bottom">Skinny Nav</h2>
-			<img title="Skinny Nav Theme" src="/files/skinny-nav.jpg">
-		</a>
-	</div>
-</div>
+<a class="toggle-theme" data-options="sparrow" href="#">
+	<h2 class="no-margin-bottom">Sparrow Neue</h2>
+	<img title="Sparrow Theme" src="/files/sparrow.jpg">
+</a>
+
+<a class="toggle-theme" data-options="skinnyNav" href="#">
+	<h2 class="no-margin-bottom">Skinny Nav</h2>
+	<img title="Skinny Nav Theme" src="/files/skinny-nav.jpg">
+</a>
 
 <script>
 	// Setup theme options object

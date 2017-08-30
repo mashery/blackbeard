@@ -2147,10 +2147,23 @@ pre.error {
   }
 }
 
+/* line 62, src/sass/components/_overrides.scss */
+.text-hero {
+  font-size: 2em;
+  line-height: 1.4;
+}
+
+@media (min-width: 40em) {
+  /* line 62, src/sass/components/_overrides.scss */
+  .text-hero {
+    font-size: 3em;
+  }
+}
+
 /**
  * Text colors
  */
-/* line 67, src/sass/components/_overrides.scss */
+/* line 76, src/sass/components/_overrides.scss */
 .text-muted, .mashtip {
   color: #808080;
 }
@@ -2158,23 +2171,23 @@ pre.error {
 /**
  * Text alignment
  */
-/* line 76, src/sass/components/_overrides.scss */
+/* line 85, src/sass/components/_overrides.scss */
 .text-center {
   text-align: center;
 }
 
-/* line 80, src/sass/components/_overrides.scss */
+/* line 89, src/sass/components/_overrides.scss */
 .text-right, .method .title .description {
   text-align: right;
 }
 
-/* line 84, src/sass/components/_overrides.scss */
+/* line 93, src/sass/components/_overrides.scss */
 .text-left {
   text-align: left;
 }
 
 @media (min-width: 40em) {
-  /* line 89, src/sass/components/_overrides.scss */
+  /* line 98, src/sass/components/_overrides.scss */
   .text-right-medium {
     text-align: right;
   }
@@ -2183,19 +2196,19 @@ pre.error {
 /**
  * Floats
  */
-/* line 99, src/sass/components/_overrides.scss */
+/* line 108, src/sass/components/_overrides.scss */
 .float-left {
   float: left;
 }
 
-/* line 103, src/sass/components/_overrides.scss */
+/* line 112, src/sass/components/_overrides.scss */
 .float-center {
   float: none;
   margin-left: auto;
   margin-right: auto;
 }
 
-/* line 109, src/sass/components/_overrides.scss */
+/* line 118, src/sass/components/_overrides.scss */
 .float-right, .method .title .description {
   float: right;
 }
@@ -2203,33 +2216,33 @@ pre.error {
 /**
  * Margins
  */
-/* line 118, src/sass/components/_overrides.scss */
+/* line 127, src/sass/components/_overrides.scss */
 .no-margin-top {
   margin-top: 0;
 }
 
-/* line 122, src/sass/components/_overrides.scss */
+/* line 131, src/sass/components/_overrides.scss */
 .no-margin-bottom, .loading #nav-primary,
 .full-width #nav-primary, #search-form {
   margin-bottom: 0;
 }
 
-/* line 126, src/sass/components/_overrides.scss */
+/* line 135, src/sass/components/_overrides.scss */
 .margin-top, .loading .placeholder-paragraph {
   margin-top: 1.5625em;
 }
 
-/* line 130, src/sass/components/_overrides.scss */
+/* line 139, src/sass/components/_overrides.scss */
 .margin-bottom, #nav-primary, .loading .placeholder-hero, .loading .placeholder-heading, .loading .placeholder-paragraph, .loading .placeholder-btn, .method {
   margin-bottom: 1.5625em;
 }
 
-/* line 134, src/sass/components/_overrides.scss */
+/* line 143, src/sass/components/_overrides.scss */
 .margin-bottom-small, .loading .placeholder-sentence, .servicesIodocs {
   margin-bottom: 0.5em;
 }
 
-/* line 138, src/sass/components/_overrides.scss */
+/* line 147, src/sass/components/_overrides.scss */
 .margin-bottom-large {
   margin-bottom: 2em;
 }
@@ -2237,42 +2250,42 @@ pre.error {
 /**
  * Padding
  */
-/* line 147, src/sass/components/_overrides.scss */
+/* line 156, src/sass/components/_overrides.scss */
 .no-padding-top {
   padding-top: 0;
 }
 
-/* line 151, src/sass/components/_overrides.scss */
+/* line 160, src/sass/components/_overrides.scss */
 .no-padding-bottom {
   padding-bottom: 0;
 }
 
-/* line 155, src/sass/components/_overrides.scss */
+/* line 164, src/sass/components/_overrides.scss */
 .padding-top {
   padding-top: 1.5625em;
 }
 
-/* line 159, src/sass/components/_overrides.scss */
+/* line 168, src/sass/components/_overrides.scss */
 .padding-top-small {
   padding-top: 0.5em;
 }
 
-/* line 163, src/sass/components/_overrides.scss */
+/* line 172, src/sass/components/_overrides.scss */
 .padding-top-large {
   padding-top: 2em;
 }
 
-/* line 167, src/sass/components/_overrides.scss */
+/* line 176, src/sass/components/_overrides.scss */
 .padding-bottom {
   padding-bottom: 1.5625em;
 }
 
-/* line 171, src/sass/components/_overrides.scss */
+/* line 180, src/sass/components/_overrides.scss */
 .padding-bottom-small {
   padding-bottom: 0.5em;
 }
 
-/* line 175, src/sass/components/_overrides.scss */
+/* line 184, src/sass/components/_overrides.scss */
 .padding-bottom-large {
   padding-bottom: 2em;
 }
@@ -2285,7 +2298,7 @@ pre.error {
  * @link https://github.com/h5bp/html5-boilerplate/blob/master/dist/css/main.css
  * @link http://snook.ca/archives/html_and_css/hiding-content-for-accessibility
  */
-/* line 189, src/sass/components/_overrides.scss */
+/* line 198, src/sass/components/_overrides.scss */
 .screen-reader {
   border: 0;
   clip: rect(0 0 0 0);
@@ -2303,7 +2316,7 @@ pre.error {
  * @link https://github.com/h5bp/html5-boilerplate/blob/master/dist/css/main.css
  * @link https://www.drupal.org/node/897638
  */
-/* line 206, src/sass/components/_overrides.scss */
+/* line 215, src/sass/components/_overrides.scss */
 .screen-reader-focusable:active,
 .screen-reader-focusable:focus {
   clip: auto;
@@ -2320,7 +2333,7 @@ pre.error {
  * @affected IE 8/9/10
  * @link http://juicystudio.com/article/screen-readers-display-none.php
  */
-/* line 222, src/sass/components/_overrides.scss */
+/* line 231, src/sass/components/_overrides.scss */
 [hidden], template {
   display: none;
   visibility: hidden;
@@ -2331,7 +2344,7 @@ pre.error {
  * The space content is one way to avoid an Opera bug when the `contenteditable` attribute is included anywhere else in the document.
  * @link https://github.com/h5bp/html5-boilerplate/blob/master/dist/css/main.css
  */
-/* line 234, src/sass/components/_overrides.scss */
+/* line 243, src/sass/components/_overrides.scss */
 .clearfix:before, .container:before,
 .row:before, .method .title:before,
 .clearfix:after,
@@ -2344,7 +2357,7 @@ pre.error {
   content: " ";
 }
 
-/* line 240, src/sass/components/_overrides.scss */
+/* line 249, src/sass/components/_overrides.scss */
 .clearfix:after, .container:after,
 .row:after, .method .title:after, .method a.clear-results:after, .method .clear-results.link-block-styled:after {
   clear: both;

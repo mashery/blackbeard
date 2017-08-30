@@ -6,16 +6,16 @@ var getNav = function (selector) {
 
 	// Variables
 	var nav = [];
-	var items = mashery.dom.querySelectorAll(selector);
 	var form, data, secret, created;
 
 	// Generate items object
-	for (var i = 0; i < items.length; i++) {
+	mashery.dom.querySelectorAll(selector).forEach(function(item) {
 		nav.push({
-			label: items[i].innerHTML,
-			url: items[i].getAttribute('href')
+			label: item.innerHTML,
+			url: item.getAttribute('href'),
+			isActive: item.parentNode.classList.contains('active') ? true : false
 		});
-	}
+	});
 
 	return nav;
 

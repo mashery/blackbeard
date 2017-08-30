@@ -59,6 +59,15 @@
 	}
 }
 
+.text-hero {
+	font-size: 2em;
+	line-height: 1.4;
+
+	@media (min-width: $bp-medium) {
+		font-size: 3em;
+	}
+}
+
 
 /**
  * Text colors

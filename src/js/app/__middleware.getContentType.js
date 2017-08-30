@@ -200,7 +200,7 @@ var getContentType = function (elem) {
 				type = 'registerSent';
 			}
 
-			// Register for a Ne Account
+			// Register for a New Account
 			else {
 				type = 'register';
 			}

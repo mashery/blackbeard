@@ -49,6 +49,9 @@ var m$ = (function () {
 		// Text to display in title while loading page
 		ajaxLoading: 'Loading...',
 
+		// Class for links that point to the current page
+		currentPageClass: 'current-page',
+
 		/**
 		 * Favicon
 		 */
@@ -2371,6 +2374,38 @@ var m$ = (function () {
 
 		// Secondary Content (if there's not one specific to the content type)
 		'{{content.secondary}}': function () {
+
+			// If docs, add true current-page
+			if (window.mashery.contentType === 'docs') {
+
+				// Variables
+				var nav = document.createElement('div');
+				var url = cleanLink(location.protocol + '//' + location.host + location.pathname);
+				nav.innerHTML = window.mashery.content.secondary;
+
+				// Add class to links
+				nav.querySelectorAll('li a').forEach(function (link) {
+
+					// Get URL
+					var href = cleanLink(link.getAttribute('href'));
+
+					// If it's the docs landing page
+					if (window.mashery.contentId === 'docs' && /\/docs\/read\/Home/.test(href)) {
+						link.parentNode.classList.add(settings.currentPageClass);
+						return;
+					}
+
+					// If the page matches the URL (without anchor tags)
+					if (href === url) {
+						link.parentNode.classList.add(settings.currentPageClass);
+					}
+
+				});
+
+				// Update the content
+				window.mashery.content.secondary = nav.innerHTML;
+
+			}
 			return window.mashery.content.secondary;
 		},
 
@@ -2396,7 +2431,21 @@ var m$ = (function () {
 
 		// Secondary Nav Items (<li><a href="#">link</a></li> without a parent list wrapper)
 		'{{content.navItemsSecondary}}': function () {
-			return getNavItems(window.mashery.content.navSecondary);
+
+			// Variables
+			var url = cleanLink(location.protocol + '//' + location.host + location.pathname);
+			var nav = document.createElement('div');
+			nav.innerHTML = getNavItems(window.mashery.content.navSecondary);
+
+			// Add current page class to active link, if any
+			nav.querySelectorAll('a').forEach(function (link) {
+				if (cleanLink(link.href) === url) {
+					link.parentNode.classList.add(settings.currentPageClass);
+				}
+			});
+
+			return nav.innerHTML;
+
 		},
 
 		// User Nav Items (<li><a href="#">link</a></li> without a parent list wrapper)
@@ -2409,11 +2458,6 @@ var m$ = (function () {
 			return '<a id="mashery-made-logo" href="http://mashery.com"><img src="https://support.mashery.com/public/Mashery/images/masherymade.png"></a>';
 		},
 
-		// Privacy Policy
-		'{{content.privacyPolicy}}': function () {
-			return settings.labels.register.privacyPolicy;
-		},
-
 		// Registration Terms of Use
 		'{{content.terms}}': function () {
 			var text =
@@ -2421,6 +2465,11 @@ var m$ = (function () {
 				'<p>By clicking the "Register" button, I certify that I have read and agree to {{content.privacyPolicy}}the <a href="http://www.mashery.com/terms/">Mashery Terms of Service</a> and <a href="http://www.mashery.com/privacy/">Privacy Policy</a>.</p>' +
 				'</div>';
 			return text;
+		},
+
+		// Privacy Policy
+		'{{content.privacyPolicy}}': function () {
+			return settings.labels.register.privacyPolicy;
 		},
 
 		// Search Form
@@ -2569,7 +2618,7 @@ var m$ = (function () {
 	m$.sanitizeClass = function (id, prefix) {
 		if (!id) return '';
 		prefix = prefix ? prefix + '-' : '';
-		return prefix + id.replace(/^[^a-z]+|[^\w:.-]+/gi, '-').toLowerCase();
+		return prefix + id.toLowerCase().replace(/^[^a-z]+|[^\w:.-]+/g, '-').replace('read-', '').replace('home-', 'home').replace('-home', '');
 	};
 
 	/**
@@ -2600,7 +2649,6 @@ var m$ = (function () {
 	 * @param   {Boolean}  deep     If true, do a deep (or recursive) merge [optional]
 	 * @param   {Object}   objects  The objects to merge together
 	 * @returns {Object}            Merged values of defaults and options
-	 * @todo optimize loops
 	 */
 	var extend = function () {
 
@@ -2704,6 +2752,18 @@ var m$ = (function () {
 	};
 
 	/**
+	 * Remove garbage from a URL
+	 * @param {String} link The URL to clean
+	 */
+	var cleanLink = function (link) {
+		var url = link.replace('/read', '').replace('/home', '').replace(/#([^\\s]*)/g, '');
+		if (url.slice(-1) === '/') {
+			url = url.slice(0, -1);
+		}
+		return url;
+	};
+
+	/**
 	 * Get the user navigation items
 	 * @private
 	 */
@@ -2712,16 +2772,30 @@ var m$ = (function () {
 		var template;
 
 		if (mashery.loggedIn) {
+
+			// Check for current page
+			var isAccount = ['accountKeys', 'accountApps', 'appRegister', 'appRegisterSuccess', 'appEdit', 'appAddAPIsSuccess', 'appAddAPIs', 'appDelete', 'appAddAPIsError', 'keyDelete', 'keyActivity', 'accountEmailSuccess', 'accountEmail', 'accountPasswordSuccess', 'accountPassword', 'memberRemove', 'showSecret', 'showSecretSuccess', 'showSecretError', 'accountManage'].indexOf(window.mashery.contentType) === -1 ? false : true;
+			var isSignOut = ['logout', 'logoutFail'].indexOf(window.mashery.contentType) === -1 ? false : true;
+
+			// @start here
+
 			// If the user is logged in
 			template =
-				'<li id="nav-user-myaccount"><a href="{{path.keys}}">' + settings.labels.userNav.account + '</a></li>' +
-				(mashery.isAdmin ? '<li><a href="{{path.dashboard}}">' + settings.labels.userNav.dashboard + '</a></li>' : '') +
-				'<li id="nav-user-signout"><a href="{{path.logout}}">' + settings.labels.userNav.signout + '</a></li>';
+				'<li id="nav-user-myaccount"' + (isAccount ? ' class="' + settings.currentPageClass + '"' : '') + '><a href="{{path.keys}}">' + settings.labels.userNav.account + '</a></li>' +
+				(mashery.isAdmin ? '<li id="nav-user-dashboard"><a href="{{path.dashboard}}">' + settings.labels.userNav.dashboard + '</a></li>' : '') +
+				'<li id="nav-user-signout"' + (isSignOut ? ' class="' + settings.currentPageClass + '"' : '') + '><a href="{{path.logout}}">' + settings.labels.userNav.signout + '</a></li>';
+
 		} else {
+
+			// Check for current page
+			var isSignIn = window.mashery.contentType === 'signin' ? true : false;
+			var isRegister = ['registerSent', 'register', 'registerResendSuccess', 'registerResend', 'joinSuccess', 'join'].indexOf(window.mashery.contentType) === -1 ? false : true;
+
 			// If they're logged out
 			template =
-				'<li id="nav-user-signin"><a href="{{path.signin}}">' + settings.labels.userNav.signin + '</a></li>' +
-				'<li id="nav-user-register"><a href="{{path.register}}">' + settings.labels.userNav.register + '</a></li>';
+				'<li id="nav-user-signin"' + (isSignIn ? ' class="' + settings.currentPageClass + '"' : '') + '><a href="{{path.signin}}">' + settings.labels.userNav.signin + '</a></li>' +
+				'<li id="nav-user-register"' + (isRegister ? ' class="' + settings.currentPageClass + '"' : '') + '><a href="{{path.register}}">' + settings.labels.userNav.register + '</a></li>';
+
 		}
 
 		return replacePlaceholders(template);
@@ -2732,11 +2806,20 @@ var m$ = (function () {
 	 * @private
 	 */
 	var getAccountNavItems = function () {
+
+		// Get current page
+		var isKeys = ['accountKeys', 'keyDelete', 'keyActivity', 'showSecret', 'showSecretSuccess', 'showSecretError'].indexOf(window.mashery.contentType) === -1 ? false : true;
+		var isApps = ['accountApps', 'appRegister', 'appRegisterSuccess', 'appEdit', 'appAddAPIsSuccess', 'appAddAPIs', 'appDelete', 'appAddAPIsError'].indexOf(window.mashery.contentType) === -1 ? false : true;
+		var isAccount = ['accountEmailSuccess', 'accountEmail', 'accountPasswordSuccess', 'accountPassword', 'memberRemoveSuccess', 'memberRemove', 'accountManage'].indexOf(window.mashery.contentType) === -1 ? false : true;
+
+		// Create template
 		var template =
-			'<li><a href="{{path.keys}}">' + settings.labels.accountNav.keys + '</a></li>' +
-			'<li><a href="{{path.apps}}">' + settings.labels.accountNav.apps + '</a></li>' +
-			'<li><a href="{{path.account}}">' + settings.labels.accountNav.account + '</a></li>';
+			'<li' + (isKeys ? ' class="' + settings.currentPageClass + '"' : '') + '><a href="{{path.keys}}">' + settings.labels.accountNav.keys + '</a></li>' +
+			'<li' + (isApps ? ' class="' + settings.currentPageClass + '"' : '') + '><a href="{{path.apps}}">' + settings.labels.accountNav.apps + '</a></li>' +
+			'<li' + (isAccount ? ' class="' + settings.currentPageClass + '"' : '') + '><a href="{{path.account}}">' + settings.labels.accountNav.account + '</a></li>';
+
 		return replacePlaceholders(template);
+
 	};
 
 	/**
@@ -2744,12 +2827,21 @@ var m$ = (function () {
 	 * @private
 	 */
 	var getMasheryAccountNavItems = function () {
+
+		// Get current page
+		var isEmail = ['accountEmailSuccess', 'accountEmail'].indexOf(window.mashery.contentType) === -1 ? false : true;
+		var isPassword = ['accountPasswordSuccess', 'accountPassword'].indexOf(window.mashery.contentType) === -1 ? false : true;
+		var isRemove = ['memberRemoveSuccess', 'memberRemove'].indexOf(window.mashery.contentType) === -1 ? false : true;
+
+		// Create template
 		var template =
-			'<li><a href="{{path.changeEmail}}">' + settings.labels.accountNav.changeEmail + '</a></li>' +
-			'<li><a href="{{path.changePassword}}">' + settings.labels.accountNav.changePassword + '</a></li>' +
+			'<li' + (isEmail ? ' class="' + settings.currentPageClass + '"' : '') + '><a href="{{path.changeEmail}}">' + settings.labels.accountNav.changeEmail + '</a></li>' +
+			'<li' + (isPassword ? ' class="' + settings.currentPageClass + '"' : '') + '><a href="{{path.changePassword}}">' + settings.labels.accountNav.changePassword + '</a></li>' +
 			'<li><a href="{{path.viewProfile}}">' + settings.labels.accountNav.viewProfile + '</a></li>' +
-			'<li><a href="{{path.removeMembership}}">' + settings.labels.accountNav.removeMembership + '</a></li>';
+			'<li' + (isRemove ? ' class="' + settings.currentPageClass + '"' : '') + '><a href="{{path.removeMembership}}">' + settings.labels.accountNav.removeMembership + '</a></li>';
+
 		return replacePlaceholders(template);
+
 	};
 
 	/**
@@ -2760,24 +2852,9 @@ var m$ = (function () {
 	var getNavItems = function (items) {
 		var template = '';
 		items.forEach(function (item) {
-			template += '<li><a href="' + decodeURIComponent(item.url) + '">' + item.label + '</a></li>';
+			template += '<li' + (item.isActive ? ' class="' + settings.currentPageClass + '"' : '') + '><a href="' + decodeURIComponent(item.url) + '">' + item.label + '</a></li>';
 		});
 		return template;
-	};
-
-	/**
-	 * Add selector class to all links that point to the current page
-	 * @private
-	 * @todo
-	 */
-	var addCurrentPageClass = function () {
-		document.querySelectorAll('a').forEach(function (link) {
-			document.querySelectorAll('a').forEach(function (link) {
-				if (link.href.toLowerCase() === (window.location.origin + window.location.pathname)) {
-					console.log(link);
-				}
-			});
-		});
 	};
 
 	/**
