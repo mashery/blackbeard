@@ -77,7 +77,7 @@ var paths = {
 		output: 'dist/img/'
 	},
 	static: {
-		input: 'src/static/*',
+		input: 'src/static/*/**',
 		output: 'dist/'
 	},
 	docs: {

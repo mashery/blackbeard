@@ -1,3 +1,5 @@
+# Markdown Support
+
 Blackbeard supports [GitHub-flavored Markdown](https://github.github.com/gfm/) for documentation and custom pages.
 
 *__Note:__ To use markdown, you MUST disable TinyMCE by unchecking "Use TinyMCE" in Control Center. If you ever edit a page written in markdown with TinyMCE enabled, it will wrap your content in paragraph elements and break your page, preventing markdown from rendering.*

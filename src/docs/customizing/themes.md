@@ -7,7 +7,9 @@
 	}
 </style>
 
-Want to see how easy it is to customize layouts? Click one of the themes below.
+Themes are pre-built combinations of layout changes, label updates, user options, and CSS. Use them as-is, or as a starting point to customize your Portal more quickly.
+
+To see how easy it is to change the look of your Portal, click one of the themes below to update the appearance of this demo.
 
 <div>
 	<a class="toggle-theme" data-options="blackbeard" href="#">
