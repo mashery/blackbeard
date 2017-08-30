@@ -1,3 +1,5 @@
+# Themes
+
 <style>
 	.toggle-theme.current h2:after {
 		color: #808080;
@@ -166,9 +168,6 @@ To see how easy it is to change the look of your Portal, click one of the themes
 
 		'use strict';
 
-		// Don't reinit
-		if (window.toggleThemesRunning) return;
-
 		// Make sure toggle theme button exists before running
 		if (!document.querySelector('.toggle-theme')) return;
 
@@ -202,9 +201,24 @@ To see how easy it is to change the look of your Portal, click one of the themes
 			theme.classList.add('current');
 		};
 
-		// Register that toggle theme is already initialized
-		window.toggleThemesRunning = true;
+		// Update current theme
+		var setCurrentTheme = function () {
+			if (window.mashery.contentId !== 'docs-themes') return;
+			var currentSS = getStylesheet();
+			var currentTheme, currentToggle;
+			for (var theme in themeOptions) {
+				if (themeOptions.hasOwnProperty(theme)) {
+					if (currentSS.getAttribute('href') !== themeOptions[theme].styles) continue;
+					currentToggle = document.querySelector('.toggle-theme[data-options="' + theme + '"]');
+					updateCurrent(currentToggle);
+					break;
+				}
+			}
+		};
+		setCurrentTheme();
 
+		// Don't reinit click listener
+		if (window.toggleThemesRunning) return;
 		document.addEventListener('click', function (event) {
 
 			// Only run if theme toggle is clicked
@@ -238,20 +252,8 @@ To see how easy it is to change the look of your Portal, click one of the themes
 
 		}, false);
 
-		// Update current theme
-		window.addEventListener('portalAfterRender', function () {
-			if (window.mashery.contentId !== 'docs-themes') return;
-			var currentSS = getStylesheet();
-			var currentTheme, currentToggle;
-			for (var theme in themeOptions) {
-				if (themeOptions.hasOwnProperty(theme)) {
-					if (currentSS.getAttribute('href') !== themeOptions[theme].styles) continue;
-					currentToggle = document.querySelector('.toggle-theme[data-options="' + theme + '"]');
-					updateCurrent(currentToggle);
-					break;
-				}
-			}
-		}, false);
+		// Register that toggle theme is already initialized
+		window.toggleThemesRunning = true;
 
 	};
 
