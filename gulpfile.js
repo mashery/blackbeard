@@ -81,7 +81,7 @@ var paths = {
 		output: 'dist/'
 	},
 	docs: {
-		input: 'src/docs/*/**',
+		input: 'src/docs/**',
 		output: 'docs/'
 		// templates: 'src/docs/_templates/',
 		// assets: 'src/docs/assets/**'
