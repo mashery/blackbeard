@@ -33,36 +33,4 @@ window.addEventListener('portalRenderAfter', function (event) {
 
 ## Emitting your own custom events
 
-Blackbeard includes a JavaScript API for emitting your own custom events.
-
-```js
-/**
- * Emit a custom event
- * @param {String} eventName  The name of the event to emit
- * @param {Object} options    Options for the event
- * @param {Node}   elem       The element to dispatch the event on [optional - defaults to window]
- */
-m$.emitEvent(eventName, options, elem);
-```
-
-### Examples
-
-**A simple event**
-
-```js
-m$.emitEvent('afterMyScript');
-```
-
-**An event with options**
-
-`m$.emitEvent()` uses the browser-native [CustomEvent API](https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent/CustomEvent). Any custom details must go under the `details` property.
-
-```js
-m$.emitEvent('afterMyScript', {
-	details: {
-		something: 'a value',
-		another: true,
-		answer: 42
-	}
-});
-```
+Blackbeard also includes [a JavaScript API for emitting your own custom events](/docs/read/api).
