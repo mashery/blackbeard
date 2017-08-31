@@ -1,6 +1,6 @@
 # Browser Compatibility
 
-Blackbeard works in the last two version of all major browsers, and IE9+. Proxy browsers (such as Opera Mini and Amazon Silk) are not supported.
+Blackbeard works in the **last two major versions of all major browsers**, and **IE9+**. Proxy browsers (such as Opera Mini and Amazon Silk) are not supported.
 
 | Browser           | Compatibility   |
 | ----------------- | --------------- |
