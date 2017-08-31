@@ -82,7 +82,7 @@ var githubDocs = function (options) {
 To load our content as quickly as possible, we'll run our `githubDocs()` method as soon as the main content is rendered.
 
 ```js
-window.addEventListener('portalRenderMainAfter', function () {
+window.addEventListener('portalAfterRenderMain', function () {
 	githubDocs();
 }, false);
 ```

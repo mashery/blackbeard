@@ -136,8 +136,8 @@ window.addEventListener('portalAfterRenderMain', function () {
 	});
 }, false);
 
-var generateCustomizingNav = function () {
-	var list = document.querySelector('#customizing-list');
+var generateNavList = function (selector) {
+	var list = document.querySelector(selector);
 	document.querySelectorAll('#nav-docs .current-page li').forEach(function (item) {
 		var newItem = item.cloneNode(true);
 		list.append(newItem);
@@ -155,8 +155,8 @@ var generateGettingStartedNav = function () {
 };
 
 window.addEventListener('portalAfterRender', function () {
-	if (mashery.contentId === 'docs-customizing') {
-		generateCustomizingNav();
+	if (mashery.contentType === 'docs' && document.querySelector('#content-nav-list')) {
+		generateNavList('#content-nav-list');
 	}
 
 	if (mashery.contentId === 'docs') {

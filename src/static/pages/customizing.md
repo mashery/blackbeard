@@ -2,5 +2,5 @@ Blackbeard was built to be extremely customizable and extensible. You have compl
 
 **Getting Starting:**
 
-<ol id="customizing-list">
+<ol id="content-nav-list">
 </ol>
