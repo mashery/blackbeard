@@ -99,6 +99,21 @@ window.addEventListener('portalAfterRenderMain', function () {
 	});
 }, false);
 
+var generateCustomizingNav = function () {
+	console.log(document.querySelectorAll('#nav-docs .current-page li'));
+	var list = document.querySelector('#customizing-list');
+	document.querySelectorAll('#nav-docs .current-page li').forEach(function (item) {
+		var newItem = item.cloneNode(true);
+		list.append(newItem);
+	});
+};
+
+window.addEventListener('portalAfterRender', function () {
+	if (mashery.contentId === 'docs-customizing') {
+		generateCustomizingNav();
+	}
+}, false);
+
 loadJS('/files/app.min.js', function () {
 	m$.init(portalOptions);
 });

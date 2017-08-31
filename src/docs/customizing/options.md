@@ -19,7 +19,7 @@ For now, you can test their functionality by opening up the Console tab of Devel
 You can copy/paste this into the console in developer tools. It will add a logo.
 
 ```js
-// Update the labels
+// Update the logo
 portalOptions.logo = '<img height="44" width="180" alt="Mashery" src="https://support.mashery.com/files/tibco-mashery.jpg">';
 
 // Update the settings with our new options

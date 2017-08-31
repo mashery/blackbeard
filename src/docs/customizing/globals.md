@@ -55,22 +55,20 @@ You can assign globals under `Manage > Portal > Portal Settings` in one of the i
 
 Globals can be a boolean, number, or string. Functions will not work and throw an error.
 
-```html
-<script>
-	mashery.globals.isAwesome = true;
-	mashery.globals.secretMessage = 'What is the answer to life, the universe, and everything?';
-	mashery.globals.answer = 42;
+```js
+mashery.globals.isAwesome = true;
+mashery.globals.secretMessage = 'What is the answer to life, the universe, and everything?';
+mashery.globals.answer = 42;
 
-	// If present, display a secret message
-	if (mashery.globals.secretMessage) {
-		var hitchHikers = prompt(mashery.globals.secretMessage);
-		if (hitchHikers == mashery.globals.answer) {
-			alert('You\'re a good frood!');
-		} else {
-			alert('So long and thanks for all the fish!');
-		}
+// If present, display a secret message
+if (mashery.globals.secretMessage) {
+	var hitchHikers = prompt(mashery.globals.secretMessage);
+	if (hitchHikers == mashery.globals.answer) {
+		alert('You\'re a good frood!');
+	} else {
+		alert('So long and thanks for all the fish!');
 	}
-</script>
+}
 ```
 
 *__Note:__ If you're using Ajax page loads (the default behavior), you must set your globals to `mashery.globals` if you want to access them on subsequent page loads.*
