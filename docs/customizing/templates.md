@@ -1,14 +1,17 @@
 # Templates
 
-With templates, you can modify the layout of and content of any page in your Portal.
+With templates, you can modify the layout of and content of any page on your Portal.
 
-Templates are modified by setting a `portalOptions.templates` value for the desired templates. Templates can be simple JavaScript strings, or for more complex or logic-driven layouts, a function that returns a string.
+Templates are modified by setting a `portalOptions.templates` value for the desired template. They can be simple JavaScript strings, or for more complex or logic-driven layouts, a function that returns a string.
 
 Templates also accept placeholder variables that are automatically replaced with content during the render process. All of the available templates and their accepted variables are detailed alphabetically below.
 
 ## Global Placeholder Variables
 
 These are placeholder variables that can be used in any template.
+
+### Content
+Placeholder variables for content.
 
 - `{{mashery.area}}` - The name of your Portal as defined in Control Center.
 - `{{content.heading}}` - The title of the page's H1 element, if one exists.
@@ -28,10 +31,41 @@ These are placeholder variables that can be used in any template.
 - `{{mashery.title}}` - The page title. The H1 content for most pages, or, if unspecified, the Mashery Area name.
 - `{{mashery.username}}` - The currently logged in user's username.
 
+### Paths
+Placeholder variables for system URLs.
+
+- `{{path.apps}}` - The My Apps page.
+- `{{path.keys}}` - The My Keys page.
+- `{{path.account}}` - The My Account page.
+- `{{path.changeEmail}}` - The page to change your email.
+- `{{path.changePassword}}` - The page to change your password.
+- `{{path.contact}}` - The contact page.
+- `{{path.dashboard}}` - The Control Center Dashboard.
+- `{{path.docs}}` - The documentation page.
+- `{{path.iodocs}}` - The IO Docs page.
+- `{{path.logout}}` - The logout link.
+- `{{path.lostPassword}}` - The page to request a lost password.
+- `{{path.lostUsername}}` - The page to request a lost username.
+- `{{path.removeMember}}` - The link to trigger a remove account request.
+- `{{path.register}}` - The page to register a new account.
+- `{{path.registerResendConfirmation}}` - The page to confirm that a registration email was resent.
+- `{{path.removeMembership}}` - The page to remove account membership from this Portal.
+- `{{path.search}}` - The search results page.
+- `{{path.signin}}` - The sign in page.
+- `{{path.viewProfile}}` - The current user's profile.
+
+
 ## The Templates
 
 ### Base layout
 The markup structure that all of the content will get loaded into.
+
+- `{{layout.navUser}}` - The wrapper for the user navigation.
+- `{{layout.navPrimary}}` - The wrapper for the primary navigation.
+- `{{layout.main}}` - The wrapper for the main content area.
+- `{{layout.footer1}}` - The wrapper for the first footer content area.
+- `{{layout.navSecondary}}` - The wrapper for the secondary navigation.
+- `{{layout.footer2}}` - The wrapper for the second footer content area.
 
 ```js
 portalOptions.templates.layout =
@@ -48,6 +82,8 @@ portalOptions.templates.layout =
 
 ### My Apps
 The page displaying a users registered applications.
+
+- `{{content.noApps}}` - The content to display when the user has no applications.
 
 ```js
 portalOptions.templates.accountApps = function () {
@@ -117,6 +153,9 @@ portalOptions.templates.accountEmailSuccess =
 ### My Keys
 The page displaying a users API keys.
 
+- `{{content.noPlanKeys}}` - The message to display when a plan has no keys.
+- `{{content.noKeys}}` - The message to display when a user has no keys.
+
 ```js
 portalOptions.templates.accountKeys = function () {
 	var template = '<h1>{{content.heading}}</h1><ul id="nav-account">{{content.navItemsAccount}}</ul>';
@@ -161,6 +200,8 @@ portalOptions.templates.accountKeys = function () {
 ### My Account
 The page where users can manage their Mashery Account details.
 
+- `{{content.subheading}}` - The heading to display above the account details form.
+
 ```js
 portalOptions.templates.accountManage =
 	'<div class="main container container-small" id="main">' +
@@ -202,7 +243,13 @@ portalOptions.templates.accountPasswordSuccess =
 
 
 ### Add App APIs
-Add APIs to an application
+Add APIs to an application.
+
+- `{{content.applicationLabel}}` - The label before the application name.
+- `{{content.createdLabel}}` - The label before the date the application was created.
+- `{{content.apiLabel}}` - The label before the API name.
+- `{{content.keyLabel}}` - The label before the API key.
+- `{{content.subheading}}` - The heading above the form to add APIs to the application.
 
 ```js
 portalOptions.templates.appAddAPIs = function () {
@@ -226,6 +273,12 @@ portalOptions.templates.appAddAPIs = function () {
 
 ### App Delete
 Delete an application
+
+- `{{content.applicationLabel}}` - The label before the application name.
+- `{{content.createdLabel}}` - The label before the date the application was created.
+- `{{content.apiLabel}}` - The label before the API name.
+- `{{content.keyLabel}}` - The label before the API key.
+- `{{content.subheading}}` - The heading above the form to delete the application.
 
 ```js
 portalOptions.templates.appDelete = function () {
@@ -340,6 +393,8 @@ portalOptions.templates.contactSuccess =
 ### Documentation
 The layout for API documentation. This page includes an automatically generated navigation menu.
 
+- `{{content.subheading}}` - The heading above the documentation sub-navigation.
+
 ```js
 portalOptions.templates.docs =
 	'<div class="main container" id="main">' +
@@ -438,6 +493,13 @@ portalOptions.templates.joinSuccess =
 ### Key Activity
 Layout for the key activity report page.
 
+- `{{content.applicationLabel}}` - The label before the application name.
+- `{{content.keyLabel}}` - The label before the API key.
+- `{{content.secretLabel}}` - The label before the key secret.
+- `{{content.statusLabel}}` - The label before the key status.
+- `{{content.createdLabel}}` - The label before the date the application was created.
+- `{{content.limits}}` - A table displaying any call limits for the key.
+
 ```js
 portalOptions.templates.keyActivity = function () {
 	var template =
@@ -465,6 +527,13 @@ portalOptions.templates.keyActivity = function () {
 
 ### Key: Delete
 Layout for the delete key page.
+
+- `{{content.applicationLabel}}` - The label before the application name.
+- `{{content.keyLabel}}` - The label before the API key.
+- `{{content.secretLabel}}` - The label before the key secret.
+- `{{content.statusLabel}}` - The label before the key status.
+- `{{content.createdLabel}}` - The label before the date the application was created.
+- `{{content.subheadingConfirm}}` - The heading above the form where users confirm that they want to delete their key.
 
 ```js
 portalOptions.templates.keyDelete = function () {
@@ -566,6 +635,9 @@ portalOptions.templates.lostUsernameReset =
 ### Remove Membership
 The page where users can remove their membership from this Portal.
 
+- `{{content.confirm}}` - The button text to confirm you want to remove your membership from this Portal.
+- `{{content.cancel}}` - The button text to cancel removing your account.
+
 ```js
 portalOptions.templates.memberRemove =
 	'<div class="main container container-small" id="main">' +
@@ -618,6 +690,12 @@ portalOptions.templates.page =
 ### User Profiles
 The layout for user profile pages.
 
+- `{{content.headingUserInfo}}` - The heading above the user's info.
+- `{{content.userWebsite}}` - The label before the user's website URL.
+- `{{content.userBlog}}` - The label before the user's blog URL.
+- `{{content.userRegistered}}` - The label before the date the user registered.
+- `{{content.headingActivity}}` - The heading above the user's list of activity.
+
 ```js
 portalOptions.templates.profile = function () {
 	var template = '<h1>{{content.heading}}</h1>';
@@ -646,6 +724,8 @@ portalOptions.templates.profile = function () {
 ### Primary Navigation
 The primary navigation content for the Portal.
 
+- `{{content.menuToggle}}` - The label on the button to expand and collapse the navigation menu on smaller screens.
+
 ```js
 portalOptions.templates.primaryNav =
 	'<div class="nav-primary nav-wrap nav-collapse" id="nav-primary">' +
@@ -665,6 +745,8 @@ portalOptions.templates.primaryNav =
 
 ### Registration
 The registration page. Terms of Use *must* be included on this page, and will be automatically injected if you omit them.
+
+- `{{content.about}}` - The "No Spam" message on the registration page.
 
 ```js
 portalOptions.templates.register =
@@ -724,6 +806,13 @@ portalOptions.templates.registerResendSuccess =
 
 ### Search
 The layout for search results.
+
+- `{{content.headingNew}}` - The heading to display if no search query is provided.
+- `{{content.meta}}` - Meta details about the search.
+- `{{content.pagePrevious}}` - The text for the link to go to the previous page of results.
+- `{{content.pageDivider}}` - The divider between the previous and next page links.
+- `{{content.pageNext}}` - The text for the link to go to the next page of results.
+- `{{content.noResults}}` - The message to display if no search results are found.
 
 ```js
 portalOptions.templates.search = function () {
