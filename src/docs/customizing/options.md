@@ -85,7 +85,7 @@ portalOptions.loadJSFooter: [];
 ```
 
 ### Logo
-Add a custom logo. Accepts any markup as a string (<img src>, <svg>, etc.).
+Add a custom logo. Accepts any markup as a string (`<img src>`, `<svg>`, etc.).
 
 ```js
 portalOptions.logo: null;
