@@ -31,7 +31,7 @@ m$.renderPortal();
 
 ## The Options
 
-## Ajax page loads
+### Ajax page loads
 Whether to load pages async or with a page reload
 
 ```js
