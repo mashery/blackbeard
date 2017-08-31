@@ -1,5 +1,3 @@
-# Themes
-
 <style>
 	.toggle-theme.current h2:after {
 		color: #808080;
@@ -75,9 +73,8 @@ To see how easy it is to change the look of your Portal, click one of the themes
 				return template;
 			};
 
-
 			portalOptions.templates.docs =
-				'<div class="main container" id="main">' +
+				'<div class="main container content" id="main">' +
 					'<h1>{{content.heading}}</h1>' +
 					'{{content.main}}' +
 				'</div>';
@@ -219,6 +216,11 @@ To see how easy it is to change the look of your Portal, click one of the themes
 
 		// Don't reinit click listener
 		if (window.toggleThemesRunning) return;
+
+		// Update the current theme indicator
+		window.addEventListener('portalAfterRender', setCurrentTheme, false);
+
+		// Listen for clicks
 		document.addEventListener('click', function (event) {
 
 			// Only run if theme toggle is clicked

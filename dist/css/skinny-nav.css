@@ -513,6 +513,11 @@ ol {
 }
 
 /* line 82, src/sass/components/_typography.scss */
+li {
+  margin-bottom: 0.25em;
+}
+
+/* line 86, src/sass/components/_typography.scss */
 ul ul,
 ul ol,
 ol ol,
@@ -520,19 +525,19 @@ ol ul {
   margin-bottom: 0;
 }
 
-/* line 89, src/sass/components/_typography.scss */
+/* line 93, src/sass/components/_typography.scss */
 dl,
 dd {
   margin: 0;
   padding: 0;
 }
 
-/* line 95, src/sass/components/_typography.scss */
+/* line 99, src/sass/components/_typography.scss */
 dd {
   margin-bottom: 1.5625em;
 }
 
-/* line 99, src/sass/components/_typography.scss */
+/* line 103, src/sass/components/_typography.scss */
 dt {
   font-weight: bold;
 }
@@ -541,7 +546,7 @@ dt {
  * Removes list styling.
  * For semantic reasons, should only be used on unordered lists.
  */
-/* line 107, src/sass/components/_typography.scss */
+/* line 111, src/sass/components/_typography.scss */
 .list-unstyled {
   margin-left: 0;
   list-style: none;
@@ -550,7 +555,7 @@ dt {
 /**
  * Display lists on a single line.
  */
-/* line 116, src/sass/components/_typography.scss */
+/* line 120, src/sass/components/_typography.scss */
 .list-inline, #nav-secondary-list, #nav-account, #controls ul {
   list-style: none;
   margin-left: -0.5em;
@@ -558,7 +563,7 @@ dt {
   padding: 0;
 }
 
-/* line 123, src/sass/components/_typography.scss */
+/* line 127, src/sass/components/_typography.scss */
 .list-inline > li, #nav-secondary-list > li, #nav-account > li, #controls ul > li {
   display: inline-block;
   margin-left: 0.5em;
@@ -569,7 +574,7 @@ dt {
  * Heading styling for h1 through h6 elements.
  * Heading class lets you use one heading type for semantics, but style it as another heading type.
  */
-/* line 135, src/sass/components/_typography.scss */
+/* line 139, src/sass/components/_typography.scss */
 h1, h2, h3, h4, h5, h6 {
   font-weight: normal;
   line-height: 1.2;
@@ -578,7 +583,7 @@ h1, h2, h3, h4, h5, h6 {
   word-wrap: break-word;
 }
 
-/* line 143, src/sass/components/_typography.scss */
+/* line 147, src/sass/components/_typography.scss */
 h1,
 .h1 {
   font-size: 1.5em;
@@ -586,20 +591,20 @@ h1,
 }
 
 @media (min-width: 40em) {
-  /* line 143, src/sass/components/_typography.scss */
+  /* line 147, src/sass/components/_typography.scss */
   h1,
   .h1 {
     font-size: 1.75em;
   }
 }
 
-/* line 153, src/sass/components/_typography.scss */
+/* line 157, src/sass/components/_typography.scss */
 h2,
 .h2 {
   font-size: 1.3125em;
 }
 
-/* line 158, src/sass/components/_typography.scss */
+/* line 162, src/sass/components/_typography.scss */
 h3,
 .h3,
 .apiDescriptionList h4,
@@ -607,13 +612,13 @@ h3,
   font-size: 1.1875em;
 }
 
-/* line 163, src/sass/components/_typography.scss */
+/* line 167, src/sass/components/_typography.scss */
 h4, h5, h6,
 .h4, .h5, .h6 {
   font-size: 1em;
 }
 
-/* line 168, src/sass/components/_typography.scss */
+/* line 172, src/sass/components/_typography.scss */
 h4,
 .h4 {
   text-transform: uppercase;
@@ -622,7 +627,7 @@ h4,
 /**
  * Lines, Quotes and Emphasis
  */
-/* line 178, src/sass/components/_typography.scss */
+/* line 182, src/sass/components/_typography.scss */
 hr {
   border: 0;
   border-top: 1px solid #e5e5e5;
@@ -635,7 +640,7 @@ hr {
 /**
  * Prevent the duplicate application of `bolder` by the next rule in Safari 6.
  */
-/* line 190, src/sass/components/_typography.scss */
+/* line 194, src/sass/components/_typography.scss */
 b,
 strong {
   font-weight: inherit;
@@ -644,7 +649,7 @@ strong {
 /**
  * Add the correct font weight in Chrome, Edge, and Safari.
  */
-/* line 198, src/sass/components/_typography.scss */
+/* line 202, src/sass/components/_typography.scss */
 b,
 strong {
   font-weight: bolder;
@@ -654,7 +659,7 @@ strong {
  * 1. Remove the bottom border in Firefox 39-.
  * 2. Add the correct text decoration in Chrome, Edge, IE, Opera, and Safari.
  */
-/* line 207, src/sass/components/_typography.scss */
+/* line 211, src/sass/components/_typography.scss */
 abbr[title] {
   border-bottom: none;
   /* 1 */
@@ -667,7 +672,7 @@ abbr[title] {
 /**
  * Address styling not present in Safari and Chrome.
  */
-/* line 216, src/sass/components/_typography.scss */
+/* line 220, src/sass/components/_typography.scss */
 dfn {
   font-style: italic;
 }
@@ -675,7 +680,7 @@ dfn {
 /**
  * Address styling not present in IE 8/9.
  */
-/* line 223, src/sass/components/_typography.scss */
+/* line 227, src/sass/components/_typography.scss */
 mark {
   background: #ff0;
   color: #000000;
@@ -684,7 +689,7 @@ mark {
 /**
  * Address inconsistent and variable font size in all browsers.
  */
-/* line 231, src/sass/components/_typography.scss */
+/* line 235, src/sass/components/_typography.scss */
 small {
   font-size: 80%;
 }
@@ -692,7 +697,7 @@ small {
 /**
  * Prevent `sub` and `sup` affecting `line-height` in all browsers.
  */
-/* line 238, src/sass/components/_typography.scss */
+/* line 242, src/sass/components/_typography.scss */
 sub,
 sup {
   font-size: 75%;
@@ -701,12 +706,12 @@ sup {
   vertical-align: baseline;
 }
 
-/* line 246, src/sass/components/_typography.scss */
+/* line 250, src/sass/components/_typography.scss */
 sup {
   top: -0.5em;
 }
 
-/* line 250, src/sass/components/_typography.scss */
+/* line 254, src/sass/components/_typography.scss */
 sub {
   bottom: -0.25em;
 }
@@ -714,7 +719,7 @@ sub {
 /**
  * Blockquotes
  */
-/* line 259, src/sass/components/_typography.scss */
+/* line 263, src/sass/components/_typography.scss */
 blockquote {
   font-size: 1.1875em;
   font-style: italic;
@@ -723,20 +728,20 @@ blockquote {
   padding-right: 0.84211em;
 }
 
-/* line 266, src/sass/components/_typography.scss */
+/* line 270, src/sass/components/_typography.scss */
 blockquote cite {
   color: #808080;
   font-size: 0.84211em;
   padding-top: 1em;
 }
 
-/* line 273, src/sass/components/_typography.scss */
+/* line 277, src/sass/components/_typography.scss */
 blockquote,
 q {
   quotes: none;
 }
 
-/* line 278, src/sass/components/_typography.scss */
+/* line 282, src/sass/components/_typography.scss */
 blockquote:before,
 blockquote:after,
 q:before,

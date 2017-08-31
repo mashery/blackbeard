@@ -10,7 +10,7 @@ When v1.x of Blackbeard goes live, these will be set under `Manage > Portal > Po
 
 For now, you can test their functionality by opening up the Console tab of Developer Tools in your browser and doing the following:
 
-0. Copy/paste your desired options into the console and hit enter.
+0. Copy/paste your desired options from the list below into the console and hit enter.
 0. Paste `m$.setOptions(portalOptions)` in the console and hit enter to update Blackbeard's default settings.
 0. Paste `m$.renderPortal()` in the console and hit enter to re-render the site.
 

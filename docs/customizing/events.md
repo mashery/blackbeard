@@ -55,7 +55,7 @@ m$.emitEvent('afterMyScript');
 
 **An event with options**
 
-`m$.emitEvent()` uses the native CustomEvent API. Any custom details must go under the `details` property.
+`m$.emitEvent()` uses the browser-native [CustomEvent API](https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent/CustomEvent). Any custom details must go under the `details` property.
 
 ```js
 m$.emitEvent('afterMyScript', {
