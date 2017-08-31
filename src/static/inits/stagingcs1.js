@@ -65,44 +65,88 @@ window.addEventListener('portalBeforeRender', function () {
 	}
 }, false);
 
-window.addEventListener('portalAfterRenderMain', function () {
+var githubDocs = function (options) {
 
+	// Polyfill for window.atob()
 	if (!('atob' in window)) {
 		!function () { function e(e) { this.message = e } var t = "undefined" != typeof exports ? exports : "undefined" != typeof self ? self : $.global, r = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="; e.prototype = new Error, e.prototype.name = "InvalidCharacterError", t.btoa || (t.btoa = function (t) { for (var o, n, a = String(t), i = 0, f = r, c = ""; a.charAt(0 | i) || (f = "=", i % 1); c += f.charAt(63 & o >> 8 - i % 1 * 8)) { if (n = a.charCodeAt(i += .75), n > 255) throw new e("'btoa' failed: The string to be encoded contains characters outside of the Latin1 range."); o = o << 8 | n } return c }), t.atob || (t.atob = function (t) { var o = String(t).replace(/[=]+$/, ""); if (o.length % 4 == 1) throw new e("'atob' failed: The string to be decoded is not correctly encoded."); for (var n, a, i = 0, f = 0, c = ""; a = o.charAt(f++); ~a && (n = i % 4 ? 64 * n + a : a, i++ % 4) ? c += String.fromCharCode(255 & n >> (-2 * i & 6)) : 0)a = r.indexOf(a); return c }) }();
 	}
 
-	// Variables
+	// Sanity check
 	if (!window.mashery.globals.github) return;
-	var main = document.querySelector('.content');
+
+	// Variables
+	var defaults = {
+		selector: '.content',
+		user: null,
+		repo: null,
+		root: '',
+		runScripts: false,
+		loading: '<p>Loading...</p>',
+		failMessage: '<p>Unable to load content. Visit <a target="_blank" href="https://github.com/mashery/blackbeard/tree/master/docs/' + mashery.globals.github + '">https://github.com/mashery/blackbeard/tree/master/docs/' + mashery.globals.github + '</a> to view the documentation.</p>'
+	}
+	var settings = m$.merge(defaults, options || {});
+	if (!settings.user || !settings.repo) return;
+	var main = document.querySelector(settings.selector);
 	if (!main) return;
 
-	// Add loading test
-	main.innerHTML = '<p>Loading...</p>';
+	// Add loading text
+	main.innerHTML = settings.loading;
 
 	// Get the docs
 	atomic.ajax({
-		url: 'https://api.github.com/repos/mashery/blackbeard/contents/docs/' + mashery.globals.github
+		url: 'https://api.github.com/repos/' + settings.user + '/' + settings.repo + '/contents/' + settings.root + mashery.globals.github
 	}).success(function (data) {
+
+		// Convert markdown to HTML
 		markdown = new showdown.Converter();
 		markdown.setFlavor('github');
 		main.innerHTML = markdown.makeHtml(window.atob(data.content));
-		// main.querySelectorAll('script').forEach(function (script) {
-		// 	var func = new Function(script.innerHTML);
-		// 	func();
-		// });
+
+		// If inline scripts should be run, run them
+		if (settings.runScripts) {
+			main.querySelectorAll('script').forEach(function (script) {
+				var func = new Function(script.innerHTML);
+				func();
+			});
+		}
+
+		// Fix the location
 		m$.fixLocation();
+
+		// Syntax highlight code
 		if ('Prism' in window) {
 			Prism.highlightAll();
 		}
+
+		m$.emit('portalGitHubRenderAfter');
+
 	}).error(function (data) {
-		main.innerHTML = '<p>Unable to load content. Visit <a target="_blank" href="https://github.com/mashery/blackbeard/tree/master/docs/' + mashery.globals.github + '">https://github.com/mashery/blackbeard/tree/master/docs/' + mashery.globals.github + '</a> to view the documentation.</p>';
+		main.innerHTML = settings.failMessage;
+		m$.emit('portalGitHubRenderFail');
+	});
+
+};
+
+window.addEventListener('portalAfterRenderMain', function () {
+	githubDocs({
+		root: 'docs/'
 	});
 }, false);
 
 var generateCustomizingNav = function () {
-	console.log(document.querySelectorAll('#nav-docs .current-page li'));
 	var list = document.querySelector('#customizing-list');
 	document.querySelectorAll('#nav-docs .current-page li').forEach(function (item) {
+		var newItem = item.cloneNode(true);
+		list.append(newItem);
+	});
+};
+
+var generateGettingStartedNav = function () {
+	var list = document.querySelector('#getting-started-list');
+	document.querySelectorAll('#nav-docs > li').forEach(function (item) {
+		if (item.classList.contains('current-page')) return;
+		if (item.innerText.trim() === 'Tests') return;
 		var newItem = item.cloneNode(true);
 		list.append(newItem);
 	});
@@ -111,6 +155,10 @@ var generateCustomizingNav = function () {
 window.addEventListener('portalAfterRender', function () {
 	if (mashery.contentId === 'docs-customizing') {
 		generateCustomizingNav();
+	}
+
+	if (mashery.contentId === 'docs') {
+		generateGettingStartedNav();
 	}
 }, false);
 
