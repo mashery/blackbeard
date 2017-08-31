@@ -30,3 +30,39 @@ window.addEventListener('portalRenderAfter', function (event) {
 - `portalAfterRenderSecondaryNav` runs after the secondary navigation is rendered.
 - `portalBeforeRenderFooter` runs before the footer is rendered.
 - `portalAfterRenderFooter` runs after the footer is rendered.
+
+## Emitting your own custom events
+
+Blackbeard includes a JavaScript API for emitting your own custom events.
+
+```js
+/**
+ * Emit a custom event
+ * @param {String} eventName  The name of the event to emit
+ * @param {Object} options    Options for the event
+ * @param {Node}   elem       The element to dispatch the event on [optional - defaults to window]
+ */
+m$.emitEvent(eventName, options, elem);
+```
+
+### Examples
+
+**A simple event**
+
+```js
+m$.emitEvent('afterMyScript');
+```
+
+**An event with options**
+
+`m$.emitEvent()` uses the native CustomEvent API. Any custom details must go under the `details` property.
+
+```js
+m$.emitEvent('afterMyScript', {
+	details: {
+		something: 'a value',
+		another: true,
+		answer: 42
+	}
+});
+```
