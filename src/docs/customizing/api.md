@@ -77,6 +77,38 @@ m$.onloadCSS(css, function () {
 });
 ```
 
+## `extend()`
+Merge two or more JavaScript objects together. By default, runs a shallow merge. To do a deep merge, pass in `true` as the first argument.
+
+```js
+/**
+ * @param   {Boolean}  deep     If true, do a deep (or recursive) merge [optional]
+ * @param   {Object}   objects  The objects to merge together
+ * @returns {Object}            Merged values of defaults and options
+ */
+m$.extend(object1, object2, ...);
+
+// Example objects
+var object1 = {
+    apple: 0,
+    banana: { weight: 52, price: 100 },
+    cherry: 97
+};
+var object2 = {
+    banana: { price: 200 },
+    durian: 100
+};
+var object3 = {
+    apple: 'yum',
+    pie: 3.214,
+    applePie: true
+};
+
+// Create a new object by combining two or more objects
+var shallowMerge = extend(object1, object2, object3);
+var deepMerge = extend(true, object1, object2, object3);
+```
+
 ## `sanitizeClass()`
 Sanitize a string for use as a class or ID. Removes spaces and other invalid characters.
 

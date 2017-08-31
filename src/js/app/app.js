@@ -2648,12 +2648,12 @@ var m$ = (function () {
 
 	/**
 	 * Merge two or more objects together.
-	 * @private
+	 * @public
 	 * @param   {Boolean}  deep     If true, do a deep (or recursive) merge [optional]
 	 * @param   {Object}   objects  The objects to merge together
 	 * @returns {Object}            Merged values of defaults and options
 	 */
-	var extend = function () {
+	m$.extend = function () {
 
 		// Variables
 		var extended = {};
@@ -2666,7 +2666,7 @@ var m$ = (function () {
 				if (Object.prototype.hasOwnProperty.call(obj, prop)) {
 					// If property is an object, merge properties
 					if (Object.prototype.toString.call(obj[prop]) === '[object Object]') {
-						extended[prop] = extend(extended[prop], obj[prop]);
+						extended[prop] = m$.extend(extended[prop], obj[prop]);
 					} else {
 						extended[prop] = obj[prop];
 					}
@@ -2701,7 +2701,7 @@ var m$ = (function () {
 	 * @param {Object} options  User options to merge into defaults
 	 */
 	m$.setOptions = function (options) {
-		settings = extend(defaults, options || {});
+		settings = m$.extend(defaults, options || {});
 	};
 
 	/**
@@ -3400,6 +3400,29 @@ var m$ = (function () {
 	};
 
 	/**
+	 * Get an element's distance from the top of the page
+	 * @private
+	 * @param  {Node}   elem  The element to get the distance of
+	 * @return {Number}       The element's distance from the top of the page
+	 */
+	var getOffsetTop = function (elem) {
+
+		// Set our distance placeholder
+		var distance = 0;
+
+		// Loop up the DOM
+		if (elem.offsetParent) {
+			do {
+				distance += elem.offsetTop;
+				elem = elem.offsetParent;
+			} while (elem);
+		}
+
+		// Return our distance
+		return distance < 0 ? 0 : distance;
+	};
+
+	/**
 	 * Jump to anchor or adjust focus when rendering is complete
 	 * (Our JS rendering process breaks the normal browser behavior)
 	 * @public
@@ -3409,6 +3432,7 @@ var m$ = (function () {
 			var location = document.querySelector(window.location.hash);
 			if (!location) return;
 			location.focus();
+			window.scrollTo(0, getOffsetTop(location));
 		} else {
 			document.querySelector('#app').focus();
 			window.scrollTo(0, 0);
