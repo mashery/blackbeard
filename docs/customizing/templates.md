@@ -6,6 +6,71 @@ Templates are modified by setting a `portalOptions.templates` value for the desi
 
 Templates also accept placeholder variables that are automatically replaced with content during the render process. All of the available templates and their accepted variables are detailed alphabetically below.
 
+## Customizing Templates
+
+When v1.x of Blackbeard goes live, these will be set under `Manage > Portal > Portal Settings` in the inline JavaScript area.
+
+For now, you can test their functionality by opening up the Console tab of Developer Tools in your browser and doing the following:
+
+0. Copy/paste your desired template from the list below into the console and hit enter.
+0. Paste `m$.setOptions(portalOptions)` in the console and hit enter to update Blackbeard's default settings.
+0. Paste `m$.renderPortal()` in the console and hit enter to re-render the site.
+
+*__Note:__ This may produce a layout you're unhappy with. Reload the browser to reset this demo Portal back to it's defaults.*
+
+### Example
+You can copy/paste this into the console in developer tools. It will update the base layout.
+
+```js
+// Remove the user nav
+portalOptions.templates.userNav = null;
+
+// Update the primary navigation
+portalOptions.templates.primaryNav = function () {
+	var template =
+		'<div class="nav-primary nav-wrap nav-collapse" id="nav-primary">' +
+			'<div class="container padding-top-small padding-bottom-small">' +
+				'<a id="logo" class="logo margin-bottom" href="/">{{content.logo}}</a>' +
+				'<a role="button" class="nav-toggle" id="nav-primary-toggle" data-nav-toggle="#nav-primary-menu" href="#">{{content.menuToggle}}</a>' +
+				'<div class="nav-menu" id="nav-primary-menu">' +
+					'<ul class="nav" id="nav-primary-list">' +
+						'{{content.navItemsPrimary}}' +
+					'</ul>' +
+					'<ul class="nav-user-list" id="nav-user-list">' +
+						'{{content.navItemsUser}}' +
+					'</ul>' +
+					'{{content.searchForm}}' +
+					(mashery.contentType === 'docs' ? '<h2 class="margin-top">In The Docs</h2><ul class="nav-docs" id="nav-docs">{{content.secondary}}</ul>' : '') +
+				'</div>' +
+			'</div>' +
+		'</div>';
+	return template;
+};
+
+// Update the base layout
+portalOptions.templates.layout =
+	'<div class="row row-no-padding clearfix">' +
+		'<div class="grid-three-fourths">' +
+			'{{layout.main}}' +
+			'<footer class="footer" id="footer">' +
+				'{{layout.footer1}}' +
+				'{{layout.navSecondary}}' +
+				'{{layout.footer2}}' +
+			'</footer>' +
+		'</div>' +
+		'<div class="grid-fourth">' +
+			'<a class="screen-reader screen-reader-focusable" href="#main">Skip to content</a>' +
+			'{{layout.navPrimary}}' +
+		'</div>' +
+	'</div>';
+
+// Update the settings with our new options
+m$.setOptions(portalOptions);
+
+// Re-render the Portal
+m$.renderPortal();
+```
+
 ## Global Placeholder Variables
 
 These are placeholder variables that can be used in any template.
