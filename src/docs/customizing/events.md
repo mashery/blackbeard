@@ -33,4 +33,4 @@ window.addEventListener('portalRenderAfter', function (event) {
 
 ## Emitting your own custom events
 
-Blackbeard also includes [a JavaScript API for emitting your own custom events](/docs/read/api).
+Blackbeard also includes [a JavaScript API for emitting your own custom events](/docs/read/api#emitevent).gu
