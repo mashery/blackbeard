@@ -250,3 +250,66 @@ m$.renderPortal();
 // Example that triggers file downloads
 m$.renderPortal(true);
 ```
+
+## `atomic.ajax()`
+To help you make XHR requests more easily, the [Atomic Ajax/HTTP plugin](https://github.com/cferdinandi/atomic) comes prebundled.
+
+Pass in the requested URL, and optionally, the request type. Defaults to `GET`.
+
+The `success`, `error`, and `always` callbacks run when the request is successful, when it fails, and either way, respectively. They accept the `responseText` (`data`) and full response (`xhr`) as arguments. All three callbacks are optional.
+
+```js
+// A GET request
+atomic.ajax({
+	url: '/endpoint.com'
+})
+	.success(function (data, xhr) {
+		console.log(data); // xhr.responseText
+		console.log(xhr); // full response
+	})
+	.error(function (data, xhr) {
+		console.log(data); // xhr.responseText
+		console.log(xhr); // full response
+	})
+	.always(function (data, xhr) {
+		console.log(data); // xhr.responseText
+		console.log(xhr); // full response
+	});
+
+// A POST request
+atomic.ajax({
+	type: 'POST',
+	url: '/endpoint.com'
+});
+```
+
+JSONP requests do not accept the callback functions. You must instead setup a global callback function and pass in the function name a string to the `callback` option. Atomic will pass the returned data into your callback as an argument (in the example below, `data`).
+
+```js
+var myCallback(data) {
+	console.log(data); // full response
+};
+
+// A JSONP request
+atomic.ajax({
+	type: 'JSONP',
+	url: '/endpoint.com',
+	callback: 'myCallback'
+});
+```
+
+**Options & Settings**
+
+```js
+atomic.ajax({
+	type: 'GET', // {String} the request type
+	url: null, // {String} the endpoint for your request
+	data: {}, // {Object|Array|String} data to be sent to the server
+	callback: null, // {String} The name of a global callback function (for use with JSONP)
+	headers: { // {Object} Adds headers to your request: request.setRequestHeader(key, value)
+		'Content-type': 'application/x-www-form-urlencoded'
+	},
+	responseType: 'text', // {String} the response type (https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/responseType)
+	withCredentials: false // {Boolean} If true, send credentials with request (https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/withCredentials)
+});
+```
