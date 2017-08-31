@@ -33,7 +33,7 @@ var githubDocs = function (options) {
 		loading: '<p>Loading...</p>',
 		failMessage: '<p>Unable to load content. Visit <a target="_blank" href="https://github.com/mashery/blackbeard/tree/master/docs/' + mashery.globals.github + '">https://github.com/mashery/blackbeard/tree/master/docs/' + mashery.globals.github + '</a> to view the documentation.</p>'
 	}
-	var settings = m$.merge(defaults, options || {});
+	var settings = m$.extend(defaults, options || {});
 	if (!settings.user || !settings.repo) return;
 	var main = document.querySelector(settings.selector);
 	if (!main) return;
@@ -67,11 +67,11 @@ var githubDocs = function (options) {
 			Prism.highlightAll();
 		}
 
-		m$.emit('portalGitHubRenderAfter');
+		m$.emitEvent('portalGitHubRenderAfter');
 
 	}).error(function (data) {
 		main.innerHTML = settings.failMessage;
-		m$.emit('portalGitHubRenderFail');
+		m$.emitEvent('portalGitHubRenderFail');
 	});
 
 };
@@ -128,6 +128,8 @@ Here's an example from the Blackbeard demo Portal.
 ```js
 window.addEventListener('portalAfterRenderMain', function () {
 	githubDocs({
+		user: 'mashery',
+		repo: 'blackbeard',
 		root: 'docs/' // The root directory for all of my documentation
 	});
 }, false);
