@@ -1,6 +1,6 @@
 {
 	"name": "blackbeard",
-	"version": "0.2.0",
+	"version": "beta",
 	"description": "Future portal layout",
 	"main": "./dist/js/main.js",
 	"author": {

@@ -18,3 +18,7 @@ window.addEventListener('portalBeforeRender', function () {
 		document.documentElement.classList.remove('full-width');
 	}
 }, false);
+
+window.addEventListener('portalLoaded', function () {
+	m$.init(portalOptions);
+}, false);

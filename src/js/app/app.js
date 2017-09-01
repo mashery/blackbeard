@@ -16,10 +16,10 @@ var m$ = (function () {
 	var filePaths = {
 
 		// IO Docs
-		ioDocsJS: '/files/iodocs-vanilla.js',
+		ioDocsJS: 'https://stagingcs1.mashery.com/files/iodocs-vanilla.min.beta.js',
 
 		// Syntax Highlighting
-		prism: '/files/prism.min.js',
+		prism: 'https://stagingcs1.mashery.com/files/files/prism.min.beta.js',
 
 		// API Reporting
 		googleJSAPI: 'https://www.google.com/jsapi',
@@ -2663,7 +2663,7 @@ var m$ = (function () {
 		// Merge the object into the extended object
 		var merge = function (obj) {
 			for (var prop in obj) {
-				if (Object.prototype.hasOwnProperty.call(obj, prop)) {
+				if (obj.hasOwnProperty(prop)) {
 					// If property is an object, merge properties
 					if (Object.prototype.toString.call(obj[prop]) === '[object Object]') {
 						extended[prop] = m$.extend(extended[prop], obj[prop]);
@@ -2888,16 +2888,11 @@ var m$ = (function () {
 	 * @param {String}  before   The name of the event to emit before rendering
 	 * @param {String}  after    The name of the event to emit after rendering
 	 */
-	var render = function (selector, key, before, after) {
+	var render = function (selector, key) {
 
 		// Get the content
 		var content = document.querySelector(selector);
 		if (!content) return;
-
-		// Emit the before render event
-		if (before) {
-			m$.emitEvent(before);
-		}
 
 		// Render the content
 		content.innerHTML = settings.templates[key] ? replacePlaceholders(settings.templates[key], key) : '';
@@ -2908,11 +2903,6 @@ var m$ = (function () {
 			junk.forEach(function (item) {
 				item.remove();
 			});
-		}
-
-		// Emit the after render event
-		if (after) {
-			m$.emitEvent(after);
 		}
 
 	};
@@ -3177,7 +3167,7 @@ var m$ = (function () {
 		document.querySelectorAll('pre').forEach(function (pre) {
 			var lang = /brush: (.*?);/.exec(pre.className);
 			var code = pre.querySelector('code');
-			if (!lang || !Array.isArray(lang) || lang.length < 2) return;
+			if (!lang || Object.prototype.toString.call(lang) !== '[object Array]' || lang.length < 2) return;
 			var langClass = getLangClass(lang[1]);
 			pre.classList.add(langClass);
 			pre.className = pre.className.replace(/brush: (.*?);/, '');
@@ -3265,7 +3255,7 @@ var m$ = (function () {
 		mashMade.innerHTML = '<p>x</p><div id="mashery-made"><div class="container"><p>' + globalPlaceholders['{{content.masheryMade}}']() + '</p></div></div>';
 
 		// Inject into the DOM
-		app.appendChild(mashMade.childNodes[1]);
+		app.append(mashMade.childNodes[1]);
 
 	};
 
@@ -3337,7 +3327,7 @@ var m$ = (function () {
 	 * @private
 	 */
 	var renderLayout = function () {
-		render('#app', 'layout', 'portalBeforeRenderLayout', 'portalAfterRenderLayout');
+		render('#app', 'layout');
 		verifyLoggedIn();
 	};
 
@@ -3354,7 +3344,7 @@ var m$ = (function () {
 	 * @private
 	 */
 	var renderUserNav = function () {
-		render('#nav-user-wrapper', 'userNav', 'portalBeforeRenderUserNav', 'portalAfterRenderUserNav');
+		render('#nav-user-wrapper', 'userNav');
 	};
 
 	/**
@@ -3362,7 +3352,7 @@ var m$ = (function () {
 	 * @private
 	 */
 	var renderPrimaryNav = function () {
-		render('#nav-primary-wrapper', 'primaryNav', 'portalBeforeRenderPrimaryNav', 'portalAfterRenderPrimaryNav');
+		render('#nav-primary-wrapper', 'primaryNav');
 	};
 
 	/**
@@ -3370,7 +3360,7 @@ var m$ = (function () {
 	 * @private
 	 */
 	var renderSecondaryNav = function () {
-		render('#nav-secondary-wrapper', 'secondaryNav', 'portalBeforeRenderSecondaryNav', 'portalAfterRenderSecondaryNav');
+		render('#nav-secondary-wrapper', 'secondaryNav');
 	};
 
 	/**
@@ -3378,17 +3368,8 @@ var m$ = (function () {
 	 * @private
 	 */
 	var renderFooter = function () {
-
-		// Run the before render event
-		m$.emitEvent('portalBeforeRenderFooter');
-
-		// Render footers 1 and 2
 		render('#footer-1-wrapper', 'footer1');
 		render('#footer-2-wrapper', 'footer2');
-
-		// Run the after render event
-		m$.emitEvent('portalAfterRenderFooter');
-
 	};
 
 	/**
@@ -3396,7 +3377,7 @@ var m$ = (function () {
 	 * @private
 	 */
 	var renderMain = function () {
-		render('#main-wrapper', window.mashery.contentType, 'portalBeforeRenderMain', 'portalAfterRenderMain');
+		render('#main-wrapper', window.mashery.contentType);
 	};
 
 	/**
@@ -3757,3 +3738,5 @@ var m$ = (function () {
 	return m$;
 
 })();
+
+m$.emitEvent('portalLoaded');

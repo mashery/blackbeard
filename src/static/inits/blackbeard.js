@@ -1,16 +1,3 @@
-portalOptions.templates.page = function () {
-	if (mashery.globals.fullWidth) {
-		return	'<div class="main content" id="main">' +
-					'{{content.main}}' +
-				'</div>';
-	} else {
-		return	'<div class="main container content" id="main">' +
-					'<h1>{{content.heading}}</h1>' +
-					'{{content.main}}' +
-				'</div>';
-	}
-};
-
 portalOptions.templates.userNav = null;
 
 portalOptions.templates.primaryNav = function () {
@@ -34,7 +21,6 @@ portalOptions.templates.primaryNav = function () {
 	return template;
 };
 
-
 portalOptions.templates.docs =
 	'<div class="main container" id="main">' +
 		'<h1>{{content.heading}}</h1>' +
@@ -57,6 +43,19 @@ portalOptions.templates.layout =
 		'</div>' +
 	'</div>';
 
+portalOptions.templates.page = function () {
+	if (mashery.globals.fullWidth) {
+		return	'<div class="main content" id="main">' +
+					'{{content.main}}' +
+				'</div>';
+	} else {
+		return	'<div class="main container content" id="main">' +
+					'<h1>{{content.heading}}</h1>' +
+					'{{content.main}}' +
+				'</div>';
+	}
+};
+
 window.addEventListener('portalBeforeRender', function () {
 	if (mashery.globals.fullWidth) {
 		document.documentElement.classList.add('full-width');
@@ -65,6 +64,6 @@ window.addEventListener('portalBeforeRender', function () {
 	}
 }, false);
 
-loadJS('/files/app.min.js', function () {
+window.addEventListener('portalLoaded', function () {
 	m$.init(portalOptions);
-});
+}, false);
