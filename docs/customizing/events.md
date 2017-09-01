@@ -5,7 +5,7 @@ Blackbeard emits custom JavaScript events that you can hook into to run other sc
 For example, here's how to open an alert window every time a page is rendered.
 
 ```js
-window.addEventListener('portalRenderAfter', function (event) {
+window.addEventListener('portalAfterRender', function (event) {
 	alert('The Portal was rendered!');
 }, false);
 ```
