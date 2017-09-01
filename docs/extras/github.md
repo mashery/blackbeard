@@ -10,80 +10,23 @@ To make this work, we'll use Blackbeard's [event hooks](/docs/read/customizing/E
 
 githubDocs.js is a tiny little helper script that fetches content from GitHub via the Content API, base64 decodes it, converts any markdown into HTML, and injects it into the DOM.
 
-Add it in Control Center under `Manage > Portal > Portal Settings` in one of the inline JavaScript sections.
+Load it into your portal after it's rendered using one of the [custom event hooks](/docs/read/customizing/Events) and [`m$.loadJS()`](/docs/read/customizing/API#loadjs).
 
 ```js
-var githubDocs = function (options) {
-
-	// Polyfill for window.atob()
-	if (!('atob' in window)) {
-		!function () { function e(e) { this.message = e } var t = "undefined" != typeof exports ? exports : "undefined" != typeof self ? self : $.global, r = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="; e.prototype = new Error, e.prototype.name = "InvalidCharacterError", t.btoa || (t.btoa = function (t) { for (var o, n, a = String(t), i = 0, f = r, c = ""; a.charAt(0 | i) || (f = "=", i % 1); c += f.charAt(63 & o >> 8 - i % 1 * 8)) { if (n = a.charCodeAt(i += .75), n > 255) throw new e("'btoa' failed: The string to be encoded contains characters outside of the Latin1 range."); o = o << 8 | n } return c }), t.atob || (t.atob = function (t) { var o = String(t).replace(/[=]+$/, ""); if (o.length % 4 == 1) throw new e("'atob' failed: The string to be decoded is not correctly encoded."); for (var n, a, i = 0, f = 0, c = ""; a = o.charAt(f++); ~a && (n = i % 4 ? 64 * n + a : a, i++ % 4) ? c += String.fromCharCode(255 & n >> (-2 * i & 6)) : 0)a = r.indexOf(a); return c }) }();
-	}
-
-	// Sanity check
-	if (!window.mashery.globals.github) return;
-
-	// Variables
-	var defaults = {
-		selector: '.content',
-		user: null,
-		repo: null,
-		root: '',
-		runScripts: false,
-		loading: '<p>Loading...</p>',
-		failMessage: '<p>Unable to load content. Visit <a target="_blank" href="https://github.com/mashery/blackbeard/tree/master/docs/' + mashery.globals.github + '">https://github.com/mashery/blackbeard/tree/master/docs/' + mashery.globals.github + '</a> to view the documentation.</p>'
-	}
-	var settings = m$.extend(defaults, options || {});
-	if (!settings.user || !settings.repo) return;
-	var main = document.querySelector(settings.selector);
-	if (!main) return;
-
-	// Add loading text
-	main.innerHTML = settings.loading;
-
-	// Get the docs
-	atomic.ajax({
-		url: 'https://api.github.com/repos/' + settings.user + '/' + settings.repo + '/contents/' + settings.root + mashery.globals.github
-	}).success(function (data) {
-
-		// Convert markdown to HTML
-		markdown = new showdown.Converter();
-		markdown.setFlavor('github');
-		main.innerHTML = markdown.makeHtml(window.atob(data.content));
-
-		// If inline scripts should be run, run them
-		if (settings.runScripts) {
-			main.querySelectorAll('script').forEach(function (script) {
-				var func = new Function(script.innerHTML);
-				func();
-			});
-		}
-
-		// Fix the location
-		m$.fixLocation();
-
-		// Syntax highlight code
-		if ('Prism' in window) {
-			Prism.highlightAll();
-		}
-
-		m$.emitEvent('portalGitHubRenderAfter');
-
-	}).error(function (data) {
-		main.innerHTML = settings.failMessage;
-		m$.emitEvent('portalGitHubRenderFail');
-	});
-
-};
+window.addEventListener('portalAfterRender', function () {
+	m$.loadJS('https://stagingcs1.mashery.com/files/githubDocs.min.beta.js');
+}, false);
 ```
 
-### 2. Setup an event listener
+### 2. Add a callback
 
-To load our content as quickly as possible, we'll run our `githubDocs()` method as soon as the main content is rendered.
+We want to run githubDocs.js after it's loaded. We'll pass a callback into `m$.loadJS()`.
 
 ```js
-window.addEventListener('portalAfterRenderMain', function () {
-	githubDocs();
+window.addEventListener('portalAfterRender', function () {
+	m$.loadJS('https://stagingcs1.mashery.com/files/githubDocs.min.beta.js', function () {
+		githubDocs();
+	});
 }, false);
 ```
 
@@ -94,15 +37,19 @@ The `githubDocs()` method accepts a few options, passed in as an object (`{}`).
 There are only two required options: `user` and `repo`. These should point to the GitHub username and repository, respectively, of the project to pull content from. Exclude any others that you'd like to use the default for.
 
 ```js
-githubDocs({
-	selector: '.content', // The selector for the container to render the content in
-	user: null, // The GitHub username for the repository
-	repo: null, // The GitHub repository to get content from
-	root: '', // The root directory to use in the project
-	runScripts: false, // If true, run any in-content scripts after loading the content
-	loading: '<p>Loading...</p>', // Text to display while loading content from GitHub
-	failMessage: '<p>Unable to load content. Visit <a target="_blank" href="https://github.com/mashery/blackbeard/tree/master/docs/' + mashery.globals.github + '">https://github.com/mashery/blackbeard/tree/master/docs/' + mashery.globals.github + '</a> to view the documentation.</p>' // Text to display if the GitHub API returns an error
-});
+window.addEventListener('portalAfterRender', function () {
+	m$.loadJS('https://stagingcs1.mashery.com/files/githubDocs.min.beta.js', function () {
+		githubDocs({
+			selector: '.content', // The selector for the container to render the content in
+			user: null, // The GitHub username for the repository
+			repo: null, // The GitHub repository to get content from
+			root: '', // The root directory to use in the project
+			runScripts: false, // If true, run any in-content scripts after loading the content
+			loading: '<p>Loading...</p>', // Text to display while loading content from GitHub
+			failMessage: '<p>Unable to load content. Visit <a target="_blank" href="https://github.com/mashery/blackbeard/tree/master/docs/' + mashery.globals.github + '">https://github.com/mashery/blackbeard/tree/master/docs/' + mashery.globals.github + '</a> to view the documentation.</p>' // Text to display if the GitHub API returns an error
+		});
+	});
+}, false);
 ```
 
 ### 4. Point to your content
@@ -126,11 +73,13 @@ Here's an example from the Blackbeard demo Portal.
 **Setup**
 
 ```js
-window.addEventListener('portalAfterRenderMain', function () {
-	githubDocs({
-		user: 'mashery',
-		repo: 'blackbeard',
-		root: 'docs/' // The root directory for all of my documentation
+window.addEventListener('portalAfterRender', function () {
+	m$.loadJS('https://stagingcs1.mashery.com/files/githubDocs.min.beta.js', function () {
+		githubDocs({
+			user: 'mashery',
+			repo: 'blackbeard',
+			root: 'docs/' // The root directory for all of my documentation
+		});
 	});
 }, false);
 ```
@@ -149,7 +98,7 @@ window.addEventListener('portalAfterRenderMain', function () {
 
 githubDocs.js emits two custom events.
 
-- `portalGitHubRenderAfter` runs after content is rendered.
-- `portalGitHubRenderFail` runs if the GitHub Content API returns with an error.
+- `portalAfterGitHubRender` runs after content is rendered.
+- `portalAfterGitHubError` runs if the GitHub Content API returns with an error.
 
 You can these to run additional scripts if desired.
