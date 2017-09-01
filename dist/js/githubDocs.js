@@ -42,7 +42,7 @@ var githubDocs = function (options) {
 	}).success((function (data) {
 
 		// Convert markdown to HTML
-		markdown = new showdown.Converter();
+		var markdown = new showdown.Converter();
 		markdown.setFlavor('github');
 		main.innerHTML = markdown.makeHtml(window.atob(data.content));
 
