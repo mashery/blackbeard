@@ -101,7 +101,7 @@ githubDocs.js emits two custom events.
 - `portalAfterGitHubRender` runs after content is rendered.
 - `portalAfterGitHubError` runs if the GitHub Content API returns with an error.
 
-You can these to run additional scripts if desired.
+You can hook into these to run additional scripts if desired.
 
 
 ## Potential Issues

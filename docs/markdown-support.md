@@ -32,6 +32,12 @@ On July 3, the Black Knights, a squadron of Marine Corps F/A-18 Hornets,
 participated in an assault on a destroyer near the city of Los Angeles.
 ```
 
+On July 2, an alien mothership entered Earth's orbit and deployed several dozen
+saucer-shaped "destroyer" spacecraft, each 15 miles (24 km) wide.
+
+On July 3, the Black Knights, a squadron of Marine Corps F/A-18 Hornets,
+participated in an assault on a destroyer near the city of Los Angeles.
+
 ## Headings
 
 You can create a heading by adding one or more `#` symbols before your heading text. The number of `#` you use will determine the size of the heading.
@@ -40,6 +46,12 @@ You can create a heading by adding one or more `#` symbols before your heading t
 # The largest heading (an H1 tag)
 ## The second largest heading (an H2 tag)
 ###### The 6th largest heading (an H6 tag)
+```
+
+```html
+<h1>The largest heading (an H1 tag)</h1>
+<h2>The second largest heading (an H2 tag)</h2>
+<h6>The 6th largest heading (an H6 tag)</h6>
 ```
 
 The space between `#` and the heading text is not required. You can wrap the headings in `#`. Both leading and trailing `#` will be removed.
@@ -62,11 +74,11 @@ If, for some reason, you need to keep a leading or trailing `#`, you can either 
 Blackbeard markdown automatically generates header IDs.
 
 ```md
-# My cool header with ID
+## My cool header with ID
 ```
 
 ```html
-<h1 id="mycoolheaderwithid">My cool header with ID</h1>
+<h2 id="mycoolheaderwithid">My cool header with ID</h2>
 ```
 
 ## Blockquotes
@@ -79,6 +91,10 @@ In the words of Abraham Lincoln:
 > Pardon my french
 ```
 
+In the words of Abraham Lincoln:
+
+> Pardon my french
+
 Blockquotes can have multiple paragraphs and can have other block elements inside.
 
 ```md
@@ -90,6 +106,13 @@ Blockquotes can have multiple paragraphs and can have other block elements insid
 > - with items
 ```
 
+> A paragraph of text
+>
+> Another paragraph
+>
+> - A list
+> - with items
+
 ## Bold and Italic
 
 You can make text bold or italic.
@@ -99,11 +122,16 @@ You can make text bold or italic.
 **This text will be bold**
 ```
 
+*This text will be italic*
+**This text will be bold**
+
 Both bold and italic can use either a `*` or an `_` around the text for styling. This allows you to combine both bold and italic if needed.
 
 ```md
 **Everyone _must_ attend the meeting at 5 o'clock today.**
 ```
+
+**Everyone _must_ attend the meeting at 5 o'clock today.**
 
 ## Strikethrough
 
@@ -126,9 +154,7 @@ Use single backticks (`) to format text in a special monospace format. Everythin
 Here's an idea: why don't we take `SuperiorProject` and turn it into `**Reasonable**Project`.
 ```
 
-```html
-<p>Here's an idea: why don't we take <code>SuperiorProject</code> and turn it into <code>**Reasonable**Project</code>.</p>
-```
+Here's an idea: why don't we take `SuperiorProject` and turn it into `**Reasonable**Project`.
 
 ### Multiple lines
 
@@ -140,6 +166,10 @@ To create blocks of code you can indent it by four spaces.
     code
 ```
 
+    this is a piece
+    of
+    code
+
 You can also use triple backticks (```) to format text as its own distinct block.
 
     Check out this neat program I wrote:
@@ -149,6 +179,14 @@ You can also use triple backticks (```) to format text as its own distinct block
     x = 2 + 2
     what is x
     ```
+
+Check out this neat program I wrote:
+
+```
+x = 0
+x = 2 + 2
+what is x
+```
 
 You can specify a language after the triple backticks, and Blackbeard will automatically add syntax highlighting.
 
@@ -174,6 +212,10 @@ You can make an unordered list by preceding list items with either a `*`, a `-` 
 - Item
 ```
 
+* Item
++ Item
+- Item
+
 ### Ordered lists
 
 You can make an ordered list by preceding list items with a number.
@@ -184,7 +226,21 @@ You can make an ordered list by preceding list items with a number.
 3. Item 3
 ```
 
+1. Item 1
+2. Item 2
+3. Item 3
+
 It’s important to note that the actual numbers you use to mark the list have no effect on the HTML output Blackbeard markdown produces. So you can use the same number in all items if you wish to.
+
+```md
+0. Item 1
+0. Item 2
+0. Item 3
+```
+
+0. Item 1
+0. Item 2
+0. Item 3
 
 ### TaskLists
 
@@ -214,6 +270,16 @@ List items may consist of multiple paragraphs. Each subsequent paragraph in a li
 2.  Suspendisse id sem consectetuer libero luctus adipiscing.
 ```
 
+1.  This is a list item with two paragraphs. Lorem ipsum dolor
+    sit amet, consectetuer adipiscing elit. Aliquam hendrerit
+    mi posuere lectus.
+
+    Vestibulum enim wisi, viverra nec, fringilla in, laoreet
+    vitae, risus. Donec sit amet nisl. Aliquam semper ipsum
+    sit amet velit.
+
+2.  Suspendisse id sem consectetuer libero luctus adipiscing.
+
 This is valid for other block elements such as blockquotes:
 
 ```md
@@ -222,6 +288,11 @@ This is valid for other block elements such as blockquotes:
     > This is a blockquote
     > inside a list item.
 ```
+
+*   A list item with a blockquote:
+
+    > This is a blockquote
+    > inside a list item.
 
 Or even other lists.
 
@@ -240,6 +311,15 @@ You can create nested lists by indenting list items by **four** spaces.
 3.  Item 3
 ```
 
+1.  Item 1
+    1. A corollary to the above item.
+    2. Yet another point to consider.
+2.  Item 2
+    * A corollary that does not need to be ordered.
+    * This is indented four spaces
+    * You might want to consider making a new list.
+3.  Item 3
+
 To nest a third (or more) sublist level, you need to indent 4 extra spaces (or 1 extra tab) for each level.
 
 ```
@@ -250,6 +330,13 @@ To nest a third (or more) sublist level, you need to indent 4 extra spaces (or 1
         1.  Level 3
 1.  Level 1
 ```
+
+1.  level 1
+    1.  Level 2
+        *   Level 3
+    2.  level 2
+        1.  Level 3
+1.  Level 1
 
 ### Nested code blocks
 
@@ -264,13 +351,20 @@ You can nest fenced codeblocks the same way you nest other block elements, by in
     ```
 ```
 
+1.  Some code:
+
+    ```js
+    var foo = 'bar';
+    console.log(foo);
+    ```
+
 To put a *indented style* code block within a list item, the code block needs to be indented twice&mdash;8 spaces or two tabs:
 
 ```md
 1.  Some code:
 
-    var foo = 'bar';
-    console.log(foo);
+        var foo = 'bar';
+        console.log(foo);
 ```
 
 ## Links
@@ -285,11 +379,17 @@ link to http://www.google.com/
 this is my email somedude@mail.com
 ```
 
+link to http://www.google.com/
+
+this is my email somedude@mail.com
+
 ### Inline
 
-You can create an inline link by wrapping link text in brackets ( `[ ]` ), and then wrapping the link in parentheses ( `( )` ).
+You can create an inline link by wrapping link text in brackets (`[]`), and then wrapping the link in parentheses (`()`).
 
 For example, to create a hyperlink to github.com/mashery/blackbeard, with a link text that says, Get Blackbeard!, you'd write this in Markdown: `[Get Blackbeard!](https://github.com/mashery/blackbeard)`.
+
+[Get Blackbeard!](https://github.com/mashery/blackbeard)
 
 ## Images
 
@@ -322,6 +422,22 @@ Colons can be used to align columns. The outer pipes (`|`) are optional. You als
 | zebra stripes | ~~are neat~~  |    $1 |
 ```
 
+| Tables        | Are           | Cool  |
+| ------------- |:-------------:| -----:|
+| **col 3 is**  | right-aligned | $1600 |
+| col 2 is      | *centered*    |   $12 |
+| zebra stripes | ~~are neat~~  |    $1 |
+
+## Line breaks
+
+Add a line break with three dashes.
+
+```md
+---
+```
+
+---
+
 ## Escaping markdown entities
 
 Blackbeard allows you to use backslash (`\`) escapes to generate literal characters which would otherwise have special meaning in markdown’s syntax. For example, if you wanted to surround a word with literal underscores (instead of an HTML `em` tag), you can use backslashes before the unserscores, like this:
@@ -329,6 +445,8 @@ Blackbeard allows you to use backslash (`\`) escapes to generate literal charact
 ```md
 \_literal underscores\_
 ```
+
+\_literal underscores\_
 
 Blackbeard provides backslash escapes for the following characters:
 
