@@ -102,3 +102,10 @@ githubDocs.js emits two custom events.
 - `portalAfterGitHubError` runs if the GitHub Content API returns with an error.
 
 You can these to run additional scripts if desired.
+
+
+## Potential Issues
+
+A known issue with this approach: content is not cached or searchable via the built-in Portal search functionality.
+
+You might try to get around this by including a brief description or some metadata in the body of your post in the Portal content editor. This content will be wiped out once the API data loads, but provides the internal search engine content to crawl and cache.
