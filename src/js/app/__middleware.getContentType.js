@@ -19,13 +19,8 @@ var getContentType = function (elem) {
 	// Get content type
 	//
 
-	// 404
-	if (elem.classList.contains('not-found') || (h1 && /Not Found/.test(h1)) ) {
-		type = 'fourOhFour';
-	}
-
 	// Must be logged in to view this content
-	else if (elem.classList.contains('please-login') || elem.classList.contains('permission-denied')) {
+	if (elem.classList.contains('please-login') || elem.classList.contains('permission-denied')) {
 		type = 'noAccess';
 	}
 
@@ -161,6 +156,11 @@ var getContentType = function (elem) {
 
 	// Account Pages
 	else if (elem.classList.contains('page-member')) {
+
+		// "You've been gone a while..."
+		if (elem.classList.contains('verify-email')) {
+			type = 'verifyAccount';
+		}
 
 		// Change Email
 		if (elem.classList.contains('email')) {
@@ -344,6 +344,12 @@ var getContentType = function (elem) {
 			type = 'contactSuccess';
 		}
 
+	}
+
+	// 404
+	// else if (elem.classList.contains('not-found') || (h1 && /Not Found/.test(h1))) {
+	else {
+		type = 'fourOhFour';
 	}
 
 	return type;

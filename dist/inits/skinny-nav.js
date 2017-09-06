@@ -1,5 +1,7 @@
+// Remove the user nav
 portalOptions.templates.userNav = null;
 
+// Adjust the primary nav
 portalOptions.templates.primaryNav =
 	'<div class="nav-primary nav-wrap nav-collapse" id="nav-primary">' +
 		'<div class="container padding-top-small padding-bottom-small">' +
@@ -21,16 +23,22 @@ portalOptions.templates.primaryNav =
 		'</div>' +
 	'</div>';
 
-portalOptions.templates.page = function () {
-	if (mashery.globals.fullWidth) {
-		return	'<div class="main content" id="main">' +
-					'{{content.main}}' +
-				'</div>';
+// Enable full width layouts
+window.portalOptions.templates.page = function () {
+	if (mashery.globals.pageFullWidth) {
+		return '<div class="main content" id="main">' +
+			'{{content.main}}' +
+			'</div>';
+	} else if (mashery.globals.pageWide) {
+		return '<div class="main container content" id="main">' +
+			'<h1>{{content.heading}}</h1>' +
+			'{{content.main}}' +
+			'</div>';
 	} else {
-		return	'<div class="main container content" id="main">' +
-					'<h1>{{content.heading}}</h1>' +
-					'{{content.main}}' +
-				'</div>';
+		return '<div class="main container container-small content" id="main">' +
+			'<h1>{{content.heading}}</h1>' +
+			'{{content.main}}' +
+			'</div>';
 	}
 };
 
@@ -40,8 +48,4 @@ window.addEventListener('portalBeforeRender', function () {
 	} else {
 		document.documentElement.classList.remove('full-width');
 	}
-}, false);
-
-window.addEventListener('portalLoaded', function () {
-	m$.init(portalOptions);
 }, false);

@@ -1,6 +1,6 @@
-**I need you to break things.** Before this goes in front of actual customers, we need to make sure it's free of bugs and that we've accounted for common use cases.
+**I need you to break things.**
 
-There are two different ways you can get involved:
+Before this goes in front of actual customers, we need to make sure it's free of bugs and that we've accounted for common use cases. There are two different ways you can get involved:
 
 1. Play around with this staging site and make sure everything works the way it's supposed to.
 2. Set up Blackbeard on your own Portal and dig into the more advanced features.
@@ -35,13 +35,13 @@ If you don't have a Portal instance to use, reach out to me and I'll get you a s
 
 **Header JS File**
 
-```http
+```
 https://stagingcs1.mashery.com/files/placeholders.min.beta.js
 ```
 
 **Body JS File**
 
-```http
+```
 https://stagingcs1.mashery.com/files/app.min.beta.js
 ```
 
@@ -59,9 +59,9 @@ window.addEventListener('portalLoaded', function () {
 
 #### Default
 
-Add this external CSS file.
+Add this external CSS file, or <a href="/files/default.css" download>download the unminified source file</a> if you want to make changes.
 
-```http
+```
 https://stagingcs1.mashery.com/files/default.min.beta.css
 ```
 
@@ -69,12 +69,17 @@ And this inline JavaScript to create full width layouts.
 
 ```js
 portalOptions.templates.page = function () {
-	if (mashery.globals.fullWidth) {
+	if (mashery.globals.pageFullWidth) {
 		return	'<div class="main content" id="main">' +
 					'{{content.main}}' +
 				'</div>';
-	} else {
+	} else if (mashery.globals.pageWide) {
 		return	'<div class="main container content" id="main">' +
+					'<h1>{{content.heading}}</h1>' +
+					'{{content.main}}' +
+				'</div>';
+	} else {
+		return	'<div class="main container container-small content" id="main">' +
 					'<h1>{{content.heading}}</h1>' +
 					'{{content.main}}' +
 				'</div>';
@@ -82,7 +87,7 @@ portalOptions.templates.page = function () {
 };
 
 window.addEventListener('portalBeforeRender', function () {
-	if (mashery.globals.fullWidth) {
+	if (mashery.globals.pageFullWidth) {
 		document.documentElement.classList.add('full-width');
 	} else {
 		document.documentElement.classList.remove('full-width');
@@ -92,9 +97,9 @@ window.addEventListener('portalBeforeRender', function () {
 
 #### Blackbeard
 
-Add this external CSS file.
+Add this external CSS file, or <a href="/files/blackbeard.css" download>download the unminified source file</a> if you want to make changes.
 
-```http
+```
 https://stagingcs1.mashery.com/files/blackbeard.min.beta.css
 ```
 
@@ -147,12 +152,17 @@ portalOptions.templates.layout =
 	'</div>';
 
 portalOptions.templates.page = function () {
-	if (mashery.globals.fullWidth) {
+	if (mashery.globals.pageFullWidth) {
 		return	'<div class="main content" id="main">' +
 					'{{content.main}}' +
 				'</div>';
-	} else {
+	} else if (mashery.globals.pageWide) {
 		return	'<div class="main container content" id="main">' +
+					'<h1>{{content.heading}}</h1>' +
+					'{{content.main}}' +
+				'</div>';
+	} else {
+		return	'<div class="main container container-small content" id="main">' +
 					'<h1>{{content.heading}}</h1>' +
 					'{{content.main}}' +
 				'</div>';
@@ -160,7 +170,7 @@ portalOptions.templates.page = function () {
 };
 
 window.addEventListener('portalBeforeRender', function () {
-	if (mashery.globals.fullWidth) {
+	if (mashery.globals.pageFullWidth) {
 		document.documentElement.classList.add('full-width');
 	} else {
 		document.documentElement.classList.remove('full-width');
@@ -170,9 +180,9 @@ window.addEventListener('portalBeforeRender', function () {
 
 #### Skinny Nav
 
-Add this external CSS file.
+Add this external CSS file, or <a href="/files/skinny-nav.css" download>download the unminified source file</a> if you want to make changes.
 
-```http
+```
 https://stagingcs1.mashery.com/files/skinny-nav.min.beta.css
 ```
 
@@ -203,12 +213,17 @@ portalOptions.templates.primaryNav =
 	'</div>';
 
 portalOptions.templates.page = function () {
-	if (mashery.globals.fullWidth) {
+	if (mashery.globals.pageFullWidth) {
 		return	'<div class="main content" id="main">' +
 					'{{content.main}}' +
 				'</div>';
-	} else {
+	} else if (mashery.globals.pageWide) {
 		return	'<div class="main container content" id="main">' +
+					'<h1>{{content.heading}}</h1>' +
+					'{{content.main}}' +
+				'</div>';
+	} else {
+		return	'<div class="main container container-small content" id="main">' +
 					'<h1>{{content.heading}}</h1>' +
 					'{{content.main}}' +
 				'</div>';
@@ -216,7 +231,7 @@ portalOptions.templates.page = function () {
 };
 
 window.addEventListener('portalBeforeRender', function () {
-	if (mashery.globals.fullWidth) {
+	if (mashery.globals.pageFullWidth) {
 		document.documentElement.classList.add('full-width');
 	} else {
 		document.documentElement.classList.remove('full-width');

@@ -1,4 +1,4 @@
-/* http://prismjs.com/download.html?themes=prism&languages=markup+css+clike+javascript+bash+c+csharp+cpp+ruby+http+java+php+python+sass+scss */
+/* http://prismjs.com/download.html?themes=prism&languages=markup+css+clike+javascript+bash+c+csharp+cpp+ruby+css-extras+http+java+json+php+php-extras+python+sass+scss */
 /* jshint ignore:start */
 var _self = (typeof window !== 'undefined')
 	? window   // if in browser
@@ -1006,6 +1006,22 @@ Prism.languages.insertBefore('cpp', 'keyword', {
 		}
 	];
 }(Prism));
+Prism.languages.css.selector = {
+	pattern: /[^\{\}\s][^\{\}]*(?=\s*\{)/,
+	inside: {
+		'pseudo-element': /:(?:after|before|first-letter|first-line|selection)|::[-\w]+/,
+		'pseudo-class': /:[-\w]+(?:\(.*\))?/,
+		'class': /\.[-:\.\w]+/,
+		'id': /#[-:\.\w]+/,
+		'attribute': /\[[^\]]+\]/
+	}
+};
+
+Prism.languages.insertBefore('css', 'function', {
+	'hexcode': /#[\da-f]{3,8}/i,
+	'entity': /\\[\da-f]{1,8}/i,
+	'number': /[\d%\.]+/
+});
 Prism.languages.http = {
 	'request-line': {
 		pattern: /^(POST|GET|PUT|DELETE|OPTIONS|PATCH|TRACE|CONNECT)\b\shttps?:\/\/\S+\sHTTP\/[0-9.]+/m,
@@ -1073,6 +1089,18 @@ Prism.languages.insertBefore('java', 'function', {
 		lookbehind: true
 	}
 });
+
+Prism.languages.json = {
+	'property': /"(?:\\.|[^\\"])*"(?=\s*:)/ig,
+	'string': /"(?!:)(?:\\.|[^\\"])*"(?!:)/g,
+	'number': /\b-?(0x[\dA-Fa-f]+|\d*\.?\d+([Ee][+-]?\d+)?)\b/g,
+	'punctuation': /[{}[\]);,]/g,
+	'operator': /:/g,
+	'boolean': /\b(true|false)\b/gi,
+	'null': /\bnull\b/gi
+};
+
+Prism.languages.jsonp = Prism.languages.json;
 
 /**
  * Original by Aaron Harun: http://aahacreative.com/2012/07/31/php-syntax-highlighting-prism/
@@ -1190,6 +1218,17 @@ if (Prism.languages.markup) {
 	});
 }
 ;
+Prism.languages.insertBefore('php', 'variable', {
+	'this': /\$this\b/,
+	'global': /\$(?:_(?:SERVER|GET|POST|FILES|REQUEST|SESSION|ENV|COOKIE)|GLOBALS|HTTP_RAW_POST_DATA|argc|argv|php_errormsg|http_response_header)/,
+	'scope': {
+		pattern: /\b[\w\\]+::/,
+		inside: {
+			keyword: /(static|self|parent)/,
+			punctuation: /(::|\\)/
+		}
+	}
+});
 Prism.languages.python = {
 	'triple-quoted-string': {
 		pattern: /"""[\s\S]+?"""|'''[\s\S]+?'''/,

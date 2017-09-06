@@ -94,8 +94,8 @@
 	text-align: left;
 }
 
-@media (min-width: $bp-medium) {
-	.text-right-medium {
+@media (min-width: $bp-large) {
+	.text-right-large {
 		text-align: right;
 	}
 }

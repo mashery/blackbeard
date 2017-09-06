@@ -1,9 +1,16 @@
+// Polyfill for window.atob()
+// https://github.com/davidchambers/Base64.js/
+if (!('atob' in window)) {
+	!function () { function e(e) { this.message = e } var t = "undefined" != typeof exports ? exports : "undefined" != typeof self ? self : $.global, r = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="; e.prototype = new Error, e.prototype.name = "InvalidCharacterError", t.btoa || (t.btoa = function (t) { for (var o, n, a = String(t), i = 0, f = r, c = ""; a.charAt(0 | i) || (f = "=", i % 1); c += f.charAt(63 & o >> 8 - i % 1 * 8)) { if (n = a.charCodeAt(i += .75), n > 255) throw new e("'btoa' failed: The string to be encoded contains characters outside of the Latin1 range."); o = o << 8 | n } return c }), t.atob || (t.atob = function (t) { var o = String(t).replace(/[=]+$/, ""); if (o.length % 4 == 1) throw new e("'atob' failed: The string to be decoded is not correctly encoded."); for (var n, a, i = 0, f = 0, c = ""; a = o.charAt(f++); ~a && (n = i % 4 ? 64 * n + a : a, i++ % 4) ? c += String.fromCharCode(255 & n >> (-2 * i & 6)) : 0)a = r.indexOf(a); return c }) }();
+}
+
+
 /**
  * Blackbeard Theme
  */
 
 portalOptions.templates.page = function () {
-	if (mashery.globals.fullWidth) {
+	if (mashery.globals.pageFullWidth) {
 		return	'<div class="main content" id="main">' +
 					'{{content.main}}' +
 				'</div>';
@@ -66,7 +73,7 @@ portalOptions.templates.layout =
  */
 
 window.addEventListener('portalBeforeRender', function () {
-	if (mashery.globals.fullWidth) {
+	if (mashery.globals.pageFullWidth) {
 		document.documentElement.classList.add('full-width');
 	} else {
 		document.documentElement.classList.remove('full-width');
@@ -221,9 +228,6 @@ window.addEventListener('portalAfterInit', function () {
 	// Re-render the Portal with new options
 	var toggleThemes = function () {
 
-		// Make sure toggle theme button exists before running
-		if (!document.querySelector('.toggle-theme')) return;
-
 		var isStylesheet = function (ss) {
 			return !!(ss.nodeName.toLowerCase() === 'link' && ss.getAttribute('rel').toLowerCase() === 'stylesheet' && ss.getAttribute('href'));
 		};
@@ -295,12 +299,17 @@ window.addEventListener('portalAfterInit', function () {
 
 			// Enable full width layouts
 			window.portalOptions.templates.page = function () {
-				if (mashery.globals.fullWidth) {
+				if (mashery.globals.pageFullWidth) {
 					return	'<div class="main content" id="main">' +
 								'{{content.main}}' +
 							'</div>';
-				} else {
+				} else if (mashery.globals.pageWide) {
 					return	'<div class="main container content" id="main">' +
+								'<h1>{{content.heading}}</h1>' +
+								'{{content.main}}' +
+							'</div>';
+				} else {
+					return	'<div class="main container container-small content" id="main">' +
 								'<h1>{{content.heading}}</h1>' +
 								'{{content.main}}' +
 							'</div>';
@@ -323,6 +332,16 @@ window.addEventListener('portalAfterInit', function () {
 }, false);
 
 portalOptions.ajaxIgnore = '.toggle-theme';
+
+
+/**
+ * Theme Customizer
+ */
+window.addEventListener('portalAfterRender', function () {
+	m$.loadJS('https://stagingcs1.mashery.com/files/customizer.min.beta.js', function () {
+		customizer();
+	});
+}, false);
 
 
 /**

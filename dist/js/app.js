@@ -4479,13 +4479,8 @@ var getContentType = function (elem) {
 	// Get content type
 	//
 
-	// 404
-	if (elem.classList.contains('not-found') || (h1 && /Not Found/.test(h1)) ) {
-		type = 'fourOhFour';
-	}
-
 	// Must be logged in to view this content
-	else if (elem.classList.contains('please-login') || elem.classList.contains('permission-denied')) {
+	if (elem.classList.contains('please-login') || elem.classList.contains('permission-denied')) {
 		type = 'noAccess';
 	}
 
@@ -4621,6 +4616,11 @@ var getContentType = function (elem) {
 
 	// Account Pages
 	else if (elem.classList.contains('page-member')) {
+
+		// "You've been gone a while..."
+		if (elem.classList.contains('verify-email')) {
+			type = 'verifyAccount';
+		}
 
 		// Change Email
 		if (elem.classList.contains('email')) {
@@ -4804,6 +4804,12 @@ var getContentType = function (elem) {
 			type = 'contactSuccess';
 		}
 
+	}
+
+	// 404
+	// else if (elem.classList.contains('not-found') || (h1 && /Not Found/.test(h1))) {
+	else {
+		type = 'fourOhFour';
 	}
 
 	return type;
@@ -5711,7 +5717,16 @@ var m$ = (function () {
 							'<ul class="nav-user-list list-inline text-small text-muted padding-top-small padding-bottom-small no-margin-bottom text-right" id="nav-user-list">' +
 								'{{content.navItemsUser}}' +
 							'</ul>' +
-						'</div>'
+						'</div>',
+
+			/**
+			 * Verify Account
+			 * Page displayed when a user has not logged in for over 180 days
+			 */
+			verifyAccount:	'<div class="main container container-small" id="main">' +
+								'<h1>{{content.heading}}</h1>' +
+								'{{content.main}}' +
+							'</div>'
 
 		},
 
@@ -6209,6 +6224,16 @@ var m$ = (function () {
 				dashboard: 'Dashboard', // "Dashboard" link (for admins only)
 				signout: 'Sign Out', // "Sign Out" link
 
+			},
+
+			/**
+			 * Verify Account
+			 * Page displayed when a user has not logged in for over 180 days
+			 */
+			verifyAccount: {
+				heading: 'You\'ve been gone a while.',
+				main:	'<p>We need to confirm that you actually are who you say you are. This happens when you don\'t log in for over 180 days.</p>' +
+						'<p><strong>Please check your email that is associated with this account and click on the confirmation link.</strong></p>'
 			}
 
 		}
@@ -7262,6 +7287,21 @@ var m$ = (function () {
 				return settings.labels.signin.main;
 			}
 
+		},
+
+		// Verify Account
+		verifyAccount: {
+
+			// Heading
+			'{{content.heading}}': function () {
+				return settings.labels.verifyAccount.heading;
+			},
+
+			// Main Content
+			'{{content.main}}': function () {
+				return settings.labels.verifyAccount.main;
+			}
+
 		}
 
 	};
@@ -8245,61 +8285,11 @@ var m$ = (function () {
 	};
 
 	/**
-	 * Render the layout
-	 * @private
-	 */
-	var renderLayout = function () {
-		render('#app', 'layout');
-		verifyLoggedIn();
-	};
-
-	/**
 	 * Render the title attribute
 	 * @private
 	 */
 	var renderTitle = function () {
 		document.title = replacePlaceholders(settings.labels.title, window.mashery.contentType);
-	};
-
-	/**
-	 * Render the user navigation
-	 * @private
-	 */
-	var renderUserNav = function () {
-		render('#nav-user-wrapper', 'userNav');
-	};
-
-	/**
-	 * Render the primary navigation
-	 * @private
-	 */
-	var renderPrimaryNav = function () {
-		render('#nav-primary-wrapper', 'primaryNav');
-	};
-
-	/**
-	 * Render the secondary navigation
-	 * @private
-	 */
-	var renderSecondaryNav = function () {
-		render('#nav-secondary-wrapper', 'secondaryNav');
-	};
-
-	/**
-	 * Render the footer
-	 * @private
-	 */
-	var renderFooter = function () {
-		render('#footer-1-wrapper', 'footer1');
-		render('#footer-2-wrapper', 'footer2');
-	};
-
-	/**
-	 * Render the main content
-	 * @private
-	 */
-	var renderMain = function () {
-		render('#main-wrapper', window.mashery.contentType);
 	};
 
 	/**
@@ -8447,7 +8437,8 @@ var m$ = (function () {
 		if (!settings.ajax || (settings.ajaxIgnore && link.matches(settings.ajaxIgnore))) return;
 
 		// Make sure clicked item was a valid, local link
-		if (!link.href || link.hostname !== window.location.hostname) return;
+		var files = new RegExp(window.location.origin + 'files');
+		if (!link.href || link.hostname !== window.location.hostname || files.test(link.href)) return;
 
 		// Skip Ajax on member remove success page
 		if (window.mashery.contentType === 'memberRemoveSuccess') return;
@@ -8592,23 +8583,34 @@ var m$ = (function () {
 	 * @param {Boolean} ajax  If true, the page is being loaded via Ajax
 	 */
 	m$.renderPortal = function (ajax) {
+
+		// Emit before render event
 		m$.emitEvent('portalBeforeRender', {
 			detail: {
 				ajax: ajax
 			}
-		});  // Emit before render event
-		renderLayout(); // Layout
-		renderUserNav(); // User Navigation
-		renderPrimaryNav(); // Primary Navigation
-		renderSecondaryNav(); // Secondary Navigation
-		renderMain(); // Main Content
+		});
+
+		// Verify logged in status
+		verifyLoggedIn();
+
+		// Render App
+		render('#app', 'layout'); // Layout
+		render('#nav-user-wrapper', 'userNav'); // User Navigation
+		render('#nav-primary-wrapper', 'primaryNav'); // Primary Navigation
+		render('#nav-secondary-wrapper', 'secondaryNav'); // Secondary Navigation
+		render('#main-wrapper', window.mashery.contentType); // Main Content
+		render('#footer-1-wrapper', 'footer1'); // Footer 1
+		render('#footer-2-wrapper', 'footer2'); // Footer 2
 		renderTitle(); // Page Title
-		renderFooter(); // Footer
+
+		// Emit after render event
 		m$.emitEvent('portalAfterRender', {
 			detail: {
 				ajax: ajax
 			}
-		});  // Emit after render event
+		});
+
 	};
 
 	/**

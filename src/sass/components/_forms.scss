@@ -111,6 +111,17 @@ textarea {
 	height: auto;
 }
 
+/**
+ * Fix styling for color inputs
+ */
+[type="color"] {
+	border-radius: 0;
+	box-sizing: content-box;
+	max-width: 100%;
+	padding: calc-em(1px) calc-em(2px);
+	width: 3em;
+}
+
 input:focus,
 textarea:focus {
 	border-color: rgba(82, 168, 236, 0.8);
