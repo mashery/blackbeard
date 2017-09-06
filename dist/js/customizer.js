@@ -30,6 +30,12 @@ var customizer = function () {
 
 	var createInits = function () {
 
+		// If no inits are needed, indicate this...
+		if (inits.length < 1) {
+			initCode.innerHTML = '// No initialization needed...';
+			return;
+		}
+
 		// Inject code
 		initCode.innerHTML = inits.replace(new RegExp('<', 'g'), '&lt;').replace(new RegExp('>', 'g'), '&gt;');
 
@@ -54,22 +60,26 @@ var customizer = function () {
 			var pluginName = plugin.getAttribute('value');
 
 			// Make sure plugin has inits
-			if (!plugin.classList.contains('has-inits')) return;
+			if (plugin.classList.contains('has-inits')) {
+				// Get initialization code
+				atomic.ajax({
+					url: baseURL + 'inits/' + pluginName + '.js'
+				}).success((function (data) {
 
-			// Get initialization code
-			atomic.ajax({
-				url: baseURL + 'inits/' + pluginName + '.js'
-			}).success((function (data) {
+					// Create inits
+					inits += atob(data.content);
 
-				// Create inits
-				inits += atob(data.content);
+					// Render initialization code
+					createInits();
 
+				})).error((function (data) {
+					// @todo
+				}));
+			} else {
 				// Render initialization code
 				createInits();
+			}
 
-			})).error((function (data) {
-				// @todo
-			}));
 		}));
 
 	};
@@ -136,7 +146,7 @@ var customizer = function () {
 		size.innerHTML = '';
 
 		// Initialization Code
-		initCode.innerHTML = '';
+		initCode.innerHTML = 'Generating...';
 
 	};
 
@@ -171,6 +181,9 @@ var customizer = function () {
 				})).error((function (data) {
 					// @todo
 				}));
+			} else {
+				// Update the download button
+				createDownload(btnJS, scripts);
 			}
 
 			// Get styles
@@ -178,8 +191,6 @@ var customizer = function () {
 				atomic.ajax({
 					url: baseURL + 'css/' + pluginName + minified + '.css'
 				}).success((function (data) {
-
-					console.log(data);
 
 					// Create scripts
 					styles += atob(data.content);
@@ -191,6 +202,9 @@ var customizer = function () {
 				})).error((function (data) {
 					// @todo
 				}));
+			} else {
+				// Update the download button
+				createDownload(btnCSS, styles);
 			}
 
 		}));
