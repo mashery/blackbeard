@@ -8,11 +8,11 @@ Pick your layout, add plugins and components, and customize the color palette to
 		<radiogroup>
 			<label>
 				<input type="radio" name="compression" value="development" checked>
-				Development
+				Development <span class="text-no-bold">(<em>unminified</em>)</span>
 			</label>
 			<label>
 				<input type="radio" name="compression" value="production">
-				Minified
+				Production <span class="text-no-bold">(<em>minified</em>)
 			</label>
 		</radiogroup>
 	</div>
