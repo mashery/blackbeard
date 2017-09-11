@@ -36,22 +36,22 @@ Whether to load pages async or with a page reload
 
 ```js
 // If true, use Ajax
-portalOptions.ajax: true;
+portalOptions.ajax = true;
 
 // Selectors to ignore if clicked.
 // Accepts any valid CSS selector.
 // Use comma separated list for multiple selectors.
-portalOptions.ajaxIgnore: null;
+portalOptions.ajaxIgnore = null;
 
 // Text to display in title while loading page
-portalOptions.ajaxLoading: 'Loading...';
+portalOptions.ajaxLoading = 'Loading...';
 ```
 
 ### Active Page Class
 Class for links that point to the current page. This is applied to links in the primary, secondary, and user navigation menus, as well as the documentation submenu on documentation pages.
 
 ```js
-portalOptions.currentPageClass: 'current-page';
+portalOptions.currentPageClass = 'current-page';
 ```
 
 ### Favicon
@@ -75,46 +75,46 @@ The files to load when the Portal renders. Useful when loading more than one CSS
 
 ```js
 // CSS (loaded in header)
-portalOptions.loadCSS: [];
+portalOptions.loadCSS = [];
 
 // JS loaded before render
-portalOptions.loadJSHeader: [];
+portalOptions.loadJSHeader = [];
 
 // JS loaded after render
-portalOptions.loadJSFooter: [];
+portalOptions.loadJSFooter = [];
 ```
 
 ### Logo
 Add a custom logo. Accepts any markup as a string (`<img src>`, `<svg>`, etc.).
 
 ```js
-portalOptions.logo: null;
+portalOptions.logo = null;
 ```
 
 ### Markdown
 If true, enable markdown on docs and custom pages.
 
 ```js
-portalOptions.markdown: true;
+portalOptions.markdown = true;
 ```
 
 ### Tooltips
 If true, activate mashtip tooltips on certain Account page elements.
 
 ```js
-portalOptions.mashtips: true;
+portalOptions.mashtips = true;
 ```
 
 ### Password Strength
 If true, provide a password strength indicator on registration and password change pages.
 
 ```js
-portalOptions.passwordStrength: true;
+portalOptions.passwordStrength = true;
 ```
 
 ### Responsive Design
 If true, include the viewport resizing meta tag required for responsively designed sites.
 
 ```js
-portalOptions.responsive: true;
+portalOptions.responsive = true;
 ```
