@@ -59,13 +59,13 @@ Add a favicon/tab icon for your Portal.
 
 ```js
 // If true, inject a favicon
-portalOptions.favicon: false;
+portalOptions.favicon = false;
 
 // The favicon URL
-portalOptions.faviconURL: '/files/favicon.ico';
+portalOptions.faviconURL = '/files/favicon.ico';
 
 // The favicon sizes
-portalOptions.faviconSizes: '16x16 32x32';
+portalOptions.faviconSizes = '16x16 32x32';
 ```
 
 ### Load Files

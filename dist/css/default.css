@@ -1756,7 +1756,7 @@ pre.error {
   background-color: transparent;
 }
 
-/* line 76, src/sass/components/_iodocs.scss */
+/* line 75, src/sass/components/_iodocs.scss */
 .apiDescriptionList h4 a.select-all, .apiDescriptionList h4 .select-all.link-block-styled,
 .method h4 a.select-all,
 .method h4 .select-all.link-block-styled {
@@ -1767,7 +1767,7 @@ pre.error {
 /**
  * Make h3 element appear as a link
  */
-/* line 88, src/sass/components/_iodocs.scss */
+/* line 86, src/sass/components/_iodocs.scss */
 .endpoint > .title .name:hover {
   cursor: pointer;
   text-decoration: underline;
@@ -1776,17 +1776,17 @@ pre.error {
 /**
  * Individual Methods
  */
-/* line 112, src/sass/components/_iodocs.scss */
+/* line 106, src/sass/components/_iodocs.scss */
 .method .title {
   padding: 0.75em;
 }
 
-/* line 117, src/sass/components/_iodocs.scss */
+/* line 111, src/sass/components/_iodocs.scss */
 .method .title:hover .name {
   text-decoration: underline;
 }
 
-/* line 122, src/sass/components/_iodocs.scss */
+/* line 115, src/sass/components/_iodocs.scss */
 .method .title .http-method {
   border-radius: 0.3125em;
   color: #ffffff;
@@ -1798,34 +1798,34 @@ pre.error {
   text-align: center;
 }
 
-/* line 133, src/sass/components/_iodocs.scss */
+/* line 125, src/sass/components/_iodocs.scss */
 .method .title .name {
   margin-right: 0.5em;
 }
 
-/* line 137, src/sass/components/_iodocs.scss */
+/* line 128, src/sass/components/_iodocs.scss */
 .method .title .uri {
   margin-right: 0.5em;
   opacity: 0.8;
 }
 
-/* line 148, src/sass/components/_iodocs.scss */
+/* line 137, src/sass/components/_iodocs.scss */
 .method form {
   padding: 0.75em;
 }
 
-/* line 151, src/sass/components/_iodocs.scss */
+/* line 139, src/sass/components/_iodocs.scss */
 .method form .parameters tr.hidden {
   display: none;
 }
 
-/* line 156, src/sass/components/_iodocs.scss */
+/* line 143, src/sass/components/_iodocs.scss */
 .method a.clear-results, .method .clear-results.link-block-styled {
   color: red;
   margin-left: 1em;
 }
 
-/* line 160, src/sass/components/_iodocs.scss */
+/* line 146, src/sass/components/_iodocs.scss */
 .method a.clear-results:hover, .method .clear-results.link-block-styled:hover, .method .link-block:hover .clear-results.link-block-styled, .link-block:hover .method .clear-results.link-block-styled {
   background-color: #0088cc;
   color: #ffffff;
@@ -1834,29 +1834,29 @@ pre.error {
 /**
  * SOAP/JSON Nesting
  */
-/* line 177, src/sass/components/_iodocs.scss */
+/* line 161, src/sass/components/_iodocs.scss */
 .fieldset-expanded {
+  border: 1px solid lightgray;
   padding-left: 1em;
   padding-right: 1em;
-  border: 1px solid lightgray;
 }
 
 @media (min-width: 40em) {
-  /* line 177, src/sass/components/_iodocs.scss */
+  /* line 161, src/sass/components/_iodocs.scss */
   .fieldset-expanded {
     padding-left: 1.5625em;
     padding-right: 1.5625em;
   }
 }
 
-/* line 188, src/sass/components/_iodocs.scss */
+/* line 171, src/sass/components/_iodocs.scss */
 .legend-expanded {
   background-color: inherit;
   padding-left: 0.25em;
   padding-right: 0.25em;
 }
 
-/* line 194, src/sass/components/_iodocs.scss */
+/* line 177, src/sass/components/_iodocs.scss */
 .category-iodocs {
   /**
 	 * GET Methods
@@ -1881,161 +1881,161 @@ pre.error {
 	 */
 }
 
-/* line 199, src/sass/components/_iodocs.scss */
+/* line 181, src/sass/components/_iodocs.scss */
 .category-iodocs .get {
   background-color: #e6f3fa;
   border: 1px solid #bfe1f2;
 }
 
-/* line 203, src/sass/components/_iodocs.scss */
+/* line 184, src/sass/components/_iodocs.scss */
 .category-iodocs .get .http-method {
   background-color: #0088cc;
 }
 
-/* line 207, src/sass/components/_iodocs.scss */
+/* line 187, src/sass/components/_iodocs.scss */
 .category-iodocs .get th,
 .category-iodocs .get td {
   border-color: #bfe1f2;
 }
 
-/* line 212, src/sass/components/_iodocs.scss */
+/* line 191, src/sass/components/_iodocs.scss */
 .category-iodocs .get .fieldset-expanded {
   border-color: #bfe1f2;
 }
 
-/* line 220, src/sass/components/_iodocs.scss */
+/* line 198, src/sass/components/_iodocs.scss */
 .category-iodocs .post {
   background-color: #ebf2ea;
   border: 1px solid #cddfcc;
 }
 
-/* line 224, src/sass/components/_iodocs.scss */
+/* line 201, src/sass/components/_iodocs.scss */
 .category-iodocs .post .http-method {
   background-color: #377f31;
 }
 
-/* line 228, src/sass/components/_iodocs.scss */
+/* line 204, src/sass/components/_iodocs.scss */
 .category-iodocs .post th,
 .category-iodocs .post td {
   border-color: #cddfcc;
 }
 
-/* line 233, src/sass/components/_iodocs.scss */
+/* line 208, src/sass/components/_iodocs.scss */
 .category-iodocs .post .fieldset-expanded {
   border-color: #cddfcc;
 }
 
-/* line 241, src/sass/components/_iodocs.scss */
+/* line 215, src/sass/components/_iodocs.scss */
 .category-iodocs .put {
   background-color: #fbf6e6;
   border: 1px solid #f6eac2;
 }
 
-/* line 245, src/sass/components/_iodocs.scss */
+/* line 218, src/sass/components/_iodocs.scss */
 .category-iodocs .put .http-method {
   background-color: #dba909;
 }
 
-/* line 249, src/sass/components/_iodocs.scss */
+/* line 221, src/sass/components/_iodocs.scss */
 .category-iodocs .put th,
 .category-iodocs .put td {
   border-color: #f6eac2;
 }
 
-/* line 254, src/sass/components/_iodocs.scss */
+/* line 225, src/sass/components/_iodocs.scss */
 .category-iodocs .put .fieldset-expanded {
   border-color: #f6eac2;
 }
 
-/* line 262, src/sass/components/_iodocs.scss */
+/* line 232, src/sass/components/_iodocs.scss */
 .category-iodocs .delete {
   background-color: #f3e7e8;
   border: 1px solid #e1c3c4;
 }
 
-/* line 266, src/sass/components/_iodocs.scss */
+/* line 235, src/sass/components/_iodocs.scss */
 .category-iodocs .delete .http-method {
   background-color: #880e14;
 }
 
-/* line 270, src/sass/components/_iodocs.scss */
+/* line 238, src/sass/components/_iodocs.scss */
 .category-iodocs .delete th,
 .category-iodocs .delete td {
   border-color: #e1c3c4;
 }
 
-/* line 275, src/sass/components/_iodocs.scss */
+/* line 242, src/sass/components/_iodocs.scss */
 .category-iodocs .delete .fieldset-expanded {
   border-color: #e1c3c4;
 }
 
-/* line 283, src/sass/components/_iodocs.scss */
+/* line 249, src/sass/components/_iodocs.scss */
 .category-iodocs .patch {
   background-color: #f3e7f4;
   border: 1px solid #e1c3e3;
 }
 
-/* line 287, src/sass/components/_iodocs.scss */
+/* line 252, src/sass/components/_iodocs.scss */
 .category-iodocs .patch .http-method {
   background-color: #860d8e;
 }
 
-/* line 291, src/sass/components/_iodocs.scss */
+/* line 255, src/sass/components/_iodocs.scss */
 .category-iodocs .patch th,
 .category-iodocs .patch td {
   border-color: #e1c3e3;
 }
 
-/* line 296, src/sass/components/_iodocs.scss */
+/* line 259, src/sass/components/_iodocs.scss */
 .category-iodocs .patch .fieldset-expanded {
   border-color: #e1c3e3;
 }
 
-/* line 304, src/sass/components/_iodocs.scss */
+/* line 266, src/sass/components/_iodocs.scss */
 .category-iodocs .method.options {
   background-color: #faf1e6;
   border: 1px solid #f2dcbf;
 }
 
-/* line 308, src/sass/components/_iodocs.scss */
+/* line 269, src/sass/components/_iodocs.scss */
 .category-iodocs .method.options .http-method {
   background-color: #cc7100;
 }
 
-/* line 312, src/sass/components/_iodocs.scss */
+/* line 272, src/sass/components/_iodocs.scss */
 .category-iodocs .method.options th,
 .category-iodocs .method.options td {
   border-color: #f2dcbf;
 }
 
-/* line 317, src/sass/components/_iodocs.scss */
+/* line 276, src/sass/components/_iodocs.scss */
 .category-iodocs .method.options .fieldset-expanded {
   border-color: #f2dcbf;
 }
 
-/* line 325, src/sass/components/_iodocs.scss */
+/* line 283, src/sass/components/_iodocs.scss */
 .category-iodocs .head {
   background-color: #e6eef2;
   border: 1px solid #bfd5df;
 }
 
-/* line 329, src/sass/components/_iodocs.scss */
+/* line 286, src/sass/components/_iodocs.scss */
 .category-iodocs .head .http-method {
   background-color: #00557f;
 }
 
-/* line 333, src/sass/components/_iodocs.scss */
+/* line 289, src/sass/components/_iodocs.scss */
 .category-iodocs .head th,
 .category-iodocs .head td {
   border-color: #bfd5df;
 }
 
-/* line 338, src/sass/components/_iodocs.scss */
+/* line 293, src/sass/components/_iodocs.scss */
 .category-iodocs .head .fieldset-expanded {
   border-color: #bfd5df;
 }
 
-/* line 348, src/sass/components/_iodocs.scss */
+/* line 302, src/sass/components/_iodocs.scss */
 .category-iodocs #main-wrapper {
   /**
 	 * Override default list styles
@@ -2045,18 +2045,18 @@ pre.error {
 	 */
 }
 
-/* line 354, src/sass/components/_iodocs.scss */
+/* line 306, src/sass/components/_iodocs.scss */
 .category-iodocs #main-wrapper ul {
   margin: 0;
 }
 
-/* line 358, src/sass/components/_iodocs.scss */
+/* line 309, src/sass/components/_iodocs.scss */
 .category-iodocs #main-wrapper li {
   list-style: none;
   margin-left: 0;
 }
 
-/* line 366, src/sass/components/_iodocs.scss */
+/* line 316, src/sass/components/_iodocs.scss */
 .category-iodocs #main-wrapper pre.response {
   max-height: 32em;
   overflow-y: auto;
