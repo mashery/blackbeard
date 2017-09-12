@@ -37,8 +37,6 @@ var customizer = function () {
 				'}, false)';
 		}
 
-		console.log(code);
-
 		// If no code, indicate this...
 		if (code.length < 1) {
 			initCode.innerHTML = '// No initialization needed...';
@@ -193,7 +191,7 @@ var customizer = function () {
 
 			// Create scripts
 			styles += atob(data.content);
-			styesSize += data.size;
+			stylesSize += data.size;
 
 			// Update the download button
 			createDownload(btnCSS, styles);
@@ -209,6 +207,7 @@ var customizer = function () {
 		if (plugins.length < 1) {
 			createDownload(btnJS, scripts);
 			createDownload(btnCSS, styles);
+			getOverrides();
 			return;
 		}
 

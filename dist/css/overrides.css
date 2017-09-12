@@ -280,9 +280,3 @@
   display: none;
   visibility: hidden;
 }
-
-/**
- * Contain floats
- * The space content is one way to avoid an Opera bug when the `contenteditable` attribute is included anywhere else in the document.
- * @link https://github.com/h5bp/html5-boilerplate/blob/master/dist/css/main.css
- */
