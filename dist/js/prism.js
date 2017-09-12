@@ -1,10 +1,4 @@
-/*!
- * blackbeard vbeta: Future portal layout
- * (c) 2017 Chris Ferdinandi
- * LicenseRef-All Rights Reserved License
- * http://github.com/mashery/blackbeard
- */
-
+/*! blackbeard vbeta | (c) 2017 Chris Ferdinandi | LicenseRef-All Rights Reserved License | http://github.com/mashery/blackbeard */
 /* http://prismjs.com/download.html?themes=prism&languages=markup+css+clike+javascript+bash+c+csharp+cpp+ruby+css-extras+http+java+json+php+php-extras+python+sass+scss */
 /* jshint ignore:start */
 var _self = (typeof window !== 'undefined')

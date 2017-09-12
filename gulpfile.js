@@ -122,13 +122,13 @@ gulp.task('build:scripts', ['clean:dist'], function() {
 	var fileVersion = settings.cacheBust ? '.' + package.version : '';
 
 	var jsTasks = lazypipe()
-		.pipe(header, banner.full, { package : package })
+		.pipe(header, banner.min, { package : package })
 		.pipe(optimizejs)
 		.pipe(gulp.dest, paths.scripts.output)
 		.pipe(rename, { suffix: '.min' + fileVersion })
-		.pipe(uglify)
+		.pipe(uglify, {output: {comments: /^!/}})
 		.pipe(optimizejs)
-		.pipe(header, banner.min, { package : package })
+		// .pipe(header, banner.min, { package : package })
 		.pipe(gulp.dest, paths.scripts.output);
 
 	return gulp.src(paths.scripts.input)
@@ -162,15 +162,11 @@ gulp.task('build:styles', ['clean:dist'], function() {
 			cascade: true,
 			remove: true
 		}))
-		.pipe(header(banner.full, { package : package }))
+		.pipe(header(banner.min, { package : package }))
 		.pipe(gulp.dest(paths.styles.output))
 		.pipe(rename({ suffix: '.min' + fileVersion }))
-		.pipe(minify({
-			discardComments: {
-				removeAll: true
-			}
-		}))
-		.pipe(header(banner.min, { package : package }))
+		.pipe(minify())
+		// .pipe(header(banner.min, { package : package }))
 		.pipe(gulp.dest(paths.styles.output));
 });
 

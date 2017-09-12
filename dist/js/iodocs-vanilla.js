@@ -1,10 +1,4 @@
-/*!
- * blackbeard vbeta: Future portal layout
- * (c) 2017 Chris Ferdinandi
- * LicenseRef-All Rights Reserved License
- * http://github.com/mashery/blackbeard
- */
-
+/*! blackbeard vbeta | (c) 2017 Chris Ferdinandi | LicenseRef-All Rights Reserved License | http://github.com/mashery/blackbeard */
 var ioDocs = (function () {
 
 	'use strict';

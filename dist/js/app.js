@@ -1,10 +1,4 @@
-/*!
- * blackbeard vbeta: Future portal layout
- * (c) 2017 Chris Ferdinandi
- * LicenseRef-All Rights Reserved License
- * http://github.com/mashery/blackbeard
- */
-
+/*! blackbeard vbeta | (c) 2017 Chris Ferdinandi | LicenseRef-All Rights Reserved License | http://github.com/mashery/blackbeard */
 /**
  * CustomEvent() polyfill
  * https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent/CustomEvent#Polyfill
@@ -7059,16 +7053,6 @@ var m$ = (function () {
 
 		},
 
-		// Primary Navigation Menu
-		primaryNav: {
-
-			// Menu toggle for smaller screens
-			'{{content.menuToggle}}': function () {
-				return settings.labels.primaryNav.toggle;
-			}
-
-		},
-
 		// User Profiles
 		profile: {
 
@@ -7377,6 +7361,12 @@ var m$ = (function () {
 		// Logo
 		'{{content.logo}}': function () {
 			return (settings.logo ? settings.logo : window.mashery.area);
+		},
+
+		// Primary Navigation Menu
+		// Menu toggle for smaller screens
+		'{{content.menuToggle}}': function () {
+			return settings.labels.primaryNav.toggle;
 		},
 
 		// User Account Nav Items (<li><a> href="#"link</a></li> without a parent list wrapper)

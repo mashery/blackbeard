@@ -50,12 +50,12 @@ Pick your layout, add plugins and components, and customize the color palette to
 <div class="row margin-bottom">
 	<div class="grid-half">
 		<label>
-			<input type="checkbox" class="has-js" name="plugins" value="githubDocs">
-			GitHub-Hosted Documentation
+			<input type="checkbox" class="has-js has-events" name="plugins" value="astro">
+			Expand-and-Collapse Mobile Navigation
 		</label>
 		<label>
-			<input type="checkbox" name="plugins" value="">
-			Plugin Name
+			<input type="checkbox" class="has-js" name="plugins" value="githubDocs">
+			GitHub-Hosted Documentation
 		</label>
 		<label>
 			<input type="checkbox" name="plugins" value="">

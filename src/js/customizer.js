@@ -14,7 +14,7 @@ var customizer = function () {
 	var btnCSS = document.querySelector('#download-custom-css');
 	var size = document.querySelector('#download-size');
 	var initCode = document.querySelector('#download-init');
-	var minified, layout, plugins, scripts, styles, inits, scriptsSize, stylesSize, timerID;
+	var minified, layout, plugins, scripts, styles, inits, events, scriptsSize, stylesSize, timerID;
 
 
 	//
@@ -23,14 +23,26 @@ var customizer = function () {
 
 	var createInits = function () {
 
-		// If no inits are needed, indicate this...
-		if (inits.length < 1) {
+		// Generate code
+		var code = '';
+		if (inits.length > 0) {
+			code += inits;
+		}
+		if (events.length > 0) {
+			code +=
+				"window.addEventListener('portalAfterRender', function () {" +
+					events +
+				'}, false)';
+		}
+
+		// If no code, indicate this...
+		if (code.length < 1) {
 			initCode.innerHTML = '// No initialization needed...';
 			return;
 		}
 
-		// Inject code
-		initCode.innerHTML = inits.replace(new RegExp('<', 'g'), '&lt;').replace(new RegExp('>', 'g'), '&gt;');
+		// Escape brackets and inject
+		initCode.innerHTML = inits.replace(new RegExp('<', 'g'), '&lt;').replace(new RegExp('>', 'g'), '&gt;').trim();
 
 		// Highlight code
 		if ('Prism' in window) {
@@ -52,7 +64,7 @@ var customizer = function () {
 			// Get the plugin name
 			var pluginName = plugin.getAttribute('value');
 
-			// Make sure plugin has inits
+			// If plugin has inits
 			if (plugin.classList.contains('has-inits')) {
 				// Get initialization code
 				atomic.ajax({
@@ -60,7 +72,28 @@ var customizer = function () {
 				}).success(function (data) {
 
 					// Create inits
-					inits += atob(data.content);
+					inits += atob(data.content) + '\n\n';
+
+					// Render initialization code
+					createInits();
+
+				}).error(function (data) {
+					// @todo
+				});
+			} else {
+				// Render initialization code
+				createInits();
+			}
+
+			// If plugin has event listeners
+			if (plugin.classList.contains('has-events')) {
+				// Get event action
+				atomic.ajax({
+					url: baseURL + 'events/' + pluginName + '.js'
+				}).success(function (data) {
+
+					// Create inits
+					events += '\t' + atob(data.content) + '\n';
 
 					// Render initialization code
 					createInits();
@@ -239,6 +272,7 @@ var customizer = function () {
 		scripts = '';
 		styles = '';
 		inits = '';
+		events = '';
 		scriptsSize = 0;
 		stylesSize = 0;
 
