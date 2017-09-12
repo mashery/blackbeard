@@ -70,8 +70,8 @@ Pick your layout, and add plugins and components. In a future version, you'll al
 	</div>
 	<div class="grid-half">
 		<label>
-			<input type="checkbox" class="" name="plugins" value="">
-			Plugin Name
+			<input type="checkbox" class="has-css has-events" name="plugins" value="conditional-content">
+			Conditional content for logged in/logged out users
 		</label>
 		<label>
 			<input type="checkbox" class="" name="plugins" value="">
