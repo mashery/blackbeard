@@ -1,4 +1,6 @@
-Pick your layout, add plugins and components, and customize the color palette to match your brand. Layout and color changes will automatically live preview on this site.
+<!-- Pick your layout, add plugins and components, and customize the color palette to match your brand. Layout and color changes will automatically live preview on this site. -->
+
+Pick your layout, and add plugins and components. In a future version, you'll also be able to customize the color palette and see a live preview of your theme.
 
 <div class="row">
 	<div class="grid-third text-right-large">

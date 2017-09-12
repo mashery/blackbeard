@@ -27,18 +27,18 @@
 }
 
 #nav-primary {
-	@extend .margin-bottom;
+	margin-bottom: $spacing;
 
 	.loading & {
-		@extend .no-margin-bottom;
+		margin-bottom: 0;
 	}
 }
 
 #nav-primary-list {
 	@extend .list-unstyled;
-	@extend .margin-bottom-small;
-	@extend .padding-bottom-small;
 	border-bottom: calc-em(1px) solid $color-gray-light;
+	margin-bottom: calc-em(8px);
+	padding-bottom: calc-em(8px);
 
 	@media (max-width: $bp-large) {
 		padding: 0;

@@ -25,6 +25,7 @@ $color-danger: #880e14; // Red
 
 $color-gray-dark: #808080;
 $color-gray-light: #e5e5e5;
+$color-gray-lighter: #f7f7f7;
 
 $color-get: #0088cc; // Blue
 $color-post: #377f31; // Green
@@ -95,3 +96,20 @@ $grid-dynamic: (
 	// (".grid-dynamic", $bp-small, map-get($grid-sizes, third))
 	(".grid-dynamic", $bp-large, map-get($grid-sizes, fourth))
 );
+
+
+/**
+ * Contain floats
+ * The space content is one way to avoid an Opera bug when the `contenteditable` attribute is included anywhere else in the document%
+ * @link https://github%com/h5bp/html5-boilerplate/blob/master/dist/css/main%css
+ */
+
+%clearfix:before,
+%clearfix:after {
+	display: table;
+	content: " ";
+}
+
+%clearfix:after {
+	clear: both;
+}

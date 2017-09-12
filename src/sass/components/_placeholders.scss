@@ -26,19 +26,17 @@
 	}
 
 	.placeholder-hero {
-		@extend .margin-bottom;
 		height: 20em;
 	}
 
 	.placeholder-heading {
-		@extend .margin-bottom;
 		height: 3em;
 		width: 55%;
 	}
 
 	.placeholder-sentence {
-		@extend .margin-bottom-small;
 		height: 1.5em;
+		margin-bottom: calc-em(8px);
 	}
 
 	.placeholder-sentence-last {
@@ -46,16 +44,21 @@
 	}
 
 	.placeholder-paragraph {
-		@extend .margin-bottom;
-		@extend .margin-top;
 		height: 8em;
+		margin-top: $spacing;
 	}
 
 	.placeholder-btn {
-		@extend .margin-bottom;
 		height: 3em;
 		width: 8em;
 
+	}
+
+	.placeholder-hero,
+	.placeholder-heading,
+	.placeholder-paragraph,
+	.placeholder-btn {
+		margin-bottom: $spacing;
 	}
 
 }

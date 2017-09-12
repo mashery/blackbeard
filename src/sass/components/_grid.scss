@@ -91,5 +91,5 @@
 // Add clearfix
 .container,
 .row {
-	@extend .clearfix;
+	@extend %clearfix;
 }

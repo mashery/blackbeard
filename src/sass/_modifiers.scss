@@ -1,8 +1,14 @@
-/**
- * @section Overrides
- * Nudge and tweak alignment, spacing, and visibility.
- */
+// @section Variables
+// Placeholder variables for use through the project
+//
+// Typographic Scale
+// (For math purposes% Actual font sizes in ems%)
+// 1px, 4px, 5px, 8px, 9px, 11px, 12px, 13px, 15px, 16px, 19px, 21px, 24px, 28px, 32px, 48px, 64px, 80px, 96px
+// line height: 1%5em on small screens, 1%5625em on big screens
 
+
+@import "config";
+@import "mixins";
 
 /**
  * Backgrounds
@@ -22,20 +28,16 @@
 	}
 }
 
-.bg-muted {
+%bg-muted {
 	background-color: lighten($color-gray-light, 5%);
 }
 
-.bg-dark {
-	@extend %bg-dark;
-}
-
-.bg-primary {
+%bg-primary {
 	@extend %bg-dark;
 	background-color: $color-primary;
 }
 
-.bg-hero {
+%bg-hero {
 	background-position: center;
 	background-size: cover;
 	width: 100%;
@@ -46,22 +48,22 @@
  * Text sizes
  */
 
-.text-small {
+%text-small {
 	font-size: calc-em(15px);
 }
 
-.text-large {
+%text-large {
 	font-size: calc-em(19px);
-	line-height: 1.4;
+	line-height: 1%4;
 
 	@media (min-width: $bp-medium) {
 		font-size: calc-em(21px);
 	}
 }
 
-.text-hero {
+%text-hero {
 	font-size: 2em;
-	line-height: 1.4;
+	line-height: 1%4;
 
 	@media (min-width: $bp-medium) {
 		font-size: 3em;
@@ -73,7 +75,7 @@
  * Text colors
  */
 
-.text-muted {
+%text-muted {
 	color: $color-gray-dark;
 }
 
@@ -82,11 +84,11 @@
  * Text decoration
  */
 
-.text-no-bold {
+%text-no-bold {
 	font-weight: normal;
 }
 
-.text-no-italic {
+%text-no-italic {
 	font-style: normal;
 }
 
@@ -95,20 +97,20 @@
  * Text alignment
  */
 
-.text-center {
+%text-center {
 	text-align: center;
 }
 
-.text-right {
+%text-right {
 	text-align: right;
 }
 
-.text-left {
+%text-left {
 	text-align: left;
 }
 
 @media (min-width: $bp-large) {
-	.text-right-large {
+	%text-right-large {
 		text-align: right;
 	}
 }
@@ -118,17 +120,17 @@
  * Floats
  */
 
-.float-left {
+%float-left {
 	float: left;
 }
 
-.float-center {
+%float-center {
 	float: none;
 	margin-left: auto;
 	margin-right: auto;
 }
 
-.float-right {
+%float-right {
 	float: right;
 }
 
@@ -137,27 +139,27 @@
  * Margins
  */
 
-.no-margin-top {
+%no-margin-top {
 	margin-top: 0;
 }
 
-.no-margin-bottom {
+%no-margin-bottom {
 	margin-bottom: 0;
 }
 
-.margin-top {
+%margin-top {
 	margin-top: $spacing;
 }
 
-.margin-bottom {
+%margin-bottom {
 	margin-bottom: $spacing;
 }
 
-.margin-bottom-small {
+%margin-bottom-small {
 	margin-bottom: calc-em(8px);
 }
 
-.margin-bottom-large {
+%margin-bottom-large {
 	margin-bottom: calc-em(32px);
 }
 
@@ -166,35 +168,35 @@
  * Padding
  */
 
-.no-padding-top {
+%no-padding-top {
 	padding-top: 0;
 }
 
-.no-padding-bottom {
+%no-padding-bottom {
 	padding-bottom: 0;
 }
 
-.padding-top {
+%padding-top {
 	padding-top: $spacing;
 }
 
-.padding-top-small {
+%padding-top-small {
 	padding-top: calc-em(8px);
 }
 
-.padding-top-large {
+%padding-top-large {
 	padding-top: calc-em(32px);
 }
 
-.padding-bottom {
+%padding-bottom {
 	padding-bottom: $spacing;
 }
 
-.padding-bottom-small {
+%padding-bottom-small {
 	padding-bottom: calc-em(8px);
 }
 
-.padding-bottom-large {
+%padding-bottom-large {
 	padding-bottom: calc-em(32px);
 }
 
@@ -205,10 +207,10 @@
 
 /**
  * Visually hide an element, but leave it available for screen readers
- * @link https://github.com/h5bp/html5-boilerplate/blob/master/dist/css/main.css
- * @link http://snook.ca/archives/html_and_css/hiding-content-for-accessibility
+ * @link https://github%com/h5bp/html5-boilerplate/blob/master/dist/css/main%css
+ * @link http://snook%ca/archives/html_and_css/hiding-content-for-accessibility
  */
-.screen-reader {
+%screen-reader {
 	border: 0;
 	clip: rect(0 0 0 0);
 	height: 1px;
@@ -221,12 +223,12 @@
 }
 
 /**
- * Extends the .screen-reader class to allow the element to be focusable when navigated to via the keyboard
- * @link https://github.com/h5bp/html5-boilerplate/blob/master/dist/css/main.css
- * @link https://www.drupal.org/node/897638
+ * Extends the %screen-reader class to allow the element to be focusable when navigated to via the keyboard
+ * @link https://github%com/h5bp/html5-boilerplate/blob/master/dist/css/main%css
+ * @link https://www%drupal%org/node/897638
  */
-.screen-reader-focusable:active,
-.screen-reader-focusable:focus {
+%screen-reader-focusable:active,
+%screen-reader-focusable:focus {
 	clip: auto;
 	height: auto;
 	margin: 0;
@@ -239,26 +241,9 @@
 /**
  * @workaround
  * @affected IE 8/9/10
- * @link http://juicystudio.com/article/screen-readers-display-none.php
+ * @link http://juicystudio%com/article/screen-readers-display-none%php
  */
-[hidden] {
+%hidden {
 	display: none;
 	visibility: hidden;
-}
-
-
-/**
- * Contain floats
- * The space content is one way to avoid an Opera bug when the `contenteditable` attribute is included anywhere else in the document.
- * @link https://github.com/h5bp/html5-boilerplate/blob/master/dist/css/main.css
- */
-
-.clearfix:before,
-.clearfix:after {
-	display: table;
-	content: " ";
-}
-
-.clearfix:after {
-	clear: both;
 }

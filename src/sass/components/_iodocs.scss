@@ -13,7 +13,7 @@
 
 // API Select Menu
 .servicesIodocs {
-	@extend .margin-bottom-small;
+	margin-bottom: calc-em(8px);
 }
 
 
@@ -102,11 +102,12 @@ pre.error {
  */
 
 .method {
-	@extend .margin-bottom;
+	margin-bottom: $spacing;
+
 	.title {
+		@extend %clearfix;
 		padding: calc-em(12px);
 
-		@extend .clearfix;
 		&:hover {
 			.name {
 				text-decoration: underline;
@@ -130,8 +131,8 @@ pre.error {
 			opacity: 0.8;
 		}
 		.description {
-			@extend .float-right;
-			@extend .text-right;
+			float: right;
+			text-align: right;
 		}
 	}
 	form {
@@ -148,7 +149,7 @@ pre.error {
 			color: $color-white;
 		}
 		&:after {
-			@extend .clearfix;
+			@extend %clearfix;
 		}
 	}
 }

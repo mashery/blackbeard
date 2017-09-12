@@ -5,18 +5,18 @@
 
 
 #nav-user-wrapper {
-	@extend .bg-muted;
+	background-color: $color-gray-lighter;
 }
 
 #nav-user-list {}
 
 #nav-primary {
-	@extend .margin-bottom;
 	border-bottom: calc-em(1px) solid $color-gray-light;
+	margin-bottom: $spacing;
 
 	.loading &,
 	.full-width & {
-		@extend .no-margin-bottom;
+		margin-bottom: 0;
 	}
 }
 

@@ -235,7 +235,7 @@ button:-moz-focusring,
 
 // Remove search form margin
 #search-form {
-	@extend .no-margin-bottom;
+	margin-bottom: 0;
 }
 
 
@@ -262,7 +262,6 @@ button:-moz-focusring,
  * Special styling for search icon as button
  */
 #search-button {
-	// @extend [hidden];
 	@extend .btn;
 }
 

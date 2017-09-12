@@ -31,10 +31,13 @@ var customizer = function () {
 		}
 		if (events.length > 0) {
 			code +=
-				"window.addEventListener('portalAfterRender', function () {" +
+				'\n\n' +
+				"window.addEventListener('portalAfterRender', function () {" + '\n' +
 					events +
 				'}, false)';
 		}
+
+		console.log(code);
 
 		// If no code, indicate this...
 		if (code.length < 1) {
@@ -43,7 +46,7 @@ var customizer = function () {
 		}
 
 		// Escape brackets and inject
-		initCode.innerHTML = inits.replace(new RegExp('<', 'g'), '&lt;').replace(new RegExp('>', 'g'), '&gt;').trim();
+		initCode.innerHTML = code.replace(new RegExp('<', 'g'), '&lt;').replace(new RegExp('>', 'g'), '&gt;').trim();
 
 		// Highlight code
 		if ('Prism' in window) {
@@ -79,7 +82,9 @@ var customizer = function () {
 					createInits();
 
 				})).error((function (data) {
-					// @todo
+					// Render initialization code
+					createInits();
+					console.error(pluginName + ' wasn\'t found');
 				}));
 			} else {
 				// Render initialization code
@@ -100,7 +105,9 @@ var customizer = function () {
 					createInits();
 
 				})).error((function (data) {
-					// @todo
+					// Render initialization code
+					createInits();
+					console.error(pluginName + ' wasn\'t found');
 				}));
 			} else {
 				// Render initialization code
@@ -124,7 +131,9 @@ var customizer = function () {
 			getPluginInits();
 
 		})).error((function (data) {
-			// @todo
+			// Add any plugins
+			getPluginInits();
+			console.error(layout + ' wasn\'t found');
 		}));
 
 	};
@@ -177,6 +186,23 @@ var customizer = function () {
 
 	};
 
+	var getOverrides = function () {
+		atomic.ajax({
+			url: baseURL + 'css/overrides' + minified + '.css'
+		}).success((function (data) {
+
+			// Create scripts
+			styles += atob(data.content);
+			styesSize += data.size;
+
+			// Update the download button
+			createDownload(btnCSS, styles);
+
+		})).error((function (data) {
+			// @todo
+		}));
+	};
+
 	var getPlugins = function () {
 
 		// If no plugins are selected, update buttons immediately
@@ -187,7 +213,8 @@ var customizer = function () {
 		}
 
 		// Otherwise, get the plugins
-		plugins.forEach((function (plugin) {
+		var last = plugins.length - 1;
+		plugins.forEach((function (plugin, index) {
 
 			// Get the plugin name
 			var pluginName = plugin.getAttribute('value');
@@ -232,6 +259,10 @@ var customizer = function () {
 			} else {
 				// Update the download button
 				createDownload(btnCSS, styles);
+			}
+
+			if (index === last) {
+				getOverrides();
 			}
 
 		}));

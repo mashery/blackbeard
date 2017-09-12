@@ -1,5 +1,28 @@
 /*! blackbeard vbeta | (c) 2017 Chris Ferdinandi | LicenseRef-All Rights Reserved License | http://github.com/mashery/blackbeard */
 /**
+ * Contain floats
+ * The space content is one way to avoid an Opera bug when the `contenteditable` attribute is included anywhere else in the document%
+ * @link https://github%com/h5bp/html5-boilerplate/blob/master/dist/css/main%css
+ */
+/* line 107, src/sass/_config.scss */
+.container:before,
+.row:before, .method .title:before,
+.container:after,
+.row:after,
+.method .title:after,
+.method a.clear-results:after,
+.method .clear-results.link-block-styled:after {
+  display: table;
+  content: " ";
+}
+
+/* line 113, src/sass/_config.scss */
+.container:after,
+.row:after, .method .title:after, .method a.clear-results:after, .method .clear-results.link-block-styled:after {
+  clear: both;
+}
+
+/**
  * @section Normalize.css
  * Normalize.css base with custom code.
  * Additional normalize styles incorporated throughout components.
@@ -172,11 +195,17 @@ embed {
 /**
  * Hide the template element in IE, Safari, and Firefox < 22.
  */
+/* line 141, src/sass/components/_normalize.scss */
+template {
+  display: none;
+  visibility: hidden;
+}
+
 /**
  * 1. Remove border when inside `a` element in IE 8/9/10.
  * 2. Prevents IE from making scaled images look like crap
  */
-/* line 149, src/sass/components/_normalize.scss */
+/* line 150, src/sass/components/_normalize.scss */
 img {
   border: 0;
   /* 1 */
@@ -187,7 +216,7 @@ img {
 /**
  * Correct overflow not hidden in IE 9/10/11.
  */
-/* line 157, src/sass/components/_normalize.scss */
+/* line 158, src/sass/components/_normalize.scss */
 svg:not(:root) {
   overflow: hidden;
 }
@@ -195,7 +224,7 @@ svg:not(:root) {
 /**
  * Address inconsistent margin.
  */
-/* line 164, src/sass/components/_normalize.scss */
+/* line 165, src/sass/components/_normalize.scss */
 figure {
   margin: 0;
 }
@@ -204,7 +233,7 @@ figure {
  * @workaround Remove focus from <main> element when using tabindex="-1" hack for skipnav link
  * @link https://code.google.com/p/chromium/issues/detail?id=37721
  */
-/* line 172, src/sass/components/_normalize.scss */
+/* line 173, src/sass/components/_normalize.scss */
 .tabindex:focus {
   outline: none;
 }
@@ -429,6 +458,13 @@ figure {
 /* line 15, src/sass/components/_layout-skinny-nav.scss */
 #nav-primary {
   border-bottom: 1px solid #e5e5e5;
+  margin-bottom: 1.5625em;
+}
+
+/* line 19, src/sass/components/_layout-skinny-nav.scss */
+.loading #nav-primary,
+.full-width #nav-primary {
+  margin-bottom: 0;
 }
 
 /**
@@ -1183,6 +1219,11 @@ button:-moz-focusring,
   -webkit-appearance: none;
 }
 
+/* line 237, src/sass/components/_forms.scss */
+#search-form {
+  margin-bottom: 0;
+}
+
 /**
  * Create rounded search bar
  */
@@ -1199,7 +1240,7 @@ button:-moz-focusring,
 /**
  * Special styling for search icon as button
  */
-/* line 269, src/sass/components/_forms.scss */
+/* line 268, src/sass/components/_forms.scss */
 .btn-search,
 #search-button,
 #main-wrapper .btn-search,
@@ -1212,7 +1253,7 @@ button:-moz-focusring,
   margin-bottom: 0;
 }
 
-/* line 280, src/sass/components/_forms.scss */
+/* line 279, src/sass/components/_forms.scss */
 .btn-search svg,
 #search-button svg,
 #main-wrapper .btn-search svg,
@@ -1220,7 +1261,7 @@ button:-moz-focusring,
   fill: #808080;
 }
 
-/* line 284, src/sass/components/_forms.scss */
+/* line 283, src/sass/components/_forms.scss */
 .btn-search:active, .btn-search:focus, .btn-search:hover,
 #search-button:active,
 #search-button:focus,
@@ -1236,7 +1277,7 @@ button:-moz-focusring,
   color: #5a5a5a;
 }
 
-/* line 291, src/sass/components/_forms.scss */
+/* line 290, src/sass/components/_forms.scss */
 .btn-search:active svg, .btn-search:focus svg, .btn-search:hover svg,
 #search-button:active svg,
 #search-button:focus svg,
@@ -1663,31 +1704,41 @@ td {
   height: 20em;
 }
 
-/* line 33, src/sass/components/_placeholders.scss */
+/* line 32, src/sass/components/_placeholders.scss */
 .loading .placeholder-heading {
   height: 3em;
   width: 55%;
 }
 
-/* line 39, src/sass/components/_placeholders.scss */
+/* line 37, src/sass/components/_placeholders.scss */
 .loading .placeholder-sentence {
   height: 1.5em;
+  margin-bottom: 0.5em;
 }
 
-/* line 44, src/sass/components/_placeholders.scss */
+/* line 42, src/sass/components/_placeholders.scss */
 .loading .placeholder-sentence-last {
   width: 85%;
 }
 
-/* line 48, src/sass/components/_placeholders.scss */
+/* line 46, src/sass/components/_placeholders.scss */
 .loading .placeholder-paragraph {
   height: 8em;
+  margin-top: 1.5625em;
 }
 
-/* line 54, src/sass/components/_placeholders.scss */
+/* line 51, src/sass/components/_placeholders.scss */
 .loading .placeholder-btn {
   height: 3em;
   width: 8em;
+}
+
+/* line 57, src/sass/components/_placeholders.scss */
+.loading .placeholder-hero,
+.loading .placeholder-heading,
+.loading .placeholder-paragraph,
+.loading .placeholder-btn {
+  margin-bottom: 1.5625em;
 }
 
 /**
@@ -1700,6 +1751,11 @@ td {
 /* line 9, src/sass/components/_iodocs.scss */
 #apiId {
   width: auto;
+}
+
+/* line 15, src/sass/components/_iodocs.scss */
+.servicesIodocs {
+  margin-bottom: 0.5em;
 }
 
 /**
@@ -1763,17 +1819,22 @@ pre.error {
 /**
  * Individual Methods
  */
-/* line 106, src/sass/components/_iodocs.scss */
+/* line 104, src/sass/components/_iodocs.scss */
+.method {
+  margin-bottom: 1.5625em;
+}
+
+/* line 107, src/sass/components/_iodocs.scss */
 .method .title {
   padding: 0.75em;
 }
 
-/* line 111, src/sass/components/_iodocs.scss */
+/* line 112, src/sass/components/_iodocs.scss */
 .method .title:hover .name {
   text-decoration: underline;
 }
 
-/* line 115, src/sass/components/_iodocs.scss */
+/* line 116, src/sass/components/_iodocs.scss */
 .method .title .http-method {
   border-radius: 0.3125em;
   color: #ffffff;
@@ -1785,34 +1846,40 @@ pre.error {
   text-align: center;
 }
 
-/* line 125, src/sass/components/_iodocs.scss */
+/* line 126, src/sass/components/_iodocs.scss */
 .method .title .name {
   margin-right: 0.5em;
 }
 
-/* line 128, src/sass/components/_iodocs.scss */
+/* line 129, src/sass/components/_iodocs.scss */
 .method .title .uri {
   margin-right: 0.5em;
   opacity: 0.8;
 }
 
-/* line 137, src/sass/components/_iodocs.scss */
+/* line 133, src/sass/components/_iodocs.scss */
+.method .title .description {
+  float: right;
+  text-align: right;
+}
+
+/* line 138, src/sass/components/_iodocs.scss */
 .method form {
   padding: 0.75em;
 }
 
-/* line 139, src/sass/components/_iodocs.scss */
+/* line 140, src/sass/components/_iodocs.scss */
 .method form .parameters tr.hidden {
   display: none;
 }
 
-/* line 143, src/sass/components/_iodocs.scss */
+/* line 144, src/sass/components/_iodocs.scss */
 .method a.clear-results, .method .clear-results.link-block-styled {
   color: red;
   margin-left: 1em;
 }
 
-/* line 146, src/sass/components/_iodocs.scss */
+/* line 147, src/sass/components/_iodocs.scss */
 .method a.clear-results:hover, .method .clear-results.link-block-styled:hover, .method .link-block:hover .clear-results.link-block-styled, .link-block:hover .method .clear-results.link-block-styled {
   background-color: #0088cc;
   color: #ffffff;
@@ -1821,7 +1888,7 @@ pre.error {
 /**
  * SOAP/JSON Nesting
  */
-/* line 161, src/sass/components/_iodocs.scss */
+/* line 162, src/sass/components/_iodocs.scss */
 .fieldset-expanded {
   border: 1px solid lightgray;
   padding-left: 1em;
@@ -1829,21 +1896,21 @@ pre.error {
 }
 
 @media (min-width: 40em) {
-  /* line 161, src/sass/components/_iodocs.scss */
+  /* line 162, src/sass/components/_iodocs.scss */
   .fieldset-expanded {
     padding-left: 1.5625em;
     padding-right: 1.5625em;
   }
 }
 
-/* line 171, src/sass/components/_iodocs.scss */
+/* line 172, src/sass/components/_iodocs.scss */
 .legend-expanded {
   background-color: inherit;
   padding-left: 0.25em;
   padding-right: 0.25em;
 }
 
-/* line 177, src/sass/components/_iodocs.scss */
+/* line 178, src/sass/components/_iodocs.scss */
 .category-iodocs {
   /**
 	 * GET Methods
@@ -1868,161 +1935,161 @@ pre.error {
 	 */
 }
 
-/* line 181, src/sass/components/_iodocs.scss */
+/* line 182, src/sass/components/_iodocs.scss */
 .category-iodocs .get {
   background-color: #e6f3fa;
   border: 1px solid #bfe1f2;
 }
 
-/* line 184, src/sass/components/_iodocs.scss */
+/* line 185, src/sass/components/_iodocs.scss */
 .category-iodocs .get .http-method {
   background-color: #0088cc;
 }
 
-/* line 187, src/sass/components/_iodocs.scss */
+/* line 188, src/sass/components/_iodocs.scss */
 .category-iodocs .get th,
 .category-iodocs .get td {
   border-color: #bfe1f2;
 }
 
-/* line 191, src/sass/components/_iodocs.scss */
+/* line 192, src/sass/components/_iodocs.scss */
 .category-iodocs .get .fieldset-expanded {
   border-color: #bfe1f2;
 }
 
-/* line 198, src/sass/components/_iodocs.scss */
+/* line 199, src/sass/components/_iodocs.scss */
 .category-iodocs .post {
   background-color: #ebf2ea;
   border: 1px solid #cddfcc;
 }
 
-/* line 201, src/sass/components/_iodocs.scss */
+/* line 202, src/sass/components/_iodocs.scss */
 .category-iodocs .post .http-method {
   background-color: #377f31;
 }
 
-/* line 204, src/sass/components/_iodocs.scss */
+/* line 205, src/sass/components/_iodocs.scss */
 .category-iodocs .post th,
 .category-iodocs .post td {
   border-color: #cddfcc;
 }
 
-/* line 208, src/sass/components/_iodocs.scss */
+/* line 209, src/sass/components/_iodocs.scss */
 .category-iodocs .post .fieldset-expanded {
   border-color: #cddfcc;
 }
 
-/* line 215, src/sass/components/_iodocs.scss */
+/* line 216, src/sass/components/_iodocs.scss */
 .category-iodocs .put {
   background-color: #fbf6e6;
   border: 1px solid #f6eac2;
 }
 
-/* line 218, src/sass/components/_iodocs.scss */
+/* line 219, src/sass/components/_iodocs.scss */
 .category-iodocs .put .http-method {
   background-color: #dba909;
 }
 
-/* line 221, src/sass/components/_iodocs.scss */
+/* line 222, src/sass/components/_iodocs.scss */
 .category-iodocs .put th,
 .category-iodocs .put td {
   border-color: #f6eac2;
 }
 
-/* line 225, src/sass/components/_iodocs.scss */
+/* line 226, src/sass/components/_iodocs.scss */
 .category-iodocs .put .fieldset-expanded {
   border-color: #f6eac2;
 }
 
-/* line 232, src/sass/components/_iodocs.scss */
+/* line 233, src/sass/components/_iodocs.scss */
 .category-iodocs .delete {
   background-color: #f3e7e8;
   border: 1px solid #e1c3c4;
 }
 
-/* line 235, src/sass/components/_iodocs.scss */
+/* line 236, src/sass/components/_iodocs.scss */
 .category-iodocs .delete .http-method {
   background-color: #880e14;
 }
 
-/* line 238, src/sass/components/_iodocs.scss */
+/* line 239, src/sass/components/_iodocs.scss */
 .category-iodocs .delete th,
 .category-iodocs .delete td {
   border-color: #e1c3c4;
 }
 
-/* line 242, src/sass/components/_iodocs.scss */
+/* line 243, src/sass/components/_iodocs.scss */
 .category-iodocs .delete .fieldset-expanded {
   border-color: #e1c3c4;
 }
 
-/* line 249, src/sass/components/_iodocs.scss */
+/* line 250, src/sass/components/_iodocs.scss */
 .category-iodocs .patch {
   background-color: #f3e7f4;
   border: 1px solid #e1c3e3;
 }
 
-/* line 252, src/sass/components/_iodocs.scss */
+/* line 253, src/sass/components/_iodocs.scss */
 .category-iodocs .patch .http-method {
   background-color: #860d8e;
 }
 
-/* line 255, src/sass/components/_iodocs.scss */
+/* line 256, src/sass/components/_iodocs.scss */
 .category-iodocs .patch th,
 .category-iodocs .patch td {
   border-color: #e1c3e3;
 }
 
-/* line 259, src/sass/components/_iodocs.scss */
+/* line 260, src/sass/components/_iodocs.scss */
 .category-iodocs .patch .fieldset-expanded {
   border-color: #e1c3e3;
 }
 
-/* line 266, src/sass/components/_iodocs.scss */
+/* line 267, src/sass/components/_iodocs.scss */
 .category-iodocs .method.options {
   background-color: #faf1e6;
   border: 1px solid #f2dcbf;
 }
 
-/* line 269, src/sass/components/_iodocs.scss */
+/* line 270, src/sass/components/_iodocs.scss */
 .category-iodocs .method.options .http-method {
   background-color: #cc7100;
 }
 
-/* line 272, src/sass/components/_iodocs.scss */
+/* line 273, src/sass/components/_iodocs.scss */
 .category-iodocs .method.options th,
 .category-iodocs .method.options td {
   border-color: #f2dcbf;
 }
 
-/* line 276, src/sass/components/_iodocs.scss */
+/* line 277, src/sass/components/_iodocs.scss */
 .category-iodocs .method.options .fieldset-expanded {
   border-color: #f2dcbf;
 }
 
-/* line 283, src/sass/components/_iodocs.scss */
+/* line 284, src/sass/components/_iodocs.scss */
 .category-iodocs .head {
   background-color: #e6eef2;
   border: 1px solid #bfd5df;
 }
 
-/* line 286, src/sass/components/_iodocs.scss */
+/* line 287, src/sass/components/_iodocs.scss */
 .category-iodocs .head .http-method {
   background-color: #00557f;
 }
 
-/* line 289, src/sass/components/_iodocs.scss */
+/* line 290, src/sass/components/_iodocs.scss */
 .category-iodocs .head th,
 .category-iodocs .head td {
   border-color: #bfd5df;
 }
 
-/* line 293, src/sass/components/_iodocs.scss */
+/* line 294, src/sass/components/_iodocs.scss */
 .category-iodocs .head .fieldset-expanded {
   border-color: #bfd5df;
 }
 
-/* line 302, src/sass/components/_iodocs.scss */
+/* line 303, src/sass/components/_iodocs.scss */
 .category-iodocs #main-wrapper {
   /**
 	 * Override default list styles
@@ -2032,18 +2099,18 @@ pre.error {
 	 */
 }
 
-/* line 306, src/sass/components/_iodocs.scss */
+/* line 307, src/sass/components/_iodocs.scss */
 .category-iodocs #main-wrapper ul {
   margin: 0;
 }
 
-/* line 309, src/sass/components/_iodocs.scss */
+/* line 310, src/sass/components/_iodocs.scss */
 .category-iodocs #main-wrapper li {
   list-style: none;
   margin-left: 0;
 }
 
-/* line 316, src/sass/components/_iodocs.scss */
+/* line 317, src/sass/components/_iodocs.scss */
 .category-iodocs #main-wrapper pre.response {
   max-height: 32em;
   overflow-y: auto;
@@ -2058,7 +2125,9 @@ pre.error {
  */
 /* line 10, src/sass/components/_mashtips.scss */
 .mashtip {
+  color: #808080;
   cursor: pointer;
+  font-size: 0.9375em;
   position: relative;
 }
 
@@ -2095,383 +2164,4 @@ pre.error {
   visibility: visible;
   width: 220px;
   z-index: 98;
-}
-
-/**
- * @section Overrides
- * Nudge and tweak alignment, spacing, and visibility.
- */
-/**
- * Backgrounds
- */
-/* line 11, src/sass/components/_overrides.scss */
-.bg-dark, .bg-primary {
-  background-color: #272727;
-  color: #ffffff;
-}
-
-/* line 15, src/sass/components/_overrides.scss */
-.bg-dark a, .bg-primary a, .bg-dark .link-block-styled, .bg-primary .link-block-styled {
-  color: #e5e5e5;
-}
-
-/* line 18, src/sass/components/_overrides.scss */
-.bg-dark a:hover, .bg-primary a:hover, .bg-dark .link-block-styled:hover, .bg-primary .link-block-styled:hover, .bg-dark .link-block:hover .link-block-styled, .link-block:hover .bg-dark .link-block-styled, .bg-primary .link-block:hover .link-block-styled, .link-block:hover .bg-primary .link-block-styled, .bg-dark a:active, .bg-primary a:active, .bg-dark .link-block-styled:active, .bg-primary .link-block-styled:active {
-  color: #ffffff;
-}
-
-/* line 25, src/sass/components/_overrides.scss */
-.bg-muted {
-  background-color: #f2f2f2;
-}
-
-/* line 33, src/sass/components/_overrides.scss */
-.bg-primary {
-  background-color: #0088cc;
-}
-
-/* line 38, src/sass/components/_overrides.scss */
-.bg-hero {
-  background-position: center;
-  background-size: cover;
-  width: 100%;
-}
-
-/**
- * Text sizes
- */
-/* line 49, src/sass/components/_overrides.scss */
-.text-small, .mashtip {
-  font-size: 0.9375em;
-}
-
-/* line 53, src/sass/components/_overrides.scss */
-.text-large {
-  font-size: 1.1875em;
-  line-height: 1.4;
-}
-
-@media (min-width: 40em) {
-  /* line 53, src/sass/components/_overrides.scss */
-  .text-large {
-    font-size: 1.3125em;
-  }
-}
-
-/* line 62, src/sass/components/_overrides.scss */
-.text-hero {
-  font-size: 2em;
-  line-height: 1.4;
-}
-
-@media (min-width: 40em) {
-  /* line 62, src/sass/components/_overrides.scss */
-  .text-hero {
-    font-size: 3em;
-  }
-}
-
-/**
- * Text colors
- */
-/* line 76, src/sass/components/_overrides.scss */
-.text-muted, .mashtip {
-  color: #808080;
-}
-
-/**
- * Text decoration
- */
-/* line 85, src/sass/components/_overrides.scss */
-.text-no-bold {
-  font-weight: normal;
-}
-
-/* line 89, src/sass/components/_overrides.scss */
-.text-no-italic {
-  font-style: normal;
-}
-
-/**
- * Text alignment
- */
-/* line 98, src/sass/components/_overrides.scss */
-.text-center {
-  text-align: center;
-}
-
-/* line 102, src/sass/components/_overrides.scss */
-.text-right, .method .title .description {
-  text-align: right;
-}
-
-/* line 106, src/sass/components/_overrides.scss */
-.text-left {
-  text-align: left;
-}
-
-@media (min-width: 60em) {
-  /* line 111, src/sass/components/_overrides.scss */
-  .text-right-large {
-    text-align: right;
-  }
-}
-
-/**
- * Floats
- */
-/* line 121, src/sass/components/_overrides.scss */
-.float-left {
-  float: left;
-}
-
-/* line 125, src/sass/components/_overrides.scss */
-.float-center {
-  float: none;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-/* line 131, src/sass/components/_overrides.scss */
-.float-right, .method .title .description {
-  float: right;
-}
-
-/**
- * Margins
- */
-/* line 140, src/sass/components/_overrides.scss */
-.no-margin-top {
-  margin-top: 0;
-}
-
-/* line 144, src/sass/components/_overrides.scss */
-.no-margin-bottom, .loading #nav-primary,
-.full-width #nav-primary, #search-form {
-  margin-bottom: 0;
-}
-
-/* line 148, src/sass/components/_overrides.scss */
-.margin-top, .loading .placeholder-paragraph {
-  margin-top: 1.5625em;
-}
-
-/* line 152, src/sass/components/_overrides.scss */
-.margin-bottom, #nav-primary, .loading .placeholder-hero, .loading .placeholder-heading, .loading .placeholder-paragraph, .loading .placeholder-btn, .method {
-  margin-bottom: 1.5625em;
-}
-
-/* line 156, src/sass/components/_overrides.scss */
-.margin-bottom-small, .loading .placeholder-sentence, .servicesIodocs {
-  margin-bottom: 0.5em;
-}
-
-/* line 160, src/sass/components/_overrides.scss */
-.margin-bottom-large {
-  margin-bottom: 2em;
-}
-
-/**
- * Padding
- */
-/* line 169, src/sass/components/_overrides.scss */
-.no-padding-top {
-  padding-top: 0;
-}
-
-/* line 173, src/sass/components/_overrides.scss */
-.no-padding-bottom {
-  padding-bottom: 0;
-}
-
-/* line 177, src/sass/components/_overrides.scss */
-.padding-top {
-  padding-top: 1.5625em;
-}
-
-/* line 181, src/sass/components/_overrides.scss */
-.padding-top-small {
-  padding-top: 0.5em;
-}
-
-/* line 185, src/sass/components/_overrides.scss */
-.padding-top-large {
-  padding-top: 2em;
-}
-
-/* line 189, src/sass/components/_overrides.scss */
-.padding-bottom {
-  padding-bottom: 1.5625em;
-}
-
-/* line 193, src/sass/components/_overrides.scss */
-.padding-bottom-small {
-  padding-bottom: 0.5em;
-}
-
-/* line 197, src/sass/components/_overrides.scss */
-.padding-bottom-large {
-  padding-bottom: 2em;
-}
-
-/**
- * Visibility
- */
-/**
- * Visually hide an element, but leave it available for screen readers
- * @link https://github.com/h5bp/html5-boilerplate/blob/master/dist/css/main.css
- * @link http://snook.ca/archives/html_and_css/hiding-content-for-accessibility
- */
-/* line 211, src/sass/components/_overrides.scss */
-.screen-reader {
-  border: 0;
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  white-space: nowrap;
-  width: 1px;
-}
-
-/**
- * Extends the .screen-reader class to allow the element to be focusable when navigated to via the keyboard
- * @link https://github.com/h5bp/html5-boilerplate/blob/master/dist/css/main.css
- * @link https://www.drupal.org/node/897638
- */
-/* line 228, src/sass/components/_overrides.scss */
-.screen-reader-focusable:active,
-.screen-reader-focusable:focus {
-  clip: auto;
-  height: auto;
-  margin: 0;
-  overflow: visible;
-  position: static;
-  white-space: normal;
-  width: auto;
-}
-
-/**
- * @workaround
- * @affected IE 8/9/10
- * @link http://juicystudio.com/article/screen-readers-display-none.php
- */
-/* line 244, src/sass/components/_overrides.scss */
-[hidden], template {
-  display: none;
-  visibility: hidden;
-}
-
-/**
- * Contain floats
- * The space content is one way to avoid an Opera bug when the `contenteditable` attribute is included anywhere else in the document.
- * @link https://github.com/h5bp/html5-boilerplate/blob/master/dist/css/main.css
- */
-/* line 256, src/sass/components/_overrides.scss */
-.clearfix:before, .container:before,
-.row:before, .method .title:before,
-.clearfix:after,
-.container:after,
-.row:after,
-.method .title:after,
-.method a.clear-results:after,
-.method .clear-results.link-block-styled:after {
-  display: table;
-  content: " ";
-}
-
-/* line 262, src/sass/components/_overrides.scss */
-.clearfix:after, .container:after,
-.row:after, .method .title:after, .method a.clear-results:after, .method .clear-results.link-block-styled:after {
-  clear: both;
-}
-
-/**
- * @section Print
- * Styling for printed content. Adapted from HTML5BP.
- * @link http://html5boilerplate.com
- */
-@media print {
-  /**
-	 * Universal selector.
-	 * Reset all content to transparent background, black color, and remove box and text shadows.
-	 */
-  /* line 13, src/sass/components/_print.scss */
-  * {
-    background: transparent !important;
-    color: #000 !important;
-    box-shadow: none !important;
-    text-shadow: none !important;
-  }
-  /**
-	 * Specifies page margin
-	 */
-  @page {
-    margin: 0.5cm;
-  }
-  /**
-	 * Underline all links
-	 */
-  /* line 30, src/sass/components/_print.scss */
-  a, .link-block-styled,
-  a:visited,
-  .link-block-styled:visited {
-    text-decoration: underline;
-  }
-  /**
-	 * Show URL after links
-	 */
-  /* line 38, src/sass/components/_print.scss */
-  a[href]:after, [href].link-block-styled:after {
-    content: " (" attr(href) ")";
-  }
-  /**
-	 * Don't show URL for internal links
-	 */
-  /* line 45, src/sass/components/_print.scss */
-  a[href^="#"]:after, [href^="#"].link-block-styled:after {
-    content: "";
-  }
-  /**
-	 * Specifies the minimum number of lines to print at the top and bottom of a page.
-	 */
-  /* line 52, src/sass/components/_print.scss */
-  p,
-  h1, h2, h3 {
-    orphans: 3;
-    widows: 3;
-  }
-  /**
-	 * Avoid inserting a page break after headers
-	 */
-  /* line 61, src/sass/components/_print.scss */
-  h1, h2, h3 {
-    page-break-after: avoid;
-  }
-  /**
-	 * Change border color on blockquotes and preformatted text.
-	 * Avoid page breaks inside the content
-	 */
-  /* line 69, src/sass/components/_print.scss */
-  pre,
-  blockquote {
-    border-color: #999;
-    page-break-inside: avoid;
-  }
-  /**
-	 * Displayed as a table header row group
-	 */
-  /* line 78, src/sass/components/_print.scss */
-  thead {
-    display: table-header-group;
-  }
-  /**
-	 * Avoid inserting a page break inside table rows and images
-	 */
-  /* line 85, src/sass/components/_print.scss */
-  tr,
-  img {
-    page-break-inside: avoid;
-  }
 }

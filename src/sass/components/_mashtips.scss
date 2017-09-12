@@ -8,9 +8,9 @@
  * Mashtip icon
  */
 .mashtip {
-	@extend .text-small;
-	@extend .text-muted;
+	color: $color-gray-dark;
 	cursor: pointer;
+	font-size: calc-em(15px);
 	position: relative;
 
 	&:before {
