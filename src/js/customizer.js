@@ -96,7 +96,7 @@ var customizer = function () {
 				}).success(function (data) {
 
 					// Create inits
-					events += '\t' + atob(data.content) + '\n';
+					events += '\t' + atob(data.content).replace(new RegExp('\n', 'g'), '\n\t') + '\n';
 
 					// Render initialization code
 					createInits();

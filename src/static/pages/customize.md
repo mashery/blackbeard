@@ -64,25 +64,25 @@ Pick your layout, and add plugins and components. In a future version, you'll al
 			Responsive iFrame Videos
 		</label>
 		<label>
-			<input type="checkbox" name="plugins" value="">
-			Plugin Name
+			<input type="checkbox" class="has-css" name="plugins" value="images">
+			Image Styles <em class="text-no-bold text-muted">(round, border, photograph)</em>
 		</label>
 	</div>
 	<div class="grid-half">
 		<label>
-			<input type="checkbox" name="plugins" value="">
+			<input type="checkbox" class="" name="plugins" value="">
 			Plugin Name
 		</label>
 		<label>
-			<input type="checkbox" name="plugins" value="">
+			<input type="checkbox" class="" name="plugins" value="">
 			Plugin Name
 		</label>
 		<label>
-			<input type="checkbox" name="plugins" value="">
+			<input type="checkbox" class="" name="plugins" value="">
 			Plugin Name
 		</label>
 		<label>
-			<input type="checkbox" name="plugins" value="">
+			<input type="checkbox" class="" name="plugins" value="">
 			Plugin Name
 		</label>
 	</div>
