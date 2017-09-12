@@ -60,8 +60,8 @@ Pick your layout, and add plugins and components. In a future version, you'll al
 			GitHub-Hosted Documentation
 		</label>
 		<label>
-			<input type="checkbox" name="plugins" value="">
-			Plugin Name
+			<input type="checkbox" class="has-js has-events" name="plugins" value="fluidvids">
+			Responsive iFrame Videos
 		</label>
 		<label>
 			<input type="checkbox" name="plugins" value="">
