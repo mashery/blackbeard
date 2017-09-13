@@ -14,6 +14,8 @@ var customizer = function () {
 	var btnCSS = document.querySelector('#download-custom-css');
 	var size = document.querySelector('#download-size');
 	var initCode = document.querySelector('#download-init');
+	var savedCache = sessionStorage.getItem('portalCustomizerCache');
+	var cache = savedCache ? JSON.parse(savedCache) : {};
 	var minified, layout, plugins, scripts, styles, inits, events, scriptsSize, stylesSize, timerID;
 
 
@@ -67,22 +69,36 @@ var customizer = function () {
 
 			// If plugin has inits
 			if (plugin.classList.contains('has-inits')) {
-				// Get initialization code
-				atomic.ajax({
-					url: baseURL + 'inits/' + pluginName + '.js'
-				}).success(function (data) {
+				if (cache[baseURL + 'inits/' + pluginName + '.js']) {
 
 					// Create inits
-					inits += atob(data.content) + '\n\n';
+					inits += cache[baseURL + 'inits/' + pluginName + '.js'] + '\n\n';
 
 					// Render initialization code
 					createInits();
 
-				}).error(function (data) {
-					// Render initialization code
-					createInits();
-					console.error(pluginName + ' wasn\'t found');
-				});
+				} else {
+
+					// Get initialization code
+					atomic.ajax({
+						url: baseURL + 'inits/' + pluginName + '.js'
+					}).success(function (data) {
+
+						// Create inits
+						cache[baseURL + 'inits/' + pluginName + '.js'] = atob(data.content);
+						inits += cache[baseURL + 'inits/' + pluginName + '.js'] + '\n\n';
+						sessionStorage.setItem('portalCustomizerCache', JSON.stringify(cache));
+
+						// Render initialization code
+						createInits();
+
+					}).error(function (data) {
+						// Render initialization code
+						createInits();
+						console.error(pluginName + ' wasn\'t found');
+					});
+
+				}
 			} else {
 				// Render initialization code
 				createInits();
@@ -90,22 +106,36 @@ var customizer = function () {
 
 			// If plugin has event listeners
 			if (plugin.classList.contains('has-events')) {
-				// Get event action
-				atomic.ajax({
-					url: baseURL + 'events/' + pluginName + '.js'
-				}).success(function (data) {
+				if (cache[baseURL + 'events/' + pluginName + '.js']) {
 
 					// Create inits
-					events += '\t' + atob(data.content).replace(new RegExp('\n', 'g'), '\n\t') + '\n';
+					events += '\t' + cache[baseURL + 'events/' + pluginName + '.js'].replace(new RegExp('\n', 'g'), '\n\t') + '\n';
 
 					// Render initialization code
 					createInits();
 
-				}).error(function (data) {
-					// Render initialization code
-					createInits();
-					console.error(pluginName + ' wasn\'t found');
-				});
+				} else {
+
+					// Get event action
+					atomic.ajax({
+						url: baseURL + 'events/' + pluginName + '.js'
+					}).success(function (data) {
+
+						// Create inits
+						cache[baseURL + 'events/' + pluginName + '.js'] = atob(data.content);
+						events += '\t' + cache[baseURL + 'events/' + pluginName + '.js'].replace(new RegExp('\n', 'g'), '\n\t') + '\n';
+						sessionStorage.setItem('portalCustomizerCache', JSON.stringify(cache));
+
+						// Render initialization code
+						createInits();
+
+					}).error(function (data) {
+						// Render initialization code
+						createInits();
+						console.error(pluginName + ' wasn\'t found');
+					});
+
+				}
 			} else {
 				// Render initialization code
 				createInits();
@@ -116,23 +146,35 @@ var customizer = function () {
 	};
 
 	var getThemeInits = function () {
-
-		atomic.ajax({
-			url: baseURL + 'inits/' + layout + '.js'
-		}).success(function (data) {
+		if (cache[baseURL + 'inits/' + layout + '.js']) {
 
 			// Create styles
-			inits = atob(data.content);
+			inits = cache[baseURL + 'inits/' + layout + '.js'];
 
 			// Add any plugins
 			getPluginInits();
 
-		}).error(function (data) {
-			// Add any plugins
-			getPluginInits();
-			console.error(layout + ' wasn\'t found');
-		});
+		} else {
 
+			atomic.ajax({
+				url: baseURL + 'inits/' + layout + '.js'
+			}).success(function (data) {
+
+				// Create styles
+				cache[baseURL + 'inits/' + layout + '.js'] = atob(data.content);
+				inits = cache[baseURL + 'inits/' + layout + '.js'];
+				sessionStorage.setItem('portalCustomizerCache', JSON.stringify(cache));
+
+				// Add any plugins
+				getPluginInits();
+
+			}).error(function (data) {
+				// Add any plugins
+				getPluginInits();
+				console.error(layout + ' wasn\'t found');
+			});
+
+		}
 	};
 
 	var prettySize = function (size) {
@@ -184,20 +226,38 @@ var customizer = function () {
 	};
 
 	var getOverrides = function () {
-		atomic.ajax({
-			url: baseURL + 'css/overrides' + minified + '.css'
-		}).success(function (data) {
+		if (cache[baseURL + 'css/overrides' + minified + '.css']) {
 
 			// Create scripts
-			styles += atob(data.content);
-			stylesSize += data.size;
+			styles += cache[baseURL + 'css/overrides' + minified + '.css'].styles;
+			stylesSize += cache[baseURL + 'css/overrides' + minified + '.css'].size;
 
 			// Update the download button
 			createDownload(btnCSS, styles);
 
-		}).error(function (data) {
-			// @todo
-		});
+		} else {
+
+			atomic.ajax({
+				url: baseURL + 'css/overrides' + minified + '.css'
+			}).success(function (data) {
+
+				// Create scripts
+				cache[baseURL + 'css/overrides' + minified + '.css'] = {
+					styles: atob(data.content),
+					size: data.size
+				};
+				styles += cache[baseURL + 'css/overrides' + minified + '.css'].styles;
+				stylesSize += cache[baseURL + 'css/overrides' + minified + '.css'].size;
+				sessionStorage.setItem('portalCustomizerCache', JSON.stringify(cache));
+
+				// Update the download button
+				createDownload(btnCSS, styles);
+
+			}).error(function (data) {
+				// @todo
+			});
+
+		}
 	};
 
 	var getPlugins = function () {
@@ -219,20 +279,38 @@ var customizer = function () {
 
 			// Get scripts
 			if (plugin.classList.contains('has-js')) {
-				atomic.ajax({
-					url: baseURL + 'js/' + pluginName + minified + '.js'
-				}).success(function (data) {
+				if (cache[baseURL + 'js/' + pluginName + minified + '.js']) {
 
 					// Create scripts
-					scripts += atob(data.content);
-					scriptsSize += data.size;
+					scripts += cache[baseURL + 'js/' + pluginName + minified + '.js'].scripts;
+					scriptsSize += cache[baseURL + 'js/' + pluginName + minified + '.js'].size;
 
 					// Update the download button
 					createDownload(btnJS, scripts);
 
-				}).error(function (data) {
-					// @todo
-				});
+				} else {
+
+					atomic.ajax({
+						url: baseURL + 'js/' + pluginName + minified + '.js'
+					}).success(function (data) {
+
+						// Create scripts
+						cache[baseURL + 'js/' + pluginName + minified + '.js'] = {
+							scripts: atob(data.content),
+							size: data.size
+						};
+						scripts += cache[baseURL + 'js/' + pluginName + minified + '.js'].scripts;
+						scriptsSize += cache[baseURL + 'js/' + pluginName + minified + '.js'].size;
+						sessionStorage.setItem('portalCustomizerCache', JSON.stringify(cache));
+
+						// Update the download button
+						createDownload(btnJS, scripts);
+
+					}).error(function (data) {
+						// @todo
+					});
+
+				}
 			} else {
 				// Update the download button
 				createDownload(btnJS, scripts);
@@ -240,20 +318,38 @@ var customizer = function () {
 
 			// Get styles
 			if (plugin.classList.contains('has-css')) {
-				atomic.ajax({
-					url: baseURL + 'css/' + pluginName + minified + '.css'
-				}).success(function (data) {
+				if (cache[baseURL + 'css/' + pluginName + minified + '.css']) {
 
 					// Create scripts
-					styles += atob(data.content);
-					stylesSize += data.size;
+					styles += cache[baseURL + 'css/' + pluginName + minified + '.css'].styles;
+					stylesSize += cache[baseURL + 'css/' + pluginName + minified + '.css'].size;
 
 					// Update the download button
 					createDownload(btnCSS, styles);
 
-				}).error(function (data) {
-					// @todo
-				});
+				} else {
+
+					atomic.ajax({
+						url: baseURL + 'css/' + pluginName + minified + '.css'
+					}).success(function (data) {
+
+						// Create scripts
+						cache[baseURL + 'css/' + pluginName + minified + '.css'] = {
+							styles: atob(data.content),
+							size: data.size
+						};
+						styles += cache[baseURL + 'css/' + pluginName + minified + '.css'].styles;
+						stylesSize += cache[baseURL + 'css/' + pluginName + minified + '.css'].size;
+						sessionStorage.setItem('portalCustomizerCache', JSON.stringify(cache));
+
+						// Update the download button
+						createDownload(btnCSS, styles);
+
+					}).error(function (data) {
+						// @todo
+					});
+
+				}
 			} else {
 				// Update the download button
 				createDownload(btnCSS, styles);
@@ -268,22 +364,38 @@ var customizer = function () {
 	};
 
 	var getLayout = function () {
-
-		atomic.ajax({
-			url: baseURL + 'css/' + layout + minified + '.css'
-		}).success(function (data) {
+		if (cache[baseURL + 'css/' + layout + minified + '.css']) {
 
 			// Create styles
-			styles = atob(data.content);
-			stylesSize += data.size;
+			styles = cache[baseURL + 'css/' + layout + minified + '.css'].styles;
+			stylesSize += cache[baseURL + 'css/' + layout + minified + '.css'].size;
 
 			// Add any plugins
 			getPlugins();
 
-		}).error(function (data) {
-			// @todo
-		});
+		} else {
 
+			atomic.ajax({
+				url: baseURL + 'css/' + layout + minified + '.css'
+			}).success(function (data) {
+
+				// Create styles
+				cache[baseURL + 'css/' + layout + minified + '.css'] = {
+					styles: atob(data.content),
+					size: data.size
+				};
+				styles = cache[baseURL + 'css/' + layout + minified + '.css'].styles;
+				stylesSize += cache[baseURL + 'css/' + layout + minified + '.css'].size;
+				sessionStorage.setItem('portalCustomizerCache', JSON.stringify(cache));
+
+				// Add any plugins
+				getPlugins();
+
+			}).error(function (data) {
+				// @todo
+			});
+
+		}
 	};
 
 	var generateCode = function () {

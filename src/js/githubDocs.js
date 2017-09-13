@@ -31,15 +31,12 @@ var githubDocs = function (options) {
 	// Add loading text
 	main.innerHTML = settings.loading;
 
-	// Get the docs
-	atomic.ajax({
-		url: 'https://api.github.com/repos/' + settings.user + '/' + settings.repo + '/contents/' + settings.root + mashery.globals.github
-	}).success(function (data) {
+	var renderDocs = function (content) {
 
 		// Convert markdown to HTML
 		var markdown = new showdown.Converter();
 		markdown.setFlavor('github');
-		main.innerHTML = markdown.makeHtml(window.atob(data.content));
+		main.innerHTML = markdown.makeHtml(content);
 
 		// If inline scripts should be run, run them
 		if (settings.runScripts) {
@@ -59,9 +56,25 @@ var githubDocs = function (options) {
 
 		m$.emitEvent('portalAfterGitHubRender');
 
-	}).error(function (data) {
-		main.innerHTML = settings.failMessage;
-		m$.emitEvent('portalAfterGitHubError');
-	});
+	};
+
+	// Get the docs
+	var docs = sessionStorage.getItem('portalGHDocs_' + window.mashery.contentId);
+	if (docs) {
+
+	} else {
+
+		atomic.ajax({
+			url: 'https://api.github.com/repos/' + settings.user + '/' + settings.repo + '/contents/' + settings.root + mashery.globals.github
+		}).success(function (data) {
+			var content = window.atob(data.content);
+			renderDocs(content);
+			sessionStorage.setItem('portalGHDocs_' + window.mashery.contentId, content);
+		}).error(function (data) {
+			main.innerHTML = settings.failMessage;
+			m$.emitEvent('portalAfterGitHubError');
+		});
+
+	}
 
 };
