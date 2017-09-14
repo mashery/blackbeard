@@ -63,7 +63,7 @@ Pick your layout, and add plugins and components. In a future version, you'll al
 		</label>
 		<label>
 			<input type="checkbox" class="has-js has-events" name="plugins" value="fluidvids">
-			Responsive iFrame Videos
+			<a target="_blank" href="/docs/plugins/Responsive_Videos">Responsive iFrame Videos</a>
 		</label>
 		<label>
 			<input type="checkbox" class="has-css" name="plugins" value="images">
