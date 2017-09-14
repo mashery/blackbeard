@@ -4473,8 +4473,13 @@ var getContentType = function (elem) {
 	// Get content type
 	//
 
+	// 404
+	if (elem.classList.contains('not-found') || (h1 && /Not Found/.test(h1))) {
+		type = 'fourOhFour';
+	}
+
 	// Must be logged in to view this content
-	if (elem.classList.contains('please-login') || elem.classList.contains('permission-denied')) {
+	else if (elem.classList.contains('please-login') || elem.classList.contains('permission-denied')) {
 		type = 'noAccess';
 	}
 

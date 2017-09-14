@@ -47,7 +47,7 @@ Pick your layout, and add plugins and components. In a future version, you'll al
 </div>
 
 
-## 2. Pick your components and plugins.
+## 2. Add components and plugins.
 
 <div class="row margin-bottom">
 	<div class="grid-half">
