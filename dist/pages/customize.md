@@ -67,7 +67,7 @@ Pick your layout, and add plugins and components. In a future version, you'll al
 		</label>
 		<label>
 			<input type="checkbox" class="has-css" name="plugins" value="images">
-			Image Styles <em class="text-no-bold text-muted">(round, border, photograph)</em>
+			<a target="_blank" href="/docs/plugins/Images_Styles">Image Styles</a> <em class="text-no-bold text-muted">(round, border, photograph)</em>
 		</label>
 	</div>
 	<div class="grid-half">
