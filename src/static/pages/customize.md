@@ -77,15 +77,11 @@ Pick your layout, and add plugins and components. In a future version, you'll al
 		</label>
 		<label>
 			<input type="checkbox" class="has-css has-js has-events" name="plugins" value="houdini">
-			Expand-and-Collapse/Accordions
+			<a target="_blank" href="/docs/plugins/ExpandandCollapse_Accordions">Expand-and-Collapse/Accordions</a>
 		</label>
 		<label>
 			<input type="checkbox" class="has-js has-events" name="plugins" value="smooth-scroll">
-			Smooth Scroll
-		</label>
-		<label>
-			<input type="checkbox" class="" name="plugins" value="">
-			Plugin Name
+			<a target="_blank" href="/docs/plugins/Smooth_Scroll">Smooth Scroll</a>
 		</label>
 	</div>
 </div>

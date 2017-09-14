@@ -71,11 +71,11 @@ Houdini also supports expand-and-collapse accordion groups. Add a `[data-group]`
 
 *__Note:__ TinyMCE will strip out `[data-group]` attributes. It's very important that you never save a page with an accordion with TinyMCE enabled or it will remove the accordion functionality.*
 
-### 3. Initialize Houdini.
+### 2. Initialize Houdini.
 
 Initialize Houdini in a `portalAfterRender` event. And that's it, you're done. Nice work!
 
-```html
+```js
 window.addEventListener('portalAfterRender', function (event) {
 	houdini.init({
 		selectorToggle: '.collapse-toggle'
@@ -94,7 +94,7 @@ You can pass options and callbacks into Houdini through the `init()` function:
 
 ```javascript
 houdini.init({
-	selectorToggle: '[data-collapse]', // Collapse toggle selector
+	selectorToggle: '.collapse-toggle', // Collapse toggle selector
 	selectorContent: '.collapse', // Collapse content selector
 	toggleActiveClass: 'active', // Class added to active toggle elements
 	contentActiveClass: 'active', // Class added to active content elements
