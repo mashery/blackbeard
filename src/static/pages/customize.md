@@ -1,5 +1,7 @@
 <!-- Pick your layout, add plugins and components, and customize the color palette to match your brand. Layout and color changes will automatically live preview on this site. -->
 
+Themes are pre-bundled [labels, templates, and plugins](/docs/read/customizing) that help you build an awesome Portal more quickly.
+
 Pick your layout, and add plugins and components. In a future version, you'll also be able to customize the color palette and see a live preview of your theme.
 
 <div class="row">
@@ -57,7 +59,7 @@ Pick your layout, and add plugins and components. In a future version, you'll al
 		</label>
 		<label>
 			<input type="checkbox" class="has-js" name="plugins" value="githubDocs">
-			GitHub-Hosted Documentation
+			<a target="_blank" href="/docs/plugins/GitHubHosted_Documentation">GitHub-Hosted Documentation</a>
 		</label>
 		<label>
 			<input type="checkbox" class="has-js has-events" name="plugins" value="fluidvids">

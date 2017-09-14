@@ -1,4 +1,4 @@
-This section documents all of the optional components and plugins. Build your own bundle with the [Theme Customizer](/docs/read/customizing/Themes).
+This section documents all of the optional components and plugins. Build your own bundle with the [Theme Customizer](/docs/read/download).
 
-<ol id="content-nav-list">
-</ol>
+<ul id="content-nav-list">
+</ul>
