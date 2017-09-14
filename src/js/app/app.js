@@ -30,6 +30,9 @@ var m$ = (function () {
 
 	};
 
+	// Links to ignore for Ajax loading
+	var ajaxIgnore = '[target]';
+
 	// Defaults
 	var defaults = {
 
@@ -3502,7 +3505,7 @@ var m$ = (function () {
 		if (!link) return;
 
 		// Make sure Ajax is enabled and clicked object isn't on the ignore list
-		if (!settings.ajax || (settings.ajaxIgnore && link.matches(settings.ajaxIgnore))) return;
+		if (link.matches(ajaxIgnore) || !settings.ajax || (settings.ajaxIgnore && link.matches(settings.ajaxIgnore))) return;
 
 		// Make sure clicked item was a valid, local link
 		var files = new RegExp(window.location.origin + 'files');

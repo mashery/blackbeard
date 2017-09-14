@@ -53,7 +53,7 @@ Pick your layout, and add plugins and components. In a future version, you'll al
 	<div class="grid-half">
 		<label>
 			<input type="checkbox" class="has-js has-events" name="plugins" value="astro">
-			Expand-and-Collapse Mobile Navigation
+			<a target="_blank" href="/docs/read/plugins/ExpandandCollapse_Mobile_Navigation">Expand-and-Collapse Mobile Navigation</a>
 		</label>
 		<label>
 			<input type="checkbox" class="has-js" name="plugins" value="githubDocs">

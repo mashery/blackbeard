@@ -25,7 +25,7 @@ Make sure that the `[data-nav-toggle]` value matches the ID of the `.nav-menu` s
 
 ### 2. Initialize Astro.
 
-Initialize Astro in a `portalAfterRender` event, after the content. And that's it, you're done. Nice work!
+Initialize Astro in a `portalAfterRender` event. And that's it, you're done. Nice work!
 
 ```js
 window.addEventListener('portalAfterRender', function (event) {
