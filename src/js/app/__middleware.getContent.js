@@ -168,10 +168,10 @@ var getContent = function (type) {
 		// Get elements
 		var keys = dom.querySelectorAll('.main .section-body h2, .main .section-body div.key');
 		var getKeys = dom.querySelector('.action.new-key'); // @todo check if user can register at all based on this link
+		content.main = {};
 
 		// Push each key to an object
 		if (keys.length > 0) {
-			content.main = {};
 			content.secondary = getKeys ? getKeys.getAttribute('href') : null;
 			var currentPlan;
 

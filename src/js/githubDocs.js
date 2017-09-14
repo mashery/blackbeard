@@ -61,7 +61,7 @@ var githubDocs = function (options) {
 	// Get the docs
 	var docs = sessionStorage.getItem('portalGHDocs_' + window.mashery.contentId);
 	if (docs) {
-
+		renderDocs(docs);
 	} else {
 
 		atomic.ajax({

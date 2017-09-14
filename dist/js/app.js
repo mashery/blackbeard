@@ -4114,10 +4114,10 @@ var getContent = function (type) {
 		// Get elements
 		var keys = dom.querySelectorAll('.main .section-body h2, .main .section-body div.key');
 		var getKeys = dom.querySelector('.action.new-key'); // @todo check if user can register at all based on this link
+		content.main = {};
 
 		// Push each key to an object
 		if (keys.length > 0) {
-			content.main = {};
 			content.secondary = getKeys ? getKeys.getAttribute('href') : null;
 			var currentPlan;
 
@@ -5088,7 +5088,7 @@ var m$ = (function () {
 			 */
 			accountKeys: function () {
 				var template = '<h1>{{content.heading}}</h1><ul id="nav-account">{{content.navItemsAccount}}</ul>';
-				if (Object.keys(mashery.content.main).length > 0 ) {
+				if (Object.keys(mashery.content.main).length > 0) {
 					mashery.content.main.forEach((function (plan) {
 						template += '<h2>' + plan.name + '</h2>';
 						if (plan.keys.length > 0) {
@@ -5613,7 +5613,7 @@ var m$ = (function () {
 				var template = '';
 				if (window.mashery.content.newSearch) {
 					template += '<h1>{{content.headingNew}}</h1>' +
-								'{{content.searchForm}}';
+								'<div class="margin-bottom">{{content.searchForm}}</div>';
 				} else if (window.mashery.content.main) {
 					template += '<h1>{{content.heading}}</h1>' +
 								'{{content.searchForm}}' +
@@ -5762,8 +5762,8 @@ var m$ = (function () {
 			 */
 			accountKeys: {
 				heading: 'My API Keys', // The heading
-				noKeys: 'You don\'t have any keys yet.', // The message to display when a user has no keys
-				noPlanKeys: 'You have not been issued keys for this API.', // The message to display when a user has no keys for a specific plan
+				noKeys: '<p>You don\'t have any keys yet.</p>', // The message to display when a user has no keys
+				noPlanKeys: '<p>You have not been issued keys for this API.</p>', // The message to display when a user has no keys for a specific plan
 			},
 
 			/**
