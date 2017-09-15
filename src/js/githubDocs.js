@@ -34,9 +34,7 @@ var githubDocs = function (options) {
 	var renderDocs = function (content) {
 
 		// Convert markdown to HTML
-		var markdown = new showdown.Converter();
-		markdown.setFlavor('github');
-		main.innerHTML = markdown.makeHtml(content);
+		main.innerHTML = m$.convertMarkdown(content);
 
 		// If inline scripts should be run, run them
 		if (settings.runScripts) {

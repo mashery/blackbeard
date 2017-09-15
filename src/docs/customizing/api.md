@@ -251,6 +251,15 @@ m$.renderPortal();
 m$.renderPortal(true);
 ```
 
+## `convertMarkdown()`
+Convert markdown into HTML. This is handled automatically for you on custom pages, documentation, and blog posts, but you can convert any other markdown content to HTML by passing in the content.
+
+```js
+var content = '## My Awesome Heading';
+m$.convertMarkdown(content);
+// <h2>My Awesome Heading</h2>
+```
+
 ## `atomic.ajax()`
 To help you make XHR requests more easily, the [Atomic Ajax/HTTP plugin](https://github.com/cferdinandi/atomic) comes prebundled.
 

@@ -498,7 +498,43 @@ var getContent = function (type) {
 
 	// @todo Forum
 
-	// @todo Blog
+	// Blog: All
+	else if (type === 'blogAll') {
+		content.main = [];
+		dom.querySelectorAll('#main .section').forEach(function (post) {
+			var title = post.querySelector('h2 a');
+			var author = post.querySelector('.user-reference a');
+			content.main.push({
+				author: author.innerHTML,
+				authorUrl: author.getAttribute('href'),
+				content: post.querySelector('.section-body').innerHTML,
+				published: post.querySelector('.timestamp abbr').getAttribute('title'),
+				title: title.innerHTML,
+				url: title.getAttribute('href'),
+			});
+		});
+		var pagination = dom.querySelector('#paging p');
+		content.secondary = {
+			pagination: pagination ? pagination.innerHTML.trim() : null,
+			rss: dom.querySelector('#main .rss').getAttribute('href')
+		};
+	}
+
+	// Blog: Single
+	else if (type === 'blogSingle') {
+		var title = dom.querySelector('#main .section h2 a');
+		var author = dom.querySelector('#main .user-reference a');
+		var edit = dom.querySelector('#main .section-menu a.edit');
+		content.main = {
+			author: author.innerHTML,
+			authorUrl: author.getAttribute('href'),
+			content: dom.querySelector('#main .section-body').innerHTML,
+			edit: edit ? edit.getAttribute('href') : null,
+			published: dom.querySelector('#main .timestamp abbr').getAttribute('title'),
+			title: title.innerHTML,
+			url: title.getAttribute('href')
+		};
+	}
 
 	// Get any inline scripts
 	dom.querySelectorAll('script').forEach(function (script) {

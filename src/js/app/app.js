@@ -323,16 +323,49 @@ var m$ = (function () {
 			/**
 			 * Blog: All Posts
 			 * The layout for the page where all blog posts are listed.
-			 * @todo Create this layout
 			 */
-			blogAll: '<div class="main container" id="main"><p>Blog content needs to get created.</p></div>',
+			blogAll: function () {
+				var template = '<h1>{{content.blogTitle}}</h1>';
+				window.mashery.content.main.forEach(function (post) {
+					template +=
+						'<h2 class="margin-bottom-small">' +
+							'<a href="' + post.url + '">' + post.title + '</a>' +
+						'</h2>' +
+						'<p class="text-muted">' +
+							'By ' + post.author + ' on <time datetime="' + post.published + '" pubdate>' + post.published + '</time>' +
+						'</p>' +
+						'<div class="content">' +
+							m$.convertMarkdown(post.content) +
+						'</div>';
+				});
+				if (window.mashery.content.secondary.pagination) {
+					template += window.mashery.content.secondary.pagination;
+				}
+
+				return '<div class="main container container-small" id="main">' + template + '</div>';
+			},
 
 			/**
 			 * Blog: Single Post
 			 * The layout for individual blog posts.
 			 * @todo Create this layout
 			 */
-			blogSingle: '<div class="main container" id="main"><p>Blog content needs to get created.</p></div>',
+			blogSingle: function () {
+				var template =
+					'<h1 class="margin-bottom-small">' + window.mashery.content.main.title + '</h1>' +
+					'<p class="text-muted">' +
+						'By ' + window.mashery.content.main.author + ' on <time datetime="' + window.mashery.content.main.published + '" pubdate>' + window.mashery.content.main.published + '</time>' +
+					'</p>' +
+					'<div class="content">' +
+						m$.convertMarkdown(window.mashery.content.main.content) +
+					'</div>';
+
+				if (window.mashery.content.main.edit) {
+					template += '<p><a href="' + window.mashery.content.main.edit + '">Edit Post</a></p>';
+				}
+
+				return '<div class="main container container-small" id="main">' + template + '</div>';
+			},
 
 			/**
 			 * Contact
@@ -956,6 +989,14 @@ var m$ = (function () {
 				// The message
 				main:	'<p>An email has been sent to you with your key and application details. You can also view them at any time from the <a href="{{path.keys}}">My Account</a> page.</p>' +
 						'<p>To get started using your API keys, dig into <a href="{{path.docs}}">our documentation</a>. We look forward to seeing what you create!</p>',
+			},
+
+			/**
+			 * Blog: All Posts
+			 * The layout for the page where all blog posts are listed.
+			 */
+			blogAll: {
+				blogTitle: 'The {{mashery.area}} Developer Blog'
 			},
 
 			/**
@@ -1744,6 +1785,16 @@ var m$ = (function () {
 
 		},
 
+		// Blog: All Posts
+		blogAll: {
+
+			// Blog Title
+			'{{content.blogTitle}}': function () {
+				return settings.labels.blogAll.blogTitle;
+			}
+
+		},
+
 		// Contact
 		contact: {
 
@@ -2391,9 +2442,7 @@ var m$ = (function () {
 			if (['page', 'docs'].indexOf(window.mashery.contentType) === -1 || !settings.markdown || window.mashery.globals.noMarkdown) {
 				return window.mashery.content.main;
 			} else {
-				return markdown.makeHtml(window.mashery.content.main.replace(/(&lt;.+)?&gt;/g, function($0, $1) {
-					return $1 ? $0 : '>';
-				}).trim());
+				return m$.convertMarkdown(window.mashery.content.main);
 			}
 		},
 
@@ -2805,6 +2854,18 @@ var m$ = (function () {
 
 		return template;
 
+	};
+
+	/**
+	 * Convert markdown content to HTML
+	 * @public
+	 * @param  {String} content The markdown content
+	 * @return {String}         The HTML content
+	 */
+	m$.convertMarkdown = function (content) {
+		return markdown.makeHtml(content.replace(/(&lt;.+)?&gt;/g, function($0, $1) {
+			return $1 ? $0 : '>';
+		}).trim());
 	};
 
 	/**
@@ -3469,6 +3530,11 @@ var m$ = (function () {
 			url: url,
 			responseType: 'document'
 		}).success(function (data) {
+
+			// If link isn't a document, redirect
+			if (!data) {
+				window.location = url;
+			}
 
 			// Render our content on Success
 			renderWithAjax(data, url, pushState);
