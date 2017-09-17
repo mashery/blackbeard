@@ -397,7 +397,7 @@ var m$ = (function () {
 								'<h1>{{content.heading}}</h1>' +
 								'{{content.main}}' +
 							'</div>' +
-							'<div class="grid-third">' +
+							'<div class="grid-third" id="nav-docs">' +
 								'<h2>{{content.subheading}}</h2>' +
 								'<ul>{{content.secondary}}</ul>' +
 							'</div>' +
@@ -3662,8 +3662,9 @@ var m$ = (function () {
 	 * @param {Event} event  The popstate event
 	 */
 	var popstateHandler = function (event) {
-		var url = event.state && event.state.url ? event.state.url : window.location.href;
-		fetchContent(url);
+		// var url = event.state && event.state.url ? event.state.url : window.location.href;
+		if (!event.state || !event.state.url) return;
+		fetchContent(event.state.url);
 	};
 
 	/**
@@ -3773,6 +3774,9 @@ var m$ = (function () {
 
 		// Render the Portal
 		m$.renderPortal();
+
+		// Set default history state
+		window.history.replaceState({ url: window.location.href }, document.title, window.location.href);
 
 		// Setup Ajax variable
 		window.masheryIsAjax = false;
