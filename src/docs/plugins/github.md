@@ -4,6 +4,8 @@ You can now host your documentation on GitHub&mdash;taking advantage of its mark
 
 This approach uses Blackbeard's [event hooks](/docs/read/customizing/Events) and [custom JavaScript globals](/docs/read/customizing/hooks#custom-globals) with the [GitHub Content API](https://developer.github.com/v3/repos/contents/).
 
+<div id="demo-toc"></div>
+
 ## Getting Started
 
 ### 1. Define your GitHub options and details.

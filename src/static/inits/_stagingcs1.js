@@ -342,6 +342,96 @@ window.addEventListener('portalAfterGitHubRender', renderDocsNote, false);
 
 
 /**
+ * Auto-generate Table of Contents on docs pages
+ */
+var renderToC = function () {
+
+	/**
+	 * Add a sub-item to the navigation list
+	 * @param {Node}   heading     The heading element
+	 * @param {Number} difference  The difference between the current and last heading
+	 */
+	var addSubItem = function (heading, difference) {
+		var toc = '';
+		for (var i = Math.abs(difference); i > 0; i--) {
+			toc += '<ul>';
+		}
+		return toc;
+	};
+
+	/**
+	 * Close a sub-item from the navigation list
+	 * @param {Node}   heading     The heading element
+	 * @param {Number} difference  The difference between the current and last heading
+	 */
+	var closeSubItem = function (heading, difference) {
+		var toc = '';
+		for (var i = Math.abs(difference); i > 0; i--) {
+			toc += '</li></ul>';
+		}
+		return toc;
+	};
+
+	/**
+	 * Render the Table of Contents
+	 */
+	var createTOC = function (toc) {
+
+		// Get the content area
+		var content = document.querySelector('.content');
+		if (!content) return;
+
+		// Variables
+		var headings = content.querySelectorAll('h2, h3, h4, h5, h6');
+		var list = '';
+		var last, current, close;
+
+		headings.forEach(function (heading) {
+
+			// Get current heading position
+			current = parseInt(heading.tagName.substring(1), 10);
+			close = '</li>';
+
+			// If first loop, set last to current
+			if (!last) {
+				close = '';
+				last = current;
+			}
+
+			// Create an ID if the heading is missing one
+			if (!heading.id || heading.id.length < 1) {
+				heading.id = createID(headings[i]);
+			}
+
+			// Get difference between last and current
+			var difference = current - last;
+
+			if (difference > 0) {
+				list += addSubItem(heading, difference);
+			} else if (difference < 0) {
+				list += closeSubItem(heading, difference);
+			}
+
+			list += close + '<li><a href="#' + heading.id + '">' + heading.innerText + '</a>';
+
+			// Update last position
+			last = current;
+
+		});
+
+		toc.innerHTML = '<h2>In These Docs</h2><ul>' + list + '</ul>';
+
+	};
+
+	var toc = document.querySelector('#demo-toc');
+	if (!toc) return;
+	createTOC(toc);
+
+};
+window.addEventListener('portalAfterRender', renderToC, false);
+window.addEventListener('portalAfterRenderAjax', renderToC, false);
+
+/**
  * Plugins and Components
  */
 window.addEventListener('portalAfterRender', function () {

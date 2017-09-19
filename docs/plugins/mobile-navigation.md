@@ -4,6 +4,8 @@ Adds an expand-and-collapse feature to your navigation menu on smaller screens.
 
 <div id="plugin-note"></div>
 
+<div id="demo-toc"></div>
+
 ## Getting Started
 
 ### 1. Add the markup to your Portal template.

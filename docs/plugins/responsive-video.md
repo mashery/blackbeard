@@ -4,6 +4,8 @@ Add fluid, responsive videos to your Portal.
 
 <div id="plugin-note"></div>
 
+<div id="demo-toc"></div>
+
 ## The Problem
 
 HTML5 video can be made responsive with two lines of CSS:

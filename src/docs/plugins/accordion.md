@@ -4,6 +4,8 @@ Add expand-and-collapse content and accordion menus to your Portal.
 
 <div id="plugin-note"></div>
 
+<div id="demo-toc"></div>
+
 ## Demo
 
 ### Basic
