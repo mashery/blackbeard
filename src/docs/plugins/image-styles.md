@@ -6,19 +6,19 @@ Add simple `.img-*` classes to any image element to add styling. You can combine
 	<div class="grid-third">
 		<p style="text-align: center;">
 			<strong>Circle</strong><br>
-			<img class="img-circle" src="https://source.unsplash.com/random/200x200">
+			<img class="img-circle" src="https://unsplash.it/200/200">
 		</p>
 	</div>
 	<div class="grid-third">
 		<p style="text-align: center;">
 			<strong>Border</strong><br>
-			<img class="img-border" src="https://source.unsplash.com/random/200x200">
+			<img class="img-border" src="https://unsplash.it/200/200">
 		</p>
 	</div>
 	<div class="grid-third">
 		<p style="text-align: center;">
 			<strong>Photo</strong><br>
-			<img class="img-photo" src="https://source.unsplash.com/random/200x200">
+			<img class="img-photo" src="https://unsplash.it/200/200">
 		</p>
 	</div>
 </div>

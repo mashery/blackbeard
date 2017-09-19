@@ -48,8 +48,9 @@
   }
 
   function addStyles () {
+    if (document.querySelector('#fluid-vids-styles')) return;
     var div = document.createElement('div');
-    div.innerHTML = '<p>x</p><style>' + css + '</style>';
+    div.innerHTML = '<p>x</p><style id="fluid-vids-styles">' + css + '</style>';
     head.appendChild(div.childNodes[1]);
   }
 

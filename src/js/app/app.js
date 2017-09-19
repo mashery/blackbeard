@@ -391,15 +391,15 @@ var m$ = (function () {
 			 * The layout for API documentation.
 			 * This page includes an automatically generated navigation menu.
 			 */
-			docs:	'<div class="main container" id="main">' +
+			docs:	'<div class="main container container-wide" id="main">' +
 						'<div class="row">' +
-							'<div class="grid-two-thirds content">' +
-								'<h1>{{content.heading}}</h1>' +
-								'{{content.main}}' +
-							'</div>' +
-							'<div class="grid-third" id="nav-docs">' +
+							'<div class="grid-fourth" id="nav-docs">' +
 								'<h2>{{content.subheading}}</h2>' +
 								'<ul>{{content.secondary}}</ul>' +
+							'</div>' +
+							'<div class="grid-three-fourths content">' +
+								'<h1>{{content.heading}}</h1>' +
+								'{{content.main}}' +
 							'</div>' +
 						'</div>' +
 					'</div>',
@@ -408,7 +408,7 @@ var m$ = (function () {
 			 * Footer 1
 			 * The first of two footer content sections.
 			 */
-			footer1: '<div class="footer-1 container" id="footer-1"><hr></div>',
+			footer1: '<hr><div class="footer-1 container" id="footer-1"></div>',
 
 			/**
 			 * Footer 2
@@ -621,7 +621,7 @@ var m$ = (function () {
 			 * Custom Pages
 			 * The layout for custom pages.
 			 */
-			page:	'<div class="main container content" id="main">' +
+			page:	'<div class="main container container-small content" id="main">' +
 						'<h1>{{content.heading}}</h1>' +
 						'{{content.main}}' +
 					'</div>',
@@ -650,7 +650,7 @@ var m$ = (function () {
 					template += '<h2>{{content.headingActivity}}</h2>' +
 					window.mashery.content.main.activity;
 				}
-				return '<div class="main container" id="main">' + template + '</div>';
+				return '<div class="main container container-small" id="main">' + template + '</div>';
 			},
 
 			/**
@@ -658,7 +658,7 @@ var m$ = (function () {
 			 * The primary navigation content for the Portal.
 			 */
 			primaryNav:	'<div class="nav-primary nav-wrap nav-collapse" id="nav-primary">' +
-							'<div class="container padding-top-small padding-bottom-small">' +
+							'<div class="container container-wide padding-top-small padding-bottom-small">' +
 								'<a id="logo" class="logo" href="/">{{content.logo}}</a>' +
 								'<a role="button" class="nav-toggle" id="nav-primary-toggle" data-nav-toggle="#nav-primary-menu" href="#">{{content.menuToggle}}</a>' +
 								'<div class="nav-menu" id="nav-primary-menu">' +
@@ -821,7 +821,7 @@ var m$ = (function () {
 			 * User Navigation
 			 * The navigation menu for sign in, registration, account, and logout links.
 			 */
-			userNav:	'<div class="nav-user container" id="nav-user">' +
+			userNav:	'<div class="nav-user container container-wide" id="nav-user">' +
 							'<ul class="nav-user-list list-inline text-small text-muted padding-top-small padding-bottom-small no-margin-bottom text-right" id="nav-user-list">' +
 								'{{content.navItemsUser}}' +
 							'</ul>' +

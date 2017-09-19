@@ -8,14 +8,14 @@
  * The space content is one way to avoid an Opera bug when the `contenteditable` attribute is included anywhere else in the document%
  * @link https://github%com/h5bp/html5-boilerplate/blob/master/dist/css/main%css
  */
-/* line 107, src/sass/_config.scss */
+/* line 108, src/sass/_config.scss */
 .clearfix:before,
 .clearfix:after {
   display: table;
   content: " ";
 }
 
-/* line 113, src/sass/_config.scss */
+/* line 114, src/sass/_config.scss */
 .clearfix:after {
   clear: both;
 }
@@ -44,12 +44,17 @@
   background-color: #f7f7f7;
 }
 
-/* line 36, src/sass/overrides.scss */
+/* line 32, src/sass/overrides.scss */
+.bg-white {
+  background-color: #ffffff;
+}
+
+/* line 40, src/sass/overrides.scss */
 .bg-primary {
   background-color: #0088cc;
 }
 
-/* line 41, src/sass/overrides.scss */
+/* line 45, src/sass/overrides.scss */
 .bg-hero {
   background-position: center;
   background-size: cover;
@@ -59,32 +64,32 @@
 /**
  * Text sizes
  */
-/* line 52, src/sass/overrides.scss */
+/* line 56, src/sass/overrides.scss */
 .text-small {
   font-size: 0.9375em;
 }
 
-/* line 56, src/sass/overrides.scss */
+/* line 60, src/sass/overrides.scss */
 .text-large {
   font-size: 1.1875em;
   line-height: 1.4;
 }
 
 @media (min-width: 40em) {
-  /* line 56, src/sass/overrides.scss */
+  /* line 60, src/sass/overrides.scss */
   .text-large {
     font-size: 1.3125em;
   }
 }
 
-/* line 65, src/sass/overrides.scss */
+/* line 69, src/sass/overrides.scss */
 .text-hero {
   font-size: 2em;
   line-height: 1.4;
 }
 
 @media (min-width: 40em) {
-  /* line 65, src/sass/overrides.scss */
+  /* line 69, src/sass/overrides.scss */
   .text-hero {
     font-size: 3em;
   }
@@ -93,7 +98,7 @@
 /**
  * Text colors
  */
-/* line 79, src/sass/overrides.scss */
+/* line 83, src/sass/overrides.scss */
 .text-muted {
   color: #808080;
 }
@@ -101,12 +106,12 @@
 /**
  * Text decoration
  */
-/* line 88, src/sass/overrides.scss */
+/* line 92, src/sass/overrides.scss */
 .text-no-bold {
   font-weight: normal;
 }
 
-/* line 92, src/sass/overrides.scss */
+/* line 96, src/sass/overrides.scss */
 .text-no-italic {
   font-style: normal;
 }
@@ -114,23 +119,23 @@
 /**
  * Text alignment
  */
-/* line 101, src/sass/overrides.scss */
+/* line 105, src/sass/overrides.scss */
 .text-center {
   text-align: center;
 }
 
-/* line 105, src/sass/overrides.scss */
+/* line 109, src/sass/overrides.scss */
 .text-right {
   text-align: right;
 }
 
-/* line 109, src/sass/overrides.scss */
+/* line 113, src/sass/overrides.scss */
 .text-left {
   text-align: left;
 }
 
 @media (min-width: 60em) {
-  /* line 114, src/sass/overrides.scss */
+  /* line 118, src/sass/overrides.scss */
   .text-right-large {
     text-align: right;
   }
@@ -139,19 +144,19 @@
 /**
  * Floats
  */
-/* line 124, src/sass/overrides.scss */
+/* line 128, src/sass/overrides.scss */
 .float-left {
   float: left;
 }
 
-/* line 128, src/sass/overrides.scss */
+/* line 132, src/sass/overrides.scss */
 .float-center {
   float: none;
   margin-left: auto;
   margin-right: auto;
 }
 
-/* line 134, src/sass/overrides.scss */
+/* line 138, src/sass/overrides.scss */
 .float-right {
   float: right;
 }
@@ -159,32 +164,32 @@
 /**
  * Margins
  */
-/* line 143, src/sass/overrides.scss */
+/* line 147, src/sass/overrides.scss */
 .no-margin-top {
   margin-top: 0;
 }
 
-/* line 147, src/sass/overrides.scss */
+/* line 151, src/sass/overrides.scss */
 .no-margin-bottom {
   margin-bottom: 0;
 }
 
-/* line 151, src/sass/overrides.scss */
+/* line 155, src/sass/overrides.scss */
 .margin-top {
   margin-top: 1.5625em;
 }
 
-/* line 155, src/sass/overrides.scss */
+/* line 159, src/sass/overrides.scss */
 .margin-bottom {
   margin-bottom: 1.5625em;
 }
 
-/* line 159, src/sass/overrides.scss */
+/* line 163, src/sass/overrides.scss */
 .margin-bottom-small {
   margin-bottom: 0.5em;
 }
 
-/* line 163, src/sass/overrides.scss */
+/* line 167, src/sass/overrides.scss */
 .margin-bottom-large {
   margin-bottom: 2em;
 }
@@ -192,42 +197,42 @@
 /**
  * Padding
  */
-/* line 172, src/sass/overrides.scss */
+/* line 176, src/sass/overrides.scss */
 .no-padding-top {
   padding-top: 0;
 }
 
-/* line 176, src/sass/overrides.scss */
+/* line 180, src/sass/overrides.scss */
 .no-padding-bottom {
   padding-bottom: 0;
 }
 
-/* line 180, src/sass/overrides.scss */
+/* line 184, src/sass/overrides.scss */
 .padding-top {
   padding-top: 1.5625em;
 }
 
-/* line 184, src/sass/overrides.scss */
+/* line 188, src/sass/overrides.scss */
 .padding-top-small {
   padding-top: 0.5em;
 }
 
-/* line 188, src/sass/overrides.scss */
+/* line 192, src/sass/overrides.scss */
 .padding-top-large {
   padding-top: 2em;
 }
 
-/* line 192, src/sass/overrides.scss */
+/* line 196, src/sass/overrides.scss */
 .padding-bottom {
   padding-bottom: 1.5625em;
 }
 
-/* line 196, src/sass/overrides.scss */
+/* line 200, src/sass/overrides.scss */
 .padding-bottom-small {
   padding-bottom: 0.5em;
 }
 
-/* line 200, src/sass/overrides.scss */
+/* line 204, src/sass/overrides.scss */
 .padding-bottom-large {
   padding-bottom: 2em;
 }
@@ -240,7 +245,7 @@
  * @link https://github.com/h5bp/html5-boilerplate/blob/master/dist/css/main.css
  * @link http://snook.ca/archives/html_and_css/hiding-content-for-accessibility
  */
-/* line 214, src/sass/overrides.scss */
+/* line 218, src/sass/overrides.scss */
 .screen-reader {
   border: 0;
   clip: rect(0 0 0 0);
@@ -258,7 +263,7 @@
  * @link https://github.com/h5bp/html5-boilerplate/blob/master/dist/css/main.css
  * @link https://www.drupal.org/node/897638
  */
-/* line 231, src/sass/overrides.scss */
+/* line 235, src/sass/overrides.scss */
 .screen-reader-focusable:active,
 .screen-reader-focusable:focus {
   clip: auto;
@@ -275,7 +280,7 @@
  * @affected IE 8/9/10
  * @link http://juicystudio.com/article/screen-readers-display-none.php
  */
-/* line 247, src/sass/overrides.scss */
+/* line 251, src/sass/overrides.scss */
 [hidden] {
   display: none;
   visibility: hidden;

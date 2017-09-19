@@ -1,0 +1,8 @@
+/*! blackbeard vbeta | (c) 2017 Chris Ferdinandi | LicenseRef-All Rights Reserved License | http://github.com/mashery/blackbeard */
+/*!
+ * BetterDocs.js v1.0.0
+ * Create better static documentation.
+ * (c) 2017 TIBCO Software Inc.
+ * Written by Chris Ferdinandi
+ * All Rights Reserved
+ */.better-docs-nav ul{list-style:none;margin-left:0;margin-right:0;padding:0}.better-docs-nav ul>li{display:inline-block}.better-docs-nav a{padding:.3125em .6875em;text-decoration:none}.better-docs-nav a:active,.better-docs-nav a:focus,.better-docs-nav a:hover{background-color:#e5e5e5;text-decoration:none}.better-docs-nav a.active{background-color:#08c;color:#fff;text-decoration:none}@media (min-width:60em){.better-docs-nav-sticky{position:absolute;right:0;top:0}.better-docs-nav-sticky ul{background-color:#f7f7f7;position:fixed;width:47.2%}}.better-docs-wide-content{position:relative}@media (min-width:60em){.better-docs-wide-content>dl,.better-docs-wide-content>h1,.better-docs-wide-content>h2,.better-docs-wide-content>h3,.better-docs-wide-content>h4,.better-docs-wide-content>h5,.better-docs-wide-content>h6,.better-docs-wide-content>ol,.better-docs-wide-content>p,.better-docs-wide-content>table,.better-docs-wide-content>ul{margin-right:52.8%}.better-docs-wide-content>table{max-width:47.2%}.better-docs-wide-content .better-docs-nav,.better-docs-wide-content blockquote,.better-docs-wide-content pre{clear:right;float:right;width:47.2%}}.better-docs-wide-content blockquote{font-size:1em;font-style:normal;margin-bottom:0}.better-docs-wide-content blockquote p:last-child{margin-bottom:.5em}@media (min-width:60em){.complete.better-docs-wide-bg body{background-image:linear-gradient(90deg,#f7f7f7 0,#f7f7f7 25%,transparent 0,transparent 63%,#f7f7f7 0,#f7f7f7)}}

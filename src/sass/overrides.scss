@@ -29,6 +29,10 @@
 	background-color: $color-gray-lighter;
 }
 
+.bg-white {
+	background-color: $color-white;
+}
+
 .bg-dark {
 	@extend %bg-dark;
 }

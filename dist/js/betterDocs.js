@@ -6,7 +6,6 @@
  * Written by Chris Ferdinandi
  * All Rights Reserved
  */
-
 (function (root, factory) {
 	if ( typeof define === 'function' && define.amd ) {
 		define([], (function () {
@@ -36,17 +35,30 @@
 	//
 
 	var defaults = {
-		// Selectors
-		selectorNav: '.nav-lang',
-		selectorTOCNav: '.nav-toc',
-		selectorTOCHeadings: 'h2, h3, h4, h5, h6',
 
-		// Content
+		// Only run on certain pages
+		restrictToPages: 'docs',
+
+		// Table of Contents
+		tocSelector: 'h2, h3, h4, h5, h6',
 		tocHeading: '',
+		tocLocation: '#nav-docs',
+		currentPageSelector: '.current-page',
+		tocLocationReplace: false,
 
 		// Languages
-		langs: {},
-		langDefault: null
+		langs: null,
+		langDefault: null,
+		langsNav: '.better-docs-nav',
+
+		// Styles
+		wideLayout: false,
+		wideLayoutBg: true,
+		initClass: 'better-docs',
+		wideLayoutClass: 'better-docs-wide',
+		wideLayoutBgClass: 'better-docs-wide-bg',
+		contentClassSuffix: '-content'
+
 	};
 
 
@@ -100,11 +112,9 @@
 	 * @param {Number} difference  The difference between the current and last heading
 	 */
 	var addSubItem = function (heading, difference) {
-		var i = Math.abs(difference);
 		var toc = '';
-		while (i > 0) {
+		for (var i = Math.abs(difference); i > 0; i--) {
 			toc += '<ul>';
-			i--;
 		}
 		return toc;
 	};
@@ -115,11 +125,9 @@
 	 * @param {Number} difference  The difference between the current and last heading
 	 */
 	var closeSubItem = function (heading, difference) {
-		var i = Math.abs(difference);
 		var toc = '';
-		while (i > 0) {
+		for (var i = Math.abs(difference); i > 0; i--) {
 			toc += '</li></ul>';
-			i--;
 		}
 		return toc;
 	};
@@ -148,6 +156,17 @@
 
 	};
 
+	var createLangNav = function (langs, selector) {
+		var list = '';
+		langs.forEach((function (lang, key) {
+			list += '<li><a role="button" data-lang="' + key + '" href="#lang-' + key + '">' + lang.title + '</a></li>';
+		}));
+		document.querySelectorAll(selector).forEach((function (langNav) {
+			langNav.innerHTML = '<ul>' + list + '</ul>';
+		}));
+
+	};
+
 
 	//
 	// BetterDocs Constructor
@@ -168,16 +187,42 @@
 		//
 
 		/**
+		 * Check if the page is one that the script should run on
+		 * @return {Boolean} [description]
+		 */
+		var isSupportedPage = function () {
+
+			// If a restricted page is set
+			if (settings.restrictToPages) {
+
+				// If it's not an array, convert it to one
+				if (Object.prototype.toString.call(settings.restrictToPages) !== '[object Array]') {
+					var temp = settings.restrictToPages;
+					settings.restrictToPages = [];
+					settings.restrictToPages.push(temp);
+				}
+
+				// Return `false` if the contentType and contentId don't match any allowed pages
+				if (
+					settings.restrictToPages.indexOf(window.mashery.contentType) === -1 &&
+					settings.restrictToPages.indexOf(window.mashery.contentId) === -1
+				) return false;
+			}
+
+			// Otherwise return true
+			return true;
+
+		};
+
+		/**
 		 * Render the Table of Contents
 		 */
 		var createTOC = function () {
 
-			var headings = content.querySelectorAll(settings.selectorTOCHeadings);
-			var toc = document.querySelector(settings.selectorTOCNav);
+			var headings = content.querySelectorAll(settings.tocSelector);
+			var toc = settings.tocLocationReplace ? document.querySelector(settings.tocLocation) : document.querySelector(settings.tocLocation + ' ' + settings.currentPageSelector);
 			var list = '';
 			var last, current, close;
-
-			console.log(headings);
 
 			if (!toc) return;
 
@@ -214,7 +259,64 @@
 
 			}));
 
-			toc.innerHTML = settings.tocHeading + '<ul>' + list + '</ul>';
+			if (settings.tocLocationReplace) {
+				toc.innerHTML = settings.tocHeading + '<ul>' + list + '</ul>';
+			} else {
+				toc.innerHTML += settings.tocHeading + '<ul>' + list + '</ul>';
+			}
+
+		};
+
+		var toggleLang = function (active) {
+			var currentLang = document.querySelectorAll('[class*="lang-"].active, [class*="language-"].active, ' + settings.langsNav + ' a.active');
+
+			var classes = settings.langs[active].selector.split(',');
+			var selectors = [];
+			classes.forEach((function (className) {
+				selectors.push('.lang-' + className.trim());
+				selectors.push('.language-' + className.trim());
+			}));
+
+			var newLang = document.querySelectorAll(selectors.join(',') + ',' + settings.langsNav + ' [data-lang="' + active + '"]');
+
+			currentLang.forEach((function (lang) {
+				lang.classList.remove('active');
+			}));
+
+			newLang.forEach((function (lang) {
+				lang.classList.add('active');
+			}));
+		};
+
+		var clickHandler = function (event) {
+			var toggle = event.target.closest(settings.langsNav + ' a');
+			if (!toggle) return;
+			event.preventDefault();
+			toggleLang(toggle.getAttribute('data-lang'));
+		};
+
+		betterDocs.destroy = function () {
+
+			// If plugin isn't already initialized, stop
+			if (!settings) return;
+
+			// Remove event listeners
+			document.removeEventListener('click', clickHandler, false);
+
+			// Remove classes
+			document.documentElement.classList.remove(settings.initClass);
+			document.documentElement.classList.remove(settings.wideLayoutClass);
+			document.documentElement.classList.remove(settings.wideLayoutBgClass);
+			if (content) {
+				content.classList.remove(settings.initClass + settings.contentClassSuffix);
+				content.classList.remove(settings.wideLayoutClass + settings.contentClassSuffix);
+			}
+
+			// Reset variables
+			settings = null;
+			content = null;
+
+			// @todo remove ToC
 
 		};
 
@@ -227,19 +329,50 @@
 			// feature test
 			if (!supports) return;
 
-			// Selectors and variables
-			settings = extend(defaults, options || {}); // Merge user options with defaults
-			content = document.querySelector(selector);
+			// Destroy any existing initializations
+			betterDocs.destroy();
 
-			// Bail if content container doesn't exist
+			// Merge defaults with user options
+			settings = extend(defaults, options || {});
+
+			// Make sure should run on this page
+			if (!isSupportedPage()) return;
+
+			// Get the content container
+			content = document.querySelector(selector);
 			if (!content) return;
+
+			// Add initialization class
+			document.documentElement.classList.add(settings.initClass);
+			content.classList.add(settings.initClass + settings.contentClassSuffix);
+
+			// If wide layout, add wide class
+			if (settings.wideLayout) {
+				document.documentElement.classList.add(settings.wideLayoutClass);
+				content.classList.add(settings.wideLayoutClass + settings.contentClassSuffix);
+
+				if (settings.wideLayoutBg) {
+					document.documentElement.classList.add(settings.wideLayoutBgClass);
+				}
+			}
 
 			// Create Table of Contents
 			createTOC();
 
+			// Create language navigation
+			createLangNav(settings.langs, settings.langsNav);
+
 			// Add inline styles
-			if (settings.langs.length > 0) {
+			if (settings.langs) {
 				createStyles(settings.langs);
+			}
+
+			// Listen for click events
+			document.addEventListener('click', clickHandler, false);
+
+			// Set a default language
+			if (settings.langDefault) {
+				toggleLang(settings.langDefault);
 			}
 
 		};

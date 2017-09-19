@@ -1,6 +1,4 @@
-<div class="nav-toc"></div>
-
-<div class="nav-lang"></div>
+<div class="better-docs-nav better-docs-nav-sticky"></div>
 
 Welcome to the Kittn API! You can use our API to access Kittn API endpoints, which can get information on various cats, kittens, and breeds in our database.
 
@@ -9,12 +7,6 @@ We have language bindings in Shell, Ruby, and Python! You can view code examples
 This example API documentation page was created with Slate. Feel free to edit it and use it as a base for your own API's documentation.
 
 ## Authentication
-
-Kittn uses API keys to allow access to the API. You can register a new Kittn API key at our developer portal.
-
-Kittn expects for the API key to be included in all API requests to the server in a header that looks like the following:
-
-`Authorization: meowmeowmeow`
 
 > To authorize, use this code:
 
@@ -45,22 +37,13 @@ let api = kittn.authorize('meowmeowmeow');
 
 >Make sure to replace meowmeowmeow with your API key.
 
+Kittn uses API keys to allow access to the API. You can register a new Kittn API key at our developer portal.
+
+Kittn expects for the API key to be included in all API requests to the server in a header that looks like the following:
+
+`Authorization: meowmeowmeow`
+
 ## Kittens
-
-### Get All Kittens
-
-This endpoint retrieves all kittens.
-
-#### HTTP Request
-
-`GET http://example.com/api/kittens`
-
-#### Query Parameters
-
-| Parameter | Default | Description |
-| --------- | ------- | ----------- |
-|`include_cats` | `false` | If set to true, the result will also include cats. |
-| `available` | `true` | If set to false, the result will include kittens that have already been adopted. |
 
 ```bash
 curl "http://example.com/api/kittens"
@@ -108,3 +91,18 @@ let kittens = api.kittens.get();
   }
 ]
 ```
+
+### Get All Kittens
+
+This endpoint retrieves all kittens.
+
+#### HTTP Request
+
+`GET http://example.com/api/kittens`
+
+#### Query Parameters
+
+| Parameter | Default | Description |
+| --------- | ------- | ----------- |
+|`include_cats` | `false` | If set to true, the result will also include cats. |
+| `available` | `true` | If set to false, the result will include kittens that have already been adopted. |

@@ -23,6 +23,9 @@ var customizer = function () {
 	// Methods
 	//
 
+	/**
+	 * Render initialization code into the DOM
+	 */
 	var createInits = function () {
 
 		// Generate code
@@ -54,6 +57,9 @@ var customizer = function () {
 
 	};
 
+	/**
+	 * Get initialization code for plugins and components
+	 */
 	var getPluginInits = function () {
 
 		// If no plugins are selected, create initialization code immediately
@@ -145,6 +151,9 @@ var customizer = function () {
 
 	};
 
+	/**
+	 * Get initialization code for the selected theme
+	 */
 	var getThemeInits = function () {
 		if (cache[baseURL + 'inits/' + layout + '.js']) {
 
@@ -177,10 +186,18 @@ var customizer = function () {
 		}
 	};
 
+	/**
+	 * Convert the file size into kilobytes
+	 * @param  {Number} size The size in bytes
+	 * @return {String}      The size in kilobytes
+	 */
 	var prettySize = function (size) {
 		return Math.round(100 * size / 1024) / 100 + 'kb';
 	};
 
+	/**
+	 * Render the file download size information
+	 */
 	var displayDownloadSize = function () {
 		var total = scriptsSize + stylesSize;
 		var percentJS = Math.round(100 * scriptsSize / total) + '%';
@@ -188,6 +205,11 @@ var customizer = function () {
 		size.innerHTML = '<p>Total Filesize: <strong>' + prettySize(total) + '</strong> (' + percentJS + ' JavaScript and ' + percentCSS + ' CSS)</p>';
 	};
 
+	/**
+	 * Create the file download link
+	 * @param  {Node}   btn  The button to trigger the download
+	 * @param  {String} code The code to download
+	 */
 	var createDownload = function (btn, code) {
 
 		// If there's no code to download
@@ -205,6 +227,9 @@ var customizer = function () {
 
 	};
 
+	/**
+	 * Update buttons and content areas while pulling from the API
+	 */
 	var setGeneratingStatus = function () {
 
 		// Scripts
@@ -225,6 +250,9 @@ var customizer = function () {
 
 	};
 
+	/**
+	 * Get the overrides.css file
+	 */
 	var getOverrides = function () {
 		if (cache[baseURL + 'css/overrides' + minified + '.css']) {
 
@@ -260,6 +288,9 @@ var customizer = function () {
 		}
 	};
 
+	/**
+	 * Get the plugin and component code
+	 */
 	var getPlugins = function () {
 
 		// If no plugins are selected, update buttons immediately
@@ -363,6 +394,9 @@ var customizer = function () {
 
 	};
 
+	/**
+	 * Get the base layout CSS
+	 */
 	var getLayout = function () {
 		if (cache[baseURL + 'css/' + layout + minified + '.css']) {
 
@@ -398,6 +432,9 @@ var customizer = function () {
 		}
 	};
 
+	/**
+	 * Generate code based on user selections
+	 */
 	var generateCode = function () {
 
 		// Temporarily disable download buttons
@@ -426,6 +463,9 @@ var customizer = function () {
 
 	};
 
+	/**
+	 * Debounce code generation for performance
+	 */
 	var generateCodeDebounce = function () {
 		if (timerID) {
 			clearTimeout(timerID);
@@ -446,6 +486,11 @@ var customizer = function () {
 		generateCodeDebounce();
 
 	};
+
+
+	//
+	// Inits & Event Listeners
+	//
 
 	// If not the customizer page, remove event listeners and bail
 	if (!btnJS || !btnCSS) {

@@ -13,6 +13,7 @@
 }
 
 #nav-primary {
+	background-color: $color-white;
 	border-bottom: calc-em(1px) solid $color-gray-light;
 	margin-bottom: $spacing;
 
@@ -28,4 +29,8 @@
 
 #nav-account {
 	@extend .list-inline;
+}
+
+#footer {
+	background-color: $color-white;
 }

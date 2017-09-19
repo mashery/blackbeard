@@ -17,6 +17,10 @@
 	max-width: $container-max-width-small;
 }
 
+.container-wide {
+	width: $container-width-wide;
+}
+
 .row {
 	margin-left: $grid-margins * -1;
 	margin-right: $grid-margins * -1;

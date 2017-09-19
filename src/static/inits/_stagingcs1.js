@@ -82,21 +82,6 @@ window.addEventListener('portalBeforeRender', function () {
 
 
 /**
- * GitHub Hosted Documentation
- */
-
-window.addEventListener('portalAfterRender', function () {
-    m$.loadJS('https://stagingcs1.mashery.com/files/githubDocs.min.beta.js', function () {
-        githubDocs({
-            user: 'mashery',
-            repo: 'blackbeard',
-            root: 'docs/' // The root directory for all of my documentation
-        });
-    });
-}, false);
-
-
-/**
  * Automatically Generate Navigation
  */
 
@@ -133,205 +118,205 @@ window.addEventListener('portalAfterRender', function () {
  * Theme Picker
  */
 
-// window.addEventListener('portalAfterInit', function () {
+window.addEventListener('portalAfterInit', function () {
 
-// 	// Setup theme options object
-// 	themeOptions = {};
+	// Setup theme options object
+	themeOptions = {};
 
-// 	themeOptions.blackbeard = {
-// 		styles: 'https://stagingcs1.mashery.com/files/blackbeard.min.beta.css',
-// 		options: function () {
-// 			portalOptions = window.portalOptions;
+	themeOptions.blackbeard = {
+		styles: 'https://stagingcs1.mashery.com/files/blackbeard.min.beta.css',
+		options: function () {
+			portalOptions = window.portalOptions;
 
-// 			portalOptions.templates.userNav = null;
+			portalOptions.templates.userNav = null;
 
-// 			portalOptions.templates.primaryNav = function () {
-// 				var template =
-// 					'<div class="nav-primary nav-wrap nav-collapse" id="nav-primary">' +
-// 						'<div class="container padding-top-small padding-bottom-small">' +
-// 							'<a id="logo" class="logo margin-bottom" href="/">{{content.logo}}</a>' +
-// 							'<a role="button" class="nav-toggle" id="nav-primary-toggle" data-nav-toggle="#nav-primary-menu" href="#">{{content.menuToggle}}</a>' +
-// 							'<div class="nav-menu" id="nav-primary-menu">' +
-// 								'<ul class="nav" id="nav-primary-list">' +
-// 									'{{content.navItemsPrimary}}' +
-// 								'</ul>' +
-// 								'<ul class="nav-user-list" id="nav-user-list">' +
-// 									'{{content.navItemsUser}}' +
-// 								'</ul>' +
-// 								'{{content.searchForm}}' +
-// 								(mashery.contentType === 'docs' ? '<h2 class="margin-top">In The Docs</h2><ul class="nav-docs" id="nav-docs">{{content.secondary}}</ul>' : '') +
-// 							'</div>' +
-// 						'</div>' +
-// 					'</div>';
-// 				return template;
-// 			};
+			portalOptions.templates.primaryNav = function () {
+				var template =
+					'<div class="nav-primary nav-wrap nav-collapse" id="nav-primary">' +
+						'<div class="container padding-top-small padding-bottom-small">' +
+							'<a id="logo" class="logo margin-bottom" href="/">{{content.logo}}</a>' +
+							'<a role="button" class="nav-toggle" id="nav-primary-toggle" data-nav-toggle="#nav-primary-menu" href="#">{{content.menuToggle}}</a>' +
+							'<div class="nav-menu" id="nav-primary-menu">' +
+								'<ul class="nav" id="nav-primary-list">' +
+									'{{content.navItemsPrimary}}' +
+								'</ul>' +
+								'<ul class="nav-user-list" id="nav-user-list">' +
+									'{{content.navItemsUser}}' +
+								'</ul>' +
+								'{{content.searchForm}}' +
+								(mashery.contentType === 'docs' ? '<h2 class="margin-top">In The Docs</h2><ul class="nav-docs" id="nav-docs">{{content.secondary}}</ul>' : '') +
+							'</div>' +
+						'</div>' +
+					'</div>';
+				return template;
+			};
 
-// 			portalOptions.templates.docs =
-// 				'<div class="main container content" id="main">' +
-// 					'<h1>{{content.heading}}</h1>' +
-// 					'{{content.main}}' +
-// 				'</div>';
+			portalOptions.templates.docs =
+				'<div class="main container content" id="main">' +
+					'<h1>{{content.heading}}</h1>' +
+					'{{content.main}}' +
+				'</div>';
 
-// 			portalOptions.templates.layout =
-// 				'<div class="row row-no-padding clearfix">' +
-// 					'<div class="grid-fourth">' +
-// 						'<a class="screen-reader screen-reader-focusable" href="#main">Skip to content</a>' +
-// 						'{{layout.navPrimary}}' +
-// 					'</div>' +
-// 					'<div class="grid-three-fourths">' +
-// 						'{{layout.main}}' +
-// 						'<footer class="footer" id="footer">' +
-// 							'{{layout.footer1}}' +
-// 							'{{layout.navSecondary}}' +
-// 							'{{layout.footer2}}' +
-// 						'</footer>' +
-// 					'</div>' +
-// 				'</div>';
-// 		}
-// 	};
+			portalOptions.templates.layout =
+				'<div class="row row-no-padding clearfix">' +
+					'<div class="grid-fourth">' +
+						'<a class="screen-reader screen-reader-focusable" href="#main">Skip to content</a>' +
+						'{{layout.navPrimary}}' +
+					'</div>' +
+					'<div class="grid-three-fourths">' +
+						'{{layout.main}}' +
+						'<footer class="footer" id="footer">' +
+							'{{layout.footer1}}' +
+							'{{layout.navSecondary}}' +
+							'{{layout.footer2}}' +
+						'</footer>' +
+					'</div>' +
+				'</div>';
+		}
+	};
 
-// 	themeOptions.default = {
-// 		styles: 'https://stagingcs1.mashery.com/files/default.min.beta.css',
-// 		options: function () {}
-// 	};
+	themeOptions.default = {
+		styles: 'https://stagingcs1.mashery.com/files/default.min.beta.css',
+		options: function () {}
+	};
 
-// 	themeOptions.skinnyNav = {
-// 		styles: 'https://stagingcs1.mashery.com/files/skinny-nav.min.beta.css',
-// 		options: function () {
-// 			portalOptions = window.portalOptions;
+	themeOptions.skinnyNav = {
+		styles: 'https://stagingcs1.mashery.com/files/skinny-nav.min.beta.css',
+		options: function () {
+			portalOptions = window.portalOptions;
 
-// 			portalOptions.templates.userNav = null;
+			portalOptions.templates.userNav = null;
 
-// 			portalOptions.templates.primaryNav =
-// 				'<div class="nav-primary nav-wrap nav-collapse" id="nav-primary">' +
-// 					'<div class="container padding-top-small padding-bottom-small">' +
-// 						'<a id="logo" class="logo" href="/">{{content.logo}}</a>' +
-// 						'<a role="button" class="nav-toggle" id="nav-primary-toggle" data-nav-toggle="#nav-primary-menu" href="#">{{content.menuToggle}}</a>' +
-// 						'<div class="nav-menu">' +
-// 							'<div id="nav-user-menu">' +
-// 								'<ul class="nav" id="nav-user-list">' +
-// 									'{{content.navItemsUser}}' +
-// 								'</ul>' +
-// 							'</div>' +
-// 							'<div id="nav-primary-menu">' +
-// 								'<ul class="nav" id="nav-primary-list">' +
-// 									'{{content.navItemsPrimary}}' +
-// 									'<li><a href="/search"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-link" width="16" height="16" viewBox="0 0 32 32"><title>Search</title><path d="M31.008 27.231l-7.58-6.447c-.784-.705-1.622-1.029-2.299-.998a11.954 11.954 0 0 0 2.87-7.787c0-6.627-5.373-12-12-12s-12 5.373-12 12 5.373 12 12 12c2.972 0 5.691-1.081 7.787-2.87-.031.677.293 1.515.998 2.299l6.447 7.58c1.104 1.226 2.907 1.33 4.007.23s.997-2.903-.23-4.007zM12 20a8 8 0 1 1 0-16 8 8 0 0 1 0 16z"/></svg></a></li>' +
-// 								'</ul>' +
-// 							'</div>' +
-// 						'</div>' +
-// 					'</div>' +
-// 				'</div>';
-// 		}
-// 	};
+			portalOptions.templates.primaryNav =
+				'<div class="nav-primary nav-wrap nav-collapse" id="nav-primary">' +
+					'<div class="container padding-top-small padding-bottom-small">' +
+						'<a id="logo" class="logo" href="/">{{content.logo}}</a>' +
+						'<a role="button" class="nav-toggle" id="nav-primary-toggle" data-nav-toggle="#nav-primary-menu" href="#">{{content.menuToggle}}</a>' +
+						'<div class="nav-menu">' +
+							'<div id="nav-user-menu">' +
+								'<ul class="nav" id="nav-user-list">' +
+									'{{content.navItemsUser}}' +
+								'</ul>' +
+							'</div>' +
+							'<div id="nav-primary-menu">' +
+								'<ul class="nav" id="nav-primary-list">' +
+									'{{content.navItemsPrimary}}' +
+									'<li><a href="/search"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-link" width="16" height="16" viewBox="0 0 32 32"><title>Search</title><path d="M31.008 27.231l-7.58-6.447c-.784-.705-1.622-1.029-2.299-.998a11.954 11.954 0 0 0 2.87-7.787c0-6.627-5.373-12-12-12s-12 5.373-12 12 5.373 12 12 12c2.972 0 5.691-1.081 7.787-2.87-.031.677.293 1.515.998 2.299l6.447 7.58c1.104 1.226 2.907 1.33 4.007.23s.997-2.903-.23-4.007zM12 20a8 8 0 1 1 0-16 8 8 0 0 1 0 16z"/></svg></a></li>' +
+								'</ul>' +
+							'</div>' +
+						'</div>' +
+					'</div>' +
+				'</div>';
+		}
+	};
 
-// 	// Re-render the Portal with new options
-// 	var toggleThemes = function () {
+	// Re-render the Portal with new options
+	var toggleThemes = function () {
 
-// 		var isStylesheet = function (ss) {
-// 			return !!(ss.nodeName.toLowerCase() === 'link' && ss.getAttribute('rel').toLowerCase() === 'stylesheet' && ss.getAttribute('href'));
-// 		};
+		var isStylesheet = function (ss) {
+			return !!(ss.nodeName.toLowerCase() === 'link' && ss.getAttribute('rel').toLowerCase() === 'stylesheet' && ss.getAttribute('href'));
+		};
 
-// 		var getStylesheet = function () {
-// 			var title = document.querySelector('title');
-// 			var ss = title.nextElementSibling;
-// 			if (!ss) return;
-// 			if (!isStylesheet(ss)) {
-// 				do {
-// 					ss = ss.nextElementSibling;
-// 				} while (!isStylesheet(ss));
-// 			}
-// 			return ss;
-// 		};
+		var getStylesheet = function () {
+			var title = document.querySelector('title');
+			var ss = title.nextElementSibling;
+			if (!ss) return;
+			if (!isStylesheet(ss)) {
+				do {
+					ss = ss.nextElementSibling;
+				} while (!isStylesheet(ss));
+			}
+			return ss;
+		};
 
-// 		var updateStyles = function (styles) {
-// 			var ss = getStylesheet();
-// 			if (!ss) return;
-// 			ss.href = styles;
-// 		};
+		var updateStyles = function (styles) {
+			var ss = getStylesheet();
+			if (!ss) return;
+			ss.href = styles;
+		};
 
-// 		var updateCurrent = function (theme) {
-// 			var current = document.querySelector('.toggle-theme.current');
-// 			if (current) {
-// 				current.classList.remove('current');
-// 			}
-// 			theme.classList.add('current');
-// 		};
+		var updateCurrent = function (theme) {
+			var current = document.querySelector('.toggle-theme.current');
+			if (current) {
+				current.classList.remove('current');
+			}
+			theme.classList.add('current');
+		};
 
-// 		// Update current theme
-// 		var setCurrentTheme = function () {
-// 			if (window.mashery.contentId !== 'docs-customizing-themes') return;
-// 			var currentSS = getStylesheet();
-// 			var currentTheme, currentToggle;
-// 			for (var theme in themeOptions) {
-// 				if (themeOptions.hasOwnProperty(theme)) {
-// 					if (currentSS.getAttribute('href') !== themeOptions[theme].styles) continue;
-// 					currentToggle = document.querySelector('.toggle-theme[data-options="' + theme + '"]');
-// 					updateCurrent(currentToggle);
-// 					break;
-// 				}
-// 			}
-// 		};
-// 		setCurrentTheme();
+		// Update current theme
+		var setCurrentTheme = function () {
+			if (window.mashery.contentId !== 'docs-customizing-themes') return;
+			var currentSS = getStylesheet();
+			var currentTheme, currentToggle;
+			for (var theme in themeOptions) {
+				if (themeOptions.hasOwnProperty(theme)) {
+					if (currentSS.getAttribute('href') !== themeOptions[theme].styles) continue;
+					currentToggle = document.querySelector('.toggle-theme[data-options="' + theme + '"]');
+					updateCurrent(currentToggle);
+					break;
+				}
+			}
+		};
+		setCurrentTheme();
 
-// 		// Update the current theme indicator
-// 		window.addEventListener('portalAfterRender', setCurrentTheme, false);
+		// Update the current theme indicator
+		window.addEventListener('portalAfterRender', setCurrentTheme, false);
 
-// 		// Listen for clicks
-// 		document.addEventListener('click', function (event) {
+		// Listen for clicks
+		document.addEventListener('click', function (event) {
 
-// 			// Only run if theme toggle is clicked
-// 			var toggle = event.target.closest('.toggle-theme');
-// 			if (!toggle) return;
+			// Only run if theme toggle is clicked
+			var toggle = event.target.closest('.toggle-theme');
+			if (!toggle) return;
 
-// 			// Get options
-// 			var options = toggle.getAttribute('data-options');
-// 			if (!options) return;
+			// Get options
+			var options = toggle.getAttribute('data-options');
+			if (!options) return;
 
-// 			// Stop link from working
-// 			event.preventDefault();
+			// Stop link from working
+			event.preventDefault();
 
-// 			// Reset portalOptions
-// 			m$.resetOptions();
+			// Reset portalOptions
+			m$.resetOptions();
 
-// 			// Update portalOptions
-// 			themeOptions[options].options();
+			// Update portalOptions
+			themeOptions[options].options();
 
-// 			// Enable full width layouts
-// 			window.portalOptions.templates.page = function () {
-// 				if (mashery.globals.pageFullWidth) {
-// 					return	'<div class="main content" id="main">' +
-// 								'{{content.main}}' +
-// 							'</div>';
-// 				} else if (mashery.globals.pageWide) {
-// 					return	'<div class="main container content" id="main">' +
-// 								'<h1>{{content.heading}}</h1>' +
-// 								'{{content.main}}' +
-// 							'</div>';
-// 				} else {
-// 					return	'<div class="main container container-small content" id="main">' +
-// 								'<h1>{{content.heading}}</h1>' +
-// 								'{{content.main}}' +
-// 							'</div>';
-// 				}
-// 			};
+			// Enable full width layouts
+			window.portalOptions.templates.page = function () {
+				if (mashery.globals.pageFullWidth) {
+					return	'<div class="main content" id="main">' +
+								'{{content.main}}' +
+							'</div>';
+				} else if (mashery.globals.pageWide) {
+					return	'<div class="main container content" id="main">' +
+								'<h1>{{content.heading}}</h1>' +
+								'{{content.main}}' +
+							'</div>';
+				} else {
+					return	'<div class="main container container-small content" id="main">' +
+								'<h1>{{content.heading}}</h1>' +
+								'{{content.main}}' +
+							'</div>';
+				}
+			};
 
-// 			// Update stylesheet
-// 			updateStyles(themeOptions[options].styles);
+			// Update stylesheet
+			updateStyles(themeOptions[options].styles);
 
-// 			// Re-render the Portal with new options
-// 			m$.setOptions(portalOptions);
-// 			m$.renderPortal();
+			// Re-render the Portal with new options
+			m$.setOptions(portalOptions);
+			m$.renderPortal();
 
-// 		}, false);
+		}, false);
 
-// 	};
+	};
 
-// 	toggleThemes();
+	toggleThemes();
 
-// }, false);
+}, false);
 
-// portalOptions.ajaxIgnore = '.toggle-theme';
+portalOptions.ajaxIgnore = '.toggle-theme';
 
 
 /**
@@ -354,6 +339,107 @@ var renderDocsNote = function () {
 };
 window.addEventListener('portalAfterRender', renderDocsNote, false);
 window.addEventListener('portalAfterGitHubRender', renderDocsNote, false);
+
+
+/**
+ * Plugins and Components
+ */
+window.addEventListener('portalAfterRender', function () {
+
+	// Astro
+	m$.loadJS('https://stagingcs1.mashery.com/files/astro.min.beta.js', function () {
+		astro.init();
+	});
+
+	// FluidVids.js
+	m$.loadJS('https://stagingcs1.mashery.com/files/fluidvids.min.beta.js', function () {
+		fluidvids.init({
+			selector: ['iframe', 'object'], // runs querySelectorAll()
+			players: ['www.youtube.com', 'player.vimeo.com'] // players to support
+		});
+	});
+
+	// Houdini
+	m$.loadJS('https://stagingcs1.mashery.com/files/houdini.min.beta.js', function () {
+		houdini.init({
+			selectorToggle: '.collapse-toggle'
+		});
+	});
+
+	// Smooth Scroll
+	m$.loadJS('https://stagingcs1.mashery.com/files/smooth-scroll.min.beta.js', function () {
+		var scroll = new SmoothScroll('a[href*="#"]');
+		window.addEventListener('portalBeforeRenderAjax', function removeSmoothScroll () {
+			scroll.destroy();
+			window.removeEventListener('portalBeforeRenderAjax', removeSmoothScroll, false);
+		}, false);
+	});
+
+	// GitHub-Hosted Documentation
+	m$.loadJS('https://stagingcs1.mashery.com/files/githubDocs.min.beta.js', function () {
+		githubDocs({
+			user: 'mashery',
+			repo: 'blackbeard',
+			root: 'docs/' // The root directory for all of my documentation
+		});
+	});
+
+	// BetterDocs.js
+	m$.loadJS('/files/betterDocs.min.beta.js', function () {
+		var docs = BetterDocs('.content', {
+			langs: {
+				bash: {
+					selector: 'bash',
+					title: 'Bash'
+				},
+				js: {
+					selector: 'javascript, js',
+					title: 'JavaScript',
+				},
+				ruby: {
+					selector: 'ruby',
+					title: 'Ruby'
+				},
+				python: {
+					selector: 'python',
+					title: 'Python'
+				}
+			},
+			langDefault: 'js',
+			wideLayout: true,
+			wideLayoutBg: true,
+			restrictToPages: 'docs-tests-better_docs'
+		});
+
+		// Self-Destruct
+		window.addEventListener('portalBeforeRenderAjax', function destroyBetterDocs () {
+			docs.destroy();
+			window.removeEventListener('portalBeforeRender', destroyBetterDocs, false);
+		}, false);
+	});
+
+	// conditional-content.css
+	// Add logged-in/logged-out class
+	if (window.mashery.loggedIn) {
+		document.documentElement.classList.add('is-logged-in');
+		document.documentElement.classList.remove('is-logged-out');
+	} else {
+		document.documentElement.classList.add('is-logged-out');
+		document.documentElement.classList.remove('is-logged-in');
+	}
+
+}, false);
+
+
+/**
+ * Load additional stylesheets
+ */
+window.addEventListener('portalLoaded', function () {
+	m$.loadCSS('https://stagingcs1.mashery.com/files/betterDocs.min.beta.css');
+	m$.loadCSS('https://stagingcs1.mashery.com/files/images.min.beta.css');
+	m$.loadCSS('https://stagingcs1.mashery.com/files/conditional-content.min.beta.css');
+	m$.loadCSS('https://stagingcs1.mashery.com/files/houdini.min.beta.css');
+}, false);
 
 
 /**

@@ -1,0 +1,105 @@
+/*!
+ * BetterDocs.js v1.0.0
+ * Create better static documentation.
+ * (c) 2017 TIBCO Software Inc.
+ * Written by Chris Ferdinandi
+ * All Rights Reserved
+ */
+
+@import "config";
+@import "mixins";
+
+.better-docs-nav {
+
+	ul {
+		list-style: none;
+		margin-left: 0;
+		margin-right: 0;
+		padding: 0;
+
+		& > li {
+			display: inline-block;
+		}
+	}
+
+	a {
+		padding: calc-em(5px) calc-em(11px);
+		text-decoration: none;
+
+		&:active,
+		&:focus,
+		&:hover {
+			background-color: $color-gray-light;
+			text-decoration: none;
+		}
+
+		&.active {
+			background-color: $color-primary;
+			color: $color-white;
+			text-decoration: none;
+		}
+	}
+
+}
+
+@media (min-width: $bp-large) {
+	.better-docs-nav-sticky {
+		position: absolute;
+		right: 0;
+		top: 0;
+
+		ul {
+			background-color: #f7f7f7;
+			position: fixed;
+			width: (50% - ($grid-margins * 2));
+		}
+	}
+}
+
+.better-docs-wide-content {
+	position: relative;
+
+	@media (min-width: $bp-large) {
+		& > h1,
+		& > h2,
+		& > h3,
+		& > h4,
+		& > h5,
+		& > h6,
+		& > p,
+		& > table,
+		& > ul,
+		& > ol,
+		& > dl {
+			margin-right: (50% + ($grid-margins * 2));
+		}
+
+		& > table {
+			max-width: (50% - ($grid-margins * 2));
+		}
+
+		.better-docs-nav,
+		blockquote,
+		pre {
+			clear: right;
+			float: right;
+			width: (50% - ($grid-margins * 2));
+		}
+	}
+
+	blockquote {
+		font-size: 1em;
+		font-style: normal;
+		margin-bottom: 0;
+
+		p:last-child {
+			margin-bottom: calc-em(8px);
+		}
+	}
+}
+
+.complete.better-docs-wide-bg body {
+	@media (min-width: $bp-large) {
+		background-image: linear-gradient(to right, #f7f7f7 0, #f7f7f7 25%, transparent 25%, transparent 63%, #f7f7f7 63%, #f7f7f7 100%);
+	}
+}
