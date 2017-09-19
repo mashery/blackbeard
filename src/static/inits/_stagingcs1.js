@@ -368,7 +368,9 @@ window.addEventListener('portalAfterRender', function () {
 
 	// Smooth Scroll
 	m$.loadJS('https://stagingcs1.mashery.com/files/smooth-scroll.min.beta.js', function () {
-		var scroll = new SmoothScroll('a[href*="#"]');
+		var scroll = new SmoothScroll('a[href*="#"]', {
+			ignore: '.js-scroll-ignore'
+		});
 		window.addEventListener('portalBeforeRenderAjax', function removeSmoothScroll () {
 			scroll.destroy();
 			window.removeEventListener('portalBeforeRenderAjax', removeSmoothScroll, false);
