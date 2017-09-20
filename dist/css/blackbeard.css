@@ -1522,6 +1522,24 @@ td {
 /**
  * Navigation Menu Container
  */
+@media (max-width: 60em) {
+  /* line 54, src/sass/components/_nav-blackbeard.scss */
+  .js-astro .nav-collapse .nav-menu {
+    display: none;
+    margin-top: 0.5em;
+    width: 100%;
+  }
+  /* line 60, src/sass/components/_nav-blackbeard.scss */
+  .js-astro .nav-collapse .nav-menu.active {
+    display: block;
+  }
+  /* line 64, src/sass/components/_nav-blackbeard.scss */
+  .js-astro .nav-collapse .nav-menu li {
+    display: block;
+    width: 100%;
+  }
+}
+
 /**
  * Navigation Menu
  */

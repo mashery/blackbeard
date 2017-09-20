@@ -167,8 +167,28 @@ var getContentType = function (elem) {
 			type = 'verifyAccount';
 		}
 
+		// Password reset
+		else if (elem.classList.contains('reset')) {
+
+			// Successful reset
+			if (elem.querySelector('#main #myaccount .success')) {
+				type = 'resetPasswordSuccess';
+			}
+
+			// Reset password
+			else {
+				type = 'resetPassword';
+			}
+
+		}
+
+		// Password reset error
+		else if (elem.classList.contains('error')) {
+			type = 'resetPasswordError';
+		}
+
 		// Change Email
-		if (elem.classList.contains('email')) {
+		else if (elem.classList.contains('email')) {
 
 			// Change Email Success
 			if (elem.querySelector('#myaccount .success')) {

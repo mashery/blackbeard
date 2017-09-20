@@ -382,7 +382,7 @@ var renderToC = function () {
 		if (!content) return;
 
 		// Variables
-		var headings = content.querySelectorAll('h2, h3, h4, h5, h6');
+		var headings = content.querySelectorAll('h2');
 		var list = '';
 		var last, current, close;
 
@@ -419,7 +419,7 @@ var renderToC = function () {
 
 		});
 
-		toc.innerHTML = '<h2>In These Docs</h2><ul>' + list + '</ul>';
+		toc.innerHTML = '<h2>In These Docs</h2><ol>' + list + '</ol>';
 
 	};
 
@@ -429,7 +429,7 @@ var renderToC = function () {
 
 };
 window.addEventListener('portalAfterRender', renderToC, false);
-window.addEventListener('portalAfterRenderAjax', renderToC, false);
+window.addEventListener('portalAfterGitHubRender', renderToC, false);
 
 /**
  * Plugins and Components
@@ -520,6 +520,16 @@ window.addEventListener('portalAfterRender', function () {
 		document.documentElement.classList.remove('is-logged-in');
 	}
 
+}, false);
+
+window.addEventListener('portalAfterGitHubRender', function () {
+	// FluidVids.js
+	m$.loadJS('https://stagingcs1.mashery.com/files/fluidvids.min.beta.js', function () {
+		fluidvids.init({
+			selector: ['iframe', 'object'], // runs querySelectorAll()
+			players: ['www.youtube.com', 'player.vimeo.com'] // players to support
+		});
+	});
 }, false);
 
 

@@ -420,6 +420,20 @@ var getContent = function (type) {
 		});
 	}
 
+	// Lost Password
+	else if (type === 'resetPassword') {
+		form = dom.querySelector('#main #myaccount form');
+		content.main = '<form action="' + form.getAttribute('action') + '" method="post" enctype="multipart/form-data">' + form.innerHTML + '</form>';
+		content.main = content.main.replace('<legend>Reset Password</legend>', '');
+		content.secondary = '<ul id="passwd_requirements">' + dom.querySelector('#passwd_requirements').innerHTML + '</ul>';
+	}
+
+	// Lost Password Error
+	else if (type === 'resetPasswordError') {
+		var errors = dom.querySelector('#main #errors');
+		content.main = errors ? errors.innerHTML : '';
+	}
+
 	// Reset Password
 	else if (type === 'lostPassword') {
 		form = dom.querySelector('#lost form');

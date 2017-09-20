@@ -1526,7 +1526,6 @@ td {
 @media (max-width: 60em) {
   /* line 55, src/sass/components/_nav-sparrow.scss */
   .js-astro .nav-collapse .nav-menu {
-    box-sizing: border-box;
     display: none;
     margin-top: 0.5em;
     width: 100%;
@@ -1541,7 +1540,6 @@ td {
     width: 100%;
     padding-top: 0.25em;
     padding-bottom: 0.25em;
-    box-sizing: border-box;
   }
 }
 

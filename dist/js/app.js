@@ -4366,6 +4366,20 @@ var getContent = function (type) {
 		}));
 	}
 
+	// Lost Password
+	else if (type === 'resetPassword') {
+		form = dom.querySelector('#main #myaccount form');
+		content.main = '<form action="' + form.getAttribute('action') + '" method="post" enctype="multipart/form-data">' + form.innerHTML + '</form>';
+		content.main = content.main.replace('<legend>Reset Password</legend>', '');
+		content.secondary = '<ul id="passwd_requirements">' + dom.querySelector('#passwd_requirements').innerHTML + '</ul>';
+	}
+
+	// Lost Password Error
+	else if (type === 'resetPasswordError') {
+		var errors = dom.querySelector('#main #errors');
+		content.main = errors ? errors.innerHTML : '';
+	}
+
 	// Reset Password
 	else if (type === 'lostPassword') {
 		form = dom.querySelector('#lost form');
@@ -4657,8 +4671,28 @@ var getContentType = function (elem) {
 			type = 'verifyAccount';
 		}
 
+		// Password reset
+		else if (elem.classList.contains('reset')) {
+
+			// Successful reset
+			if (elem.querySelector('#main #myaccount .success')) {
+				type = 'resetPasswordSuccess';
+			}
+
+			// Reset password
+			else {
+				type = 'resetPassword';
+			}
+
+		}
+
+		// Password reset error
+		else if (elem.classList.contains('error')) {
+			type = 'resetPasswordError';
+		}
+
 		// Change Email
-		if (elem.classList.contains('email')) {
+		else if (elem.classList.contains('email')) {
 
 			// Change Email Success
 			if (elem.querySelector('#myaccount .success')) {
@@ -5683,6 +5717,35 @@ var m$ = (function () {
 									'</div>',
 
 			/**
+			 * Password Reset
+			 * Layout for the password reset form.
+			 */
+			resetPassword:	'<div class="main container container-small" id="main">' +
+								'<h1>{{content.heading}}</h1>' +
+								'{{content.main}}' +
+								'{{content.passwordStrength}}' +
+								'{{content.form}}' +
+							'</div>',
+
+			/**
+			 * Password Reset Error
+			 * Layout for when password reset form has an error.
+			 */
+			resetPasswordError:	'<div class="main container container-small" id="main">' +
+									'<h1>{{content.heading}}</h1>' +
+									'{{content.main}}' +
+								'</div>',
+
+			/**
+			 * Password Reset Success
+			 * Layout for when password reset form is successful.
+			 */
+			resetPasswordSuccess:	'<div class="main container container-small" id="main">' +
+										'<h1>{{content.heading}}</h1>' +
+										'{{content.main}}' +
+									'</div>',
+
+			/**
 			 * Search
 			 * The layout for search results.
 			 */
@@ -6211,7 +6274,33 @@ var m$ = (function () {
 			 */
 			registerResendSuccess: {
 				heading: 'Success', // The heading
-				main: 'Your confirmation email was resent.' // The message
+				main: '<p>Your confirmation email was resent.</p>' // The message
+			},
+
+			/**
+			 * Password Reset
+			 * The lost password reset form
+			 */
+			resetPassword: {
+				heading: 'New Password',
+				main: '<p>Reset your password using the criteria below.</p>'
+			},
+
+			/**
+			 * Password Reset Error
+			 * Lost password reset form error page
+			 */
+			resetPasswordError: {
+				heading: 'Oops! There was a problem.'
+			},
+
+			/**
+			 * Password Reset Success
+			 * Lost password was successfully reset
+			 */
+			resetPasswordSuccess: {
+				heading: 'Success!',
+				main: '<p>Your password was successfully reset. <a href="{{path.account}}">Back to your account &rarr;</a></p>'
 			},
 
 			/**
@@ -7239,6 +7328,50 @@ var m$ = (function () {
 			// Main Content
 			'{{content.main}}': function () {
 				return settings.labels.registerResendSuccess.main;
+			}
+
+		},
+
+		// The lost password page
+		resetPassword: {
+
+			// Heading
+			'{{content.heading}}': function () {
+				return settings.labels.resetPassword.heading;
+			},
+
+			// Main Content
+			'{{content.main}}': function () {
+				return settings.labels.resetPassword.main;
+			},
+
+			// The password strength details
+			'{{content.passwordStrength}}': function () {
+				return window.mashery.content.secondary;
+			}
+
+		},
+
+		// Password Reset Error
+		resetPasswordError: {
+
+			// Heading
+			'{{content.heading}}': function () {
+				return settings.labels.resetPasswordError.heading;
+			}
+
+		},
+
+		resetPasswordSuccess: {
+
+			// Heading
+			'{{content.heading}}': function () {
+				return settings.labels.resetPasswordSuccess.heading;
+			},
+
+			// Main Content
+			'{{content.main}}': function () {
+				return settings.labels.resetPasswordSuccess.main;
 			}
 
 		},
