@@ -32,6 +32,9 @@ var footer = require('gulp-footer');
 var watch = require('gulp-watch');
 var livereload = require('gulp-livereload');
 var package = require('./package.json');
+var s3 = require( "gulp-s3" );
+var properties = require ("properties");
+
 
 // Scripts
 var jshint = settings.scripts ? require('gulp-jshint') : null;
@@ -51,7 +54,6 @@ var svgmin = settings.svgs ? require('gulp-svgmin') : null;
 // Docs
 // var markdown = settings.docs ? require('gulp-markdown') : null;
 // var fileinclude = settings.docs ? require('gulp-file-include') : null;
-
 
 /**
  * Paths to project folders
@@ -296,4 +298,18 @@ gulp.task('default', [
 gulp.task('watch', [
 	'listen',
 	'default'
+]);
+
+gulp.task('deploy:dist', function () {
+	properties.parse ("/etc/mashery/conf/secure.conf", { sections: true, path: true, comments: ";", separators: "=", strict: true}, function (error, obj){
+	  	if (error) return console.error (error);
+  		var AWS = obj['Mashery_Developer_Portal'];
+  		console.log(AWS);
+    	return gulp.src( paths.output + '/**' )
+    	.pipe( s3( AWS ) );
+    });
+});
+
+gulp.task('deploy', [
+    'deploy:dist'
 ]);
