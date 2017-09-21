@@ -1,4 +1,0 @@
-var portalOptions = {
-	templates: {},
-	labels: {}
-};
