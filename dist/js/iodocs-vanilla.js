@@ -1,4 +1,4 @@
-/*! blackbeard vbeta | (c) 2017 Chris Ferdinandi | LicenseRef-All Rights Reserved License | http://github.com/mashery/blackbeard */
+/*! blackbeard v0.1.0 | (c) 2017 Chris Ferdinandi | LicenseRef-All Rights Reserved License | http://github.com/mashery/blackbeard */
 var ioDocs = (function () {
 
 	'use strict';

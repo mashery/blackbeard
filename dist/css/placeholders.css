@@ -1,0 +1,80 @@
+/*! blackbeard v0.1.0 | (c) 2017 Chris Ferdinandi | LicenseRef-All Rights Reserved License | http://github.com/mashery/blackbeard */
+/**
+ * Placeholder Styling
+ */
+/**
+ * Contain floats
+ * The space content is one way to avoid an Opera bug when the `contenteditable` attribute is included anywhere else in the document%
+ * @link https://github%com/h5bp/html5-boilerplate/blob/master/dist/css/main%css
+ */
+@-webkit-keyframes fadeColor {
+  0% {
+    background-color: lightgray;
+  }
+  50% {
+    background-color: #e5e5e5;
+  }
+  100% {
+    background-color: lightgray;
+  }
+}
+@keyframes fadeColor {
+  0% {
+    background-color: lightgray;
+  }
+  50% {
+    background-color: #e5e5e5;
+  }
+  100% {
+    background-color: lightgray;
+  }
+}
+
+/* line 25, src/sass/placeholders.scss */
+.loading .placeholder {
+  -webkit-animation: fadeColor 1.5s ease-in infinite;
+          animation: fadeColor 1.5s ease-in infinite;
+  background-color: #e5e5e5;
+}
+
+/* line 30, src/sass/placeholders.scss */
+.loading .placeholder-hero {
+  height: 20em;
+}
+
+/* line 34, src/sass/placeholders.scss */
+.loading .placeholder-heading {
+  height: 3em;
+  width: 55%;
+}
+
+/* line 39, src/sass/placeholders.scss */
+.loading .placeholder-sentence {
+  height: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+/* line 44, src/sass/placeholders.scss */
+.loading .placeholder-sentence-last {
+  width: 85%;
+}
+
+/* line 48, src/sass/placeholders.scss */
+.loading .placeholder-paragraph {
+  height: 8em;
+  margin-top: 1.5625em;
+}
+
+/* line 53, src/sass/placeholders.scss */
+.loading .placeholder-btn {
+  height: 3em;
+  width: 8em;
+}
+
+/* line 59, src/sass/placeholders.scss */
+.loading .placeholder-hero,
+.loading .placeholder-heading,
+.loading .placeholder-paragraph,
+.loading .placeholder-btn {
+  margin-bottom: 1.5625em;
+}
