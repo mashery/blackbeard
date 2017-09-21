@@ -52,6 +52,10 @@ var svgmin = settings.svgs ? require('gulp-svgmin') : null;
 // var markdown = settings.docs ? require('gulp-markdown') : null;
 // var fileinclude = settings.docs ? require('gulp-file-include') : null;
 
+// Deploy
+var s3 = require('gulp-s3');
+var properties = require('properties');
+
 
 /**
  * Paths to project folders
@@ -262,6 +266,17 @@ gulp.task('refresh', ['compile', 'docs'], function () {
 	livereload.changed();
 });
 
+// Deploy to Amazon S3
+gulp.task('deploy:dist', function () {
+	properties.parse ("/etc/mashery/conf/secure.conf", { sections: true, path: true, comments: ";", separators: "=", strict: true}, function (error, obj){
+		if (error) return console.error (error);
+		var AWS = obj['Mashery_Developer_Portal'];
+		console.log(AWS);
+		return gulp.src(paths.output + '/**')
+		.pipe(s3(AWS));
+	});
+});
+
 
 /**
  * Task Runners
@@ -296,4 +311,9 @@ gulp.task('default', [
 gulp.task('watch', [
 	'listen',
 	'default'
+]);
+
+// Deploy to Amazon S3
+gulp.task('deploy', [
+    'deploy:dist'
 ]);
